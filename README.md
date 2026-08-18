@@ -12,7 +12,7 @@
 ### 安装依赖
 
 ```bash
-npm install
+bun install
 ```
 
 ### 配置环境变量
@@ -30,7 +30,7 @@ cp .env.example .env.local
 ### 启动开发服务器
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 ## 授权与来源
