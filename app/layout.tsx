@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 	},
 	description:
 		'许泽升（Golden）的个人博客，关注 AI Agent、深度学习与计算机视觉。',
-	metadataBase: new URL('https://golden-blog.vercel.app'),
+	metadataBase: new URL('https://golden-xzs-blog.vercel.app'),
 };
 
 interface RootLayoutProps {

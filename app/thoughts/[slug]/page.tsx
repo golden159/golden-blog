@@ -13,7 +13,7 @@ export async function generateMetadata(props: {
 	const params = await props.params;
 	const { metadata } = await getPostFromSlug(params.slug);
 
-	const url = `https://golden-blog.vercel.app/thoughts/${params.slug}`;
+	const url = `https://golden-xzs-blog.vercel.app/thoughts/${params.slug}`;
 	const ogImage = metadata.image || '/static/og-image.png';
 
 	return {

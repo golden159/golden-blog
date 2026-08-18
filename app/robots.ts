@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
 			userAgent: '*',
 			allow: '/',
 		},
-		sitemap: `https://golden-blog.vercel.app/sitemap.xml`,
-		host: `https://golden-blog.vercel.app`,
+		sitemap: `https://golden-xzs-blog.vercel.app/sitemap.xml`,
+		host: `https://golden-xzs-blog.vercel.app`,
 	};
 }
