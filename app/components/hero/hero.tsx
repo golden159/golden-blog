@@ -5,6 +5,7 @@ import { AtSignIcon } from '../layouts/icons/at-sign-icon';
 import { GithubIcon } from '../layouts/icons/github-icon';
 import { XIcon } from '../layouts/icons/x-icon';
 import SplashCursor from '../splash-cursor';
+import HeroRoutes from './hero-routes';
 
 export default function Hero() {
 	return (
@@ -65,15 +66,7 @@ export default function Hero() {
 								</div>
 							</div>
 							<div className='h-14 border-l border-gray-300' />
-							<div
-								className='flex flex-wrap space-x-3 space-y-1'
-								data-skip-splash-cursor
-							>
-								<Link href='/projects'>/projects</Link>
-								<Link href='/thoughts'>/thoughts</Link>
-								<Link href='/uses'>/uses</Link>
-								<Link href='/stats'>/stats</Link>
-							</div>
+							<HeroRoutes />
 						</section>
 					</div>
 				</div>
