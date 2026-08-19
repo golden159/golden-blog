@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { hobbyCategories } from '../content';
 import type { HobbyId } from '../types';
 import AnimeDetails from './anime-details';
+import FoodDetails from './food-details';
 import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
+import TravelDetails from './travel-details';
 
 function renderDetails(id: HobbyId, summary: string) {
 	if (id === 'games') {
@@ -13,6 +15,12 @@ function renderDetails(id: HobbyId, summary: string) {
 	}
 	if (id === 'anime') {
 		return <AnimeDetails />;
+	}
+	if (id === 'food') {
+		return <FoodDetails />;
+	}
+	if (id === 'travel') {
+		return <TravelDetails />;
 	}
 	return (
 		<p className='leading-7 text-gray-600 dark:text-gray-300'>{summary}</p>

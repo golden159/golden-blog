@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Album art placeholder</title>
+  <desc id="description">Abstract record shape with a pink center.</desc>
+  <rect width="512" height="512" fill="#111827"/>
+  <circle cx="256" cy="256" r="170" fill="#1f2937" stroke="#4b5563" stroke-width="18"/>
+  <circle cx="256" cy="256" r="68" fill="#de1d8d"/>
+  <circle cx="256" cy="256" r="14" fill="#111827"/>
+</svg>

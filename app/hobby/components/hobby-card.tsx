@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { ReactNode } from 'react';
 import type { HobbyCategory } from '../types';
+import CategoryVisual from './category-visual';
 
 type HobbyCardProps = {
 	category: HobbyCategory;
@@ -56,6 +57,7 @@ export default function HobbyCard({
 					<span className='mt-3 block text-sm leading-6 text-gray-600 dark:text-gray-300 md:text-base'>
 						{category.summary}
 					</span>
+					<CategoryVisual id={category.id} />
 				</span>
 				<motion.span
 					aria-hidden='true'
