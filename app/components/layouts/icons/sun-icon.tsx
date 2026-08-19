@@ -62,9 +62,11 @@ const SunMediumIcon = forwardRef<SunMediumIconHandle, SunMediumIconProps>(
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				{...props}
+				aria-hidden='true'
 			>
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
+					aria-hidden='true'
 					width={size}
 					height={size}
 					viewBox='0 0 24 24'

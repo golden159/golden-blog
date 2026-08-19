@@ -137,7 +137,7 @@ export const BackgroundGradientAnimation = ({
 				containerClassName,
 			)}
 		>
-			<svg className='hidden'>
+			<svg className='hidden' aria-hidden='true'>
 				<defs>
 					<filter id='blurMe'>
 						<feGaussianBlur
@@ -211,6 +211,7 @@ export const BackgroundGradientAnimation = ({
 				{interactive && (
 					<div
 						ref={interactiveRef}
+						aria-hidden='true'
 						onMouseMove={handleMouseMove}
 						className={classNames(
 							`absolute [background:radial-gradient(circle_at_center,_rgba(var(--pointer-color),_0.8)_0,_rgba(var(--pointer-color),_0)_50%)_no-repeat]`,

@@ -28,8 +28,8 @@ export default function Hero() {
 						</h1>
 						<section className='relative z-10'>
 							<p className='text-base text-justify'>
-								我是许泽升（Golden）——深圳大学光电信息科学与工程本科生，专注
-								AI Agent、深度学习、计算机视觉与低层视觉。我将光学系统、数学模型与深度学习结合，把复杂问题拆解为可测量、可验证并具备工程价值的解决方案。
+								我是许泽升（Golden）——深圳大学光电信息科学与工程本科生，专注 AI
+								Agent、深度学习、计算机视觉与低层视觉。我将光学系统、数学模型与深度学习结合，把复杂问题拆解为可测量、可验证并具备工程价值的解决方案。
 							</p>
 						</section>
 						<section className='relative z-10 flex space-x-4 items-center text-sm'>

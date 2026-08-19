@@ -89,6 +89,12 @@
           }
         }
       }
+    },
+    {
+      "includes": ["next-env.d.ts"],
+      "formatter": {
+        "enabled": false
+      }
     }
   ],
   "assist": {

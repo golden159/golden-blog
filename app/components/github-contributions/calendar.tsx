@@ -49,6 +49,7 @@ export default function Calendar({ contributions }: Props) {
 				))}
 			</ul>
 
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: Mouse leave only dismisses a pointer tooltip. */}
 			<div
 				role='presentation'
 				className='flex justify-start gap-0.75 overflow-hidden'
