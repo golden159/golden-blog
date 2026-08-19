@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchNeteaseActivity } from './netease';
 
 const env = {
@@ -9,11 +9,23 @@ const env = {
 	NETEASE_USER_ID: '3719820729',
 };
 
+const incompleteEnvironments = [
+	['base URL', { ...env, NETEASE_API_BASE_URL: '' }],
+	['cookie', { ...env, NETEASE_MUSIC_COOKIE: '' }],
+	['user ID', { ...env, NETEASE_USER_ID: '' }],
+] as const;
+
 describe('fetchNeteaseActivity', () => {
-	it('returns unavailable without complete configuration', async () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it.each(
+		incompleteEnvironments,
+	)('returns unavailable when the %s is missing', async (_missingValue, incompleteEnv) => {
 		const fetchImpl = vi.fn();
 		const result = await fetchNeteaseActivity({
-			env: {},
+			env: incompleteEnv,
 			fetchImpl: fetchImpl as typeof fetch,
 		});
 
@@ -22,7 +34,10 @@ describe('fetchNeteaseActivity', () => {
 	});
 
 	it('posts the secret server-side but returns only normalized public data', async () => {
-		const timeoutSpy = vi.spyOn(AbortSignal, 'timeout');
+		const timeoutSignal = new AbortController().signal;
+		const timeoutSpy = vi
+			.spyOn(AbortSignal, 'timeout')
+			.mockReturnValue(timeoutSignal);
 		const fetchImpl = vi.fn().mockResolvedValue(
 			new Response(
 				JSON.stringify({
@@ -49,15 +64,27 @@ describe('fetchNeteaseActivity', () => {
 			fetchImpl: fetchImpl as typeof fetch,
 			now: 1_800_000_000_001,
 		});
+		expect(fetchImpl).toHaveBeenCalledTimes(1);
 		const request = fetchImpl.mock.calls[0];
-		const body = request[1]?.body as URLSearchParams;
+		const requestOptions = request[1];
+		const body = requestOptions?.body as URLSearchParams;
 
 		expect(request[0]).toBe(
 			'https://netease.internal.example/record/recent/song',
 		);
-		expect(request[1]?.method).toBe('POST');
-		expect(body.get('cookie')).toBe(env.NETEASE_MUSIC_COOKIE);
-		expect(body.get('limit')).toBe('1');
+		expect(requestOptions?.method).toBe('POST');
+		expect(requestOptions?.headers).toEqual({
+			'Content-Type': 'application/x-www-form-urlencoded',
+		});
+		expect([...body.entries()]).toEqual([
+			['cookie', env.NETEASE_MUSIC_COOKIE],
+			['limit', '1'],
+			['timestamp', '1800000000001'],
+			['uid', env.NETEASE_USER_ID],
+		]);
+		expect(requestOptions?.cache).toBe('no-store');
+		expect(requestOptions?.signal).toBe(timeoutSignal);
+		expect(timeoutSpy).toHaveBeenCalledTimes(1);
 		expect(timeoutSpy).toHaveBeenCalledWith(5000);
 		expect(JSON.stringify(result)).not.toContain('super-secret');
 		expect(JSON.stringify(result)).not.toContain('netease.internal.example');
