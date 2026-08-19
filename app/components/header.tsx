@@ -8,7 +8,7 @@ export default function Header({ title }: { title: string }) {
 		<Link
 			href='/'
 			className={classNames(
-				'flex gap-2 items-center text-primary-500 mb-12 outline-0',
+				'flex items-center gap-2 mb-12 rounded-sm text-primary-600 dark:text-primary-400 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
 				mukta.className,
 			)}
 		>

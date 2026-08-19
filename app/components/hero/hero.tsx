@@ -5,6 +5,7 @@ import { AtSignIcon } from '../layouts/icons/at-sign-icon';
 import { GithubIcon } from '../layouts/icons/github-icon';
 import { XIcon } from '../layouts/icons/x-icon';
 import SplashCursor from '../splash-cursor';
+import HeroRoutes from './hero-routes';
 
 export default function Hero() {
 	return (
@@ -28,8 +29,8 @@ export default function Hero() {
 						</h1>
 						<section className='relative z-10'>
 							<p className='text-base text-justify'>
-								我是许泽升（Golden）——深圳大学光电信息科学与工程本科生，专注
-								AI Agent、深度学习、计算机视觉与低层视觉。我将光学系统、数学模型与深度学习结合，把复杂问题拆解为可测量、可验证并具备工程价值的解决方案。
+								我是许泽升（Golden）——深圳大学光电信息科学与工程本科生，专注 AI
+								Agent、深度学习、计算机视觉与低层视觉。我将光学系统、数学模型与深度学习结合，把复杂问题拆解为可测量、可验证并具备工程价值的解决方案。
 							</p>
 						</section>
 						<section className='relative z-10 flex space-x-4 items-center text-sm'>
@@ -65,15 +66,7 @@ export default function Hero() {
 								</div>
 							</div>
 							<div className='h-14 border-l border-gray-300' />
-							<div
-								className='flex flex-wrap space-x-3 space-y-1'
-								data-skip-splash-cursor
-							>
-								<Link href='/projects'>/projects</Link>
-								<Link href='/thoughts'>/thoughts</Link>
-								<Link href='/uses'>/uses</Link>
-								<Link href='/stats'>/stats</Link>
-							</div>
+							<HeroRoutes />
 						</section>
 					</div>
 				</div>

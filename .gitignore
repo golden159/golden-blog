@@ -2,6 +2,9 @@
 
 # dependencies
 /node_modules
+
+# local git worktrees
+/.worktrees/
 /.pnp
 .pnp.js
 .env
