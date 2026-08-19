@@ -41,6 +41,15 @@ describe('HobbyGrid', () => {
 		expect(trigger('Games')).toHaveAttribute('aria-expanded', 'false');
 	});
 
+	it('shows the Games account section only after Games opens', () => {
+		render(<HobbyGrid />);
+		expect(screen.queryByText('Game Accounts')).not.toBeInTheDocument();
+
+		fireEvent.click(trigger('Games'));
+
+		expect(screen.getByText('Game Accounts')).toBeInTheDocument();
+	});
+
 	it('matches trigger and panel identifiers', () => {
 		render(<HobbyGrid />);
 		const gamesTrigger = trigger('Games');

@@ -3,7 +3,21 @@
 import { useState } from 'react';
 import { hobbyCategories } from '../content';
 import type { HobbyId } from '../types';
+import AnimeDetails from './anime-details';
+import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
+
+function renderDetails(id: HobbyId, summary: string) {
+	if (id === 'games') {
+		return <GameDetails />;
+	}
+	if (id === 'anime') {
+		return <AnimeDetails />;
+	}
+	return (
+		<p className='leading-7 text-gray-600 dark:text-gray-300'>{summary}</p>
+	);
+}
 
 export default function HobbyGrid() {
 	const [activeCategory, setActiveCategory] = useState<HobbyId | null>(null);
@@ -27,9 +41,7 @@ export default function HobbyGrid() {
 							)
 						}
 					>
-						<p className='leading-7 text-gray-600 dark:text-gray-300'>
-							{category.summary}
-						</p>
+						{renderDetails(category.id, category.summary)}
 					</HobbyCard>
 				);
 			})}
