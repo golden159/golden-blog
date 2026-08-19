@@ -15,6 +15,14 @@ describe('HobbyGrid', () => {
 		}
 	});
 
+	it('keeps category visuals within phrasing-content markup', () => {
+		render(<HobbyGrid />);
+
+		for (const button of screen.getAllByRole('button')) {
+			expect(button.querySelector('div, p')).toBeNull();
+		}
+	});
+
 	it('keeps only one category open at a time', () => {
 		render(<HobbyGrid />);
 
