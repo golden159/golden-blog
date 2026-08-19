@@ -46,14 +46,14 @@ export default function AccountCopyButton({
 				type='button'
 				onClick={copy}
 				aria-label={`复制 ${label}`}
-				className='mt-3 rounded-full border border-primary-500 px-3 py-1 text-xs text-primary-500 outline-none hover:bg-primary-500 hover:text-white focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black'
+				className='mt-3 rounded-full border border-primary-500 px-3 py-1 text-xs text-primary-600 outline-none hover:bg-primary-500 hover:text-white focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:text-primary-400 dark:focus-visible:ring-offset-black'
 			>
 				复制
 			</button>
 			{/* biome-ignore lint/a11y/useSemanticElements: status is required for live announcements */}
 			<span role='status' aria-live='polite' className='ml-3 text-xs'>
-				{status === 'copied' && 'Copied'}
-				{status === 'failed' && 'Copy failed'}
+				{status === 'copied' && '已复制'}
+				{status === 'failed' && '复制失败，请手动选择账号'}
 			</span>
 		</div>
 	);

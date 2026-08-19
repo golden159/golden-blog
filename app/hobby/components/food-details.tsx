@@ -12,7 +12,7 @@ export default function FoodDetails() {
 				className='aspect-video w-full rounded-xl object-cover'
 			/>
 			<div>
-				<p className='text-sm font-semibold text-primary-500'>
+				<p className='text-sm font-semibold text-primary-600 dark:text-primary-400'>
 					{foodContent.label}
 				</p>
 				<p className='mt-3 leading-7 text-gray-600 dark:text-gray-300'>

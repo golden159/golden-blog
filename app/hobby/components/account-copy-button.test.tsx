@@ -24,7 +24,11 @@ describe('AccountCopyButton', () => {
 		await waitFor(() =>
 			expect(writeText).toHaveBeenCalledWith('小朱诺诺的#5394'),
 		);
-		expect(screen.getByRole('status')).toHaveTextContent('Copied');
+		expect(screen.getByRole('status')).toHaveTextContent('已复制');
+		expect(screen.getByRole('button', { name: '复制 Battle.net' })).toHaveClass(
+			'text-primary-600',
+			'dark:text-primary-400',
+		);
 	});
 
 	it('keeps the value visible and announces copy failure', async () => {
@@ -34,7 +38,9 @@ describe('AccountCopyButton', () => {
 		fireEvent.click(screen.getByRole('button', { name: '复制 小黑盒' }));
 
 		await waitFor(() =>
-			expect(screen.getByRole('status')).toHaveTextContent('Copy failed'),
+			expect(screen.getByRole('status')).toHaveTextContent(
+				'复制失败，请手动选择账号',
+			),
 		);
 		expect(screen.getByText('29362113')).toBeInTheDocument();
 	});

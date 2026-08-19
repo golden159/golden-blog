@@ -7,7 +7,7 @@ export default function GameDetails() {
 			<div className='grid gap-4 md:grid-cols-3'>
 				{gameGroups.map((group) => (
 					<section key={group.label}>
-						<h3 className='text-sm font-semibold text-primary-500'>
+						<h3 className='text-sm font-semibold text-primary-600 dark:text-primary-400'>
 							{group.label}
 						</h3>
 						<ul className='mt-3 flex flex-wrap gap-2'>

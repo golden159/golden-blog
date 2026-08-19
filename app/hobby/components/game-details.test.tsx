@@ -18,6 +18,10 @@ describe('GameDetails', () => {
 			expect(screen.getByText(game)).toBeInTheDocument();
 		}
 
+		expect(screen.getByRole('heading', { name: 'Competitive' })).toHaveClass(
+			'text-primary-600',
+			'dark:text-primary-400',
+		);
 		expect(screen.getByRole('link', { name: /Steam/ })).toHaveAttribute(
 			'href',
 			'https://steamcommunity.com/profiles/76561198985102331/',

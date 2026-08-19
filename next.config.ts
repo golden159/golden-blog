@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: 'https',
+				hostname: 'music.126.net',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
 				hostname: '**.music.126.net',
 				pathname: '/**',
 			},

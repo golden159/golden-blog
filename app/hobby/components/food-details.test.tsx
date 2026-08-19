@@ -6,7 +6,10 @@ describe('FoodDetails', () => {
 	it('shows an explicit placeholder without invented restaurants', () => {
 		render(<FoodDetails />);
 
-		expect(screen.getByText('Coming soon')).toBeInTheDocument();
+		expect(screen.getByText('Coming soon')).toHaveClass(
+			'text-primary-600',
+			'dark:text-primary-400',
+		);
 		expect(screen.getByAltText('等待补充的美食照片占位图')).toBeInTheDocument();
 	});
 });

@@ -7,6 +7,7 @@ const env = {
 	NETEASE_API_BASE_URL: 'https://netease.internal.example/',
 	NETEASE_MUSIC_COOKIE: 'MUSIC_U=super-secret',
 	NETEASE_USER_ID: '3719820729',
+	NODE_ENV: 'production',
 };
 
 const incompleteEnvironments = [
@@ -31,6 +32,52 @@ describe('fetchNeteaseActivity', () => {
 
 		expect(result).toEqual({ state: 'unavailable', track: null });
 		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		['production loopback HTTP', 'http://localhost:3000', 'production'],
+		[
+			'development non-loopback HTTP',
+			'http://netease.internal.example',
+			'development',
+		],
+	] as const)('returns unavailable without fetching for %s', async (_case, baseUrl, nodeEnv) => {
+		const fetchImpl = vi.fn();
+		const result = await fetchNeteaseActivity({
+			env: {
+				...env,
+				NETEASE_API_BASE_URL: baseUrl,
+				NODE_ENV: nodeEnv,
+			},
+			fetchImpl: fetchImpl as typeof fetch,
+		});
+
+		expect(result).toEqual({ state: 'unavailable', track: null });
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		'http://localhost:3000',
+		'http://127.0.0.1:3000',
+		'http://[::1]:3000',
+	])('allows development loopback HTTP at %s', async (baseUrl) => {
+		const fetchImpl = vi
+			.fn()
+			.mockResolvedValue(
+				new Response(JSON.stringify({ data: { list: [] } }), { status: 200 }),
+			);
+
+		const result = await fetchNeteaseActivity({
+			env: {
+				...env,
+				NETEASE_API_BASE_URL: baseUrl,
+				NODE_ENV: 'development',
+			},
+			fetchImpl: fetchImpl as typeof fetch,
+		});
+
+		expect(result).toEqual({ state: 'empty', track: null });
+		expect(fetchImpl).toHaveBeenCalledTimes(1);
 	});
 
 	it('posts the secret server-side but returns only normalized public data', async () => {
@@ -83,12 +130,24 @@ describe('fetchNeteaseActivity', () => {
 			['uid', env.NETEASE_USER_ID],
 		]);
 		expect(requestOptions?.cache).toBe('no-store');
+		expect(requestOptions?.redirect).toBe('error');
 		expect(requestOptions?.signal).toBe(timeoutSignal);
 		expect(timeoutSpy).toHaveBeenCalledTimes(1);
 		expect(timeoutSpy).toHaveBeenCalledWith(5000);
 		expect(JSON.stringify(result)).not.toContain('super-secret');
 		expect(JSON.stringify(result)).not.toContain('netease.internal.example');
 		expect(result.state).toBe('recent');
+	});
+
+	it('returns unavailable when fetch rejects a redirect or upstream request', async () => {
+		const fetchImpl = vi.fn().mockRejectedValue(new TypeError('fetch failed'));
+
+		expect(
+			await fetchNeteaseActivity({
+				env,
+				fetchImpl: fetchImpl as typeof fetch,
+			}),
+		).toEqual({ state: 'unavailable', track: null });
 	});
 
 	it('returns unavailable for a failed upstream response', async () => {

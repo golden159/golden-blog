@@ -20,7 +20,7 @@ export default function TravelDetails() {
 							/>
 						))}
 					</div>
-					<p className='text-xs text-primary-500'>
+					<p className='text-xs text-primary-600 dark:text-primary-400'>
 						{String(index + 1).padStart(2, '0')}
 					</p>
 					<h3 className='mt-2 text-xl font-semibold'>{city}</h3>

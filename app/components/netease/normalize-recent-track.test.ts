@@ -57,6 +57,34 @@ describe('normalizeRecentTrack', () => {
 		});
 	});
 
+	it('accepts album art from the approved apex NetEase host', () => {
+		const result = normalizeRecentTrack(
+			{
+				...payload(NOW),
+				data: {
+					...payload(NOW).data,
+					list: [
+						{
+							...payload(NOW).data.list[0],
+							data: {
+								...payload(NOW).data.list[0].data,
+								al: {
+									name: 'THE BOOK',
+									picUrl: 'https://music.126.net/apex-cover.jpg',
+								},
+							},
+						},
+					],
+				},
+			},
+			NOW,
+		);
+
+		expect(result.track?.albumArtUrl).toBe(
+			'https://music.126.net/apex-cover.jpg',
+		);
+	});
+
 	it('rejects album art outside the approved NetEase host', () => {
 		const result = normalizeRecentTrack(
 			{

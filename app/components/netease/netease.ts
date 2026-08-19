@@ -5,7 +5,10 @@ import { unavailableActivity } from './types';
 
 type NeteaseEnv = Partial<
 	Record<
-		'NETEASE_API_BASE_URL' | 'NETEASE_MUSIC_COOKIE' | 'NETEASE_USER_ID',
+		| 'NETEASE_API_BASE_URL'
+		| 'NETEASE_MUSIC_COOKIE'
+		| 'NETEASE_USER_ID'
+		| 'NODE_ENV',
 		string
 	>
 >;
@@ -15,6 +18,26 @@ type FetchNeteaseOptions = {
 	fetchImpl?: typeof fetch;
 	now?: number;
 };
+
+const isLoopbackHostname = (hostname: string): boolean => {
+	const normalized = hostname.toLowerCase().replace(/^\[|\]$/g, '');
+	if (normalized === 'localhost' || normalized === '::1') {
+		return true;
+	}
+
+	const octets = normalized.split('.');
+	return (
+		octets.length === 4 &&
+		octets[0] === '127' &&
+		octets.every((octet) => /^\d{1,3}$/.test(octet) && Number(octet) <= 255)
+	);
+};
+
+const canSendSecretTo = (url: URL, nodeEnv: string | undefined): boolean =>
+	url.protocol === 'https:' ||
+	(url.protocol === 'http:' &&
+		nodeEnv !== 'production' &&
+		isLoopbackHostname(url.hostname));
 
 export async function fetchNeteaseActivity({
 	env = process.env as NeteaseEnv,
@@ -31,7 +54,7 @@ export async function fetchNeteaseActivity({
 
 	try {
 		const upstreamUrl = new URL(`${baseUrl}/record/recent/song`);
-		if (!['http:', 'https:'].includes(upstreamUrl.protocol)) {
+		if (!canSendSecretTo(upstreamUrl, env.NODE_ENV)) {
 			return unavailableActivity();
 		}
 
@@ -47,6 +70,7 @@ export async function fetchNeteaseActivity({
 				uid: userId,
 			}),
 			cache: 'no-store',
+			redirect: 'error',
 			signal: AbortSignal.timeout(5000),
 		});
 
