@@ -27,6 +27,12 @@ cp .env.example .env.local
 - `WAKATIME_SECRET_KEY` — WakaTime 编程时长
 - `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` / `SPOTIFY_REFRESH_TOKEN` — Spotify 最近播放
 
+`/hobby` 的“最近在听”功能使用单独部署的 NeteaseCloudMusicApi 服务。未配置时 Music 卡片仍会展示音乐偏好和网易云主页入口：
+
+- `NETEASE_API_BASE_URL` — 自建 NeteaseCloudMusicApi 服务地址
+- `NETEASE_MUSIC_COOKIE` — 仅服务端保存的网易云 Cookie，禁止提交到仓库
+- `NETEASE_USER_ID` — 网易云用户 ID，当前为 `3719820729`
+
 ### 启动开发服务器
 
 ```bash
