@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
 	reactStrictMode: true,
 	pageExtensions: ['ts', 'tsx'],
 	transpilePackages: ['next-mdx-remote'],
+	images: {
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: '**.music.126.net',
+				pathname: '/**',
+			},
+		],
+	},
 	reactCompiler: true,
 	turbopack: {
 		root: path.join(__dirname, '..'),

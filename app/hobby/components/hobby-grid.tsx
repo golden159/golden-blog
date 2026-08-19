@@ -7,6 +7,7 @@ import AnimeDetails from './anime-details';
 import FoodDetails from './food-details';
 import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
+import MusicDetails from './music-details';
 import TravelDetails from './travel-details';
 
 function renderDetails(id: HobbyId, summary: string) {
@@ -15,6 +16,9 @@ function renderDetails(id: HobbyId, summary: string) {
 	}
 	if (id === 'anime') {
 		return <AnimeDetails />;
+	}
+	if (id === 'music') {
+		return <MusicDetails />;
 	}
 	if (id === 'food') {
 		return <FoodDetails />;
