@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { NeteaseListeningFootprint } from 'app/components/netease/footprint-types';
 import { describe, expect, it } from 'vitest';
 import ListeningFootprint from './listening-footprint';
+import { unavailableMusicFootprint } from './music-footprint-data';
 
 const validFootprint: NeteaseListeningFootprint = {
 	state: 'ready',
@@ -167,6 +168,61 @@ describe('ListeningFootprint', () => {
 		expect(within(comparison).getByText('—')).toBeInTheDocument();
 	});
 
+	it('uses truthful geometry for zero, unavailable, and positive chart buckets', () => {
+		const geometryFootprint: NeteaseListeningFootprint = {
+			...validFootprint,
+			today: {
+				...validFootprint.today,
+				buckets: validFootprint.today.buckets.map((bucket, index) => ({
+					...bucket,
+					durationMs: index === 1 ? null : index === 2 ? 600_000 : 0,
+				})),
+			},
+			reports: {
+				...validFootprint.reports,
+				week: {
+					...validFootprint.reports.week,
+					buckets: validFootprint.reports.week.buckets.map((bucket, index) => ({
+						...bucket,
+						durationMs: index === 1 ? null : index === 2 ? 600_000 : 0,
+					})),
+				},
+			},
+		};
+
+		render(<ListeningFootprint footprint={geometryFootprint} />);
+
+		const todayZero = screen.getByTitle('00:00：0 分钟，0 条记录');
+		expect(todayZero).toHaveAttribute('data-geometry', 'quantitative-bar');
+		expect(todayZero).toHaveStyle({ height: '0%' });
+
+		const todayUnavailable = screen.getByTitle('02:00：时长不可用，1 条记录');
+		expect(todayUnavailable).toHaveAttribute(
+			'data-geometry',
+			'unavailable-marker',
+		);
+		expect(todayUnavailable).not.toHaveStyle({ height: '8%' });
+
+		const todayPositive = screen.getByTitle('04:00：10 分钟，2 条记录');
+		expect(todayPositive).toHaveAttribute('data-geometry', 'quantitative-bar');
+		expect(todayPositive).toHaveStyle({ height: '100%' });
+
+		const weekPanel = screen.getByRole('tabpanel', { name: '周' });
+		const reportZero = within(weekPanel).getByTitle('周一：0 分钟，2 条记录');
+		expect(reportZero).toHaveStyle({ height: '0%' });
+		const reportUnavailable = within(weekPanel).getByTitle(
+			'周二：时长不可用，3 条记录',
+		);
+		expect(reportUnavailable).toHaveAttribute(
+			'data-geometry',
+			'unavailable-marker',
+		);
+		const reportPositive = within(weekPanel).getByTitle(
+			'周三：10 分钟，4 条记录',
+		);
+		expect(reportPositive).toHaveStyle({ height: '100%' });
+	});
+
 	it('formats durations beyond 24 hours without wrapping them into a clock', () => {
 		render(<ListeningFootprint footprint={validFootprint} />);
 
@@ -201,23 +257,50 @@ describe('ListeningFootprint', () => {
 		expect(screen.getByText(/本周代表曲目暂不可用/)).toBeInTheDocument();
 	});
 
-	it('renders an understandable unavailable state', () => {
-		render(
-			<ListeningFootprint
-				footprint={{
-					...validFootprint,
-					state: 'unavailable',
-					coverage: {
-						...validFootprint.coverage,
-						recentAvailable: false,
-						recordCount: null,
-					},
-				}}
-			/>,
-		);
+	it('renders the real unavailable fallback without claiming a zero-record limit', () => {
+		render(<ListeningFootprint footprint={unavailableMusicFootprint} />);
 
 		expect(screen.getByText(/听歌记录暂不可用/)).toBeInTheDocument();
-		expect(screen.getByText(/最近 100 条记录暂时无法读取/)).toBeInTheDocument();
+		expect(
+			screen.getByText(/近期记录覆盖范围暂时无法确认/),
+		).toBeInTheDocument();
+		expect(screen.queryByText(/最近 0 条记录/)).not.toBeInTheDocument();
+	});
+
+	it('keeps every tab control target mounted with only the selected panel exposed', () => {
+		render(<ListeningFootprint footprint={validFootprint} />);
+
+		const assertRelationships = (selectedName: string) => {
+			for (const tab of screen.getAllByRole('tab')) {
+				const targetId = tab.getAttribute('aria-controls');
+				expect(targetId).toBeTruthy();
+				const panel = document.getElementById(targetId ?? '');
+				expect(panel).toBeInTheDocument();
+				const selected = tab.textContent === selectedName;
+				expect(tab).toHaveAttribute('aria-selected', String(selected));
+				if (selected) expect(panel).not.toHaveAttribute('hidden');
+				else expect(panel).toHaveAttribute('hidden');
+			}
+		};
+
+		assertRelationships('周');
+		fireEvent.click(screen.getByRole('tab', { name: '年' }));
+		assertRelationships('年');
+		expect(screen.getAllByRole('tabpanel', { hidden: true })).toHaveLength(3);
+		expect(screen.getAllByRole('tabpanel')).toHaveLength(1);
+	});
+
+	it('keeps small coverage and source metadata at readable neutral contrast', () => {
+		render(<ListeningFootprint footprint={validFootprint} />);
+
+		const coverage = screen.getByText(/最近 100 条记录已取满/).parentElement;
+		expect(coverage).toHaveClass('text-neutral-300');
+		const sourceFooter = screen.getByText(/时区：Asia\/Shanghai/);
+		expect(sourceFooter).toHaveClass('text-neutral-400');
+		expect(sourceFooter).not.toHaveClass(
+			'text-neutral-500',
+			'text-neutral-600',
+		);
 	});
 
 	it('uses semantic loading and native, focusable tab controls', () => {

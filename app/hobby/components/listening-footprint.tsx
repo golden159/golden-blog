@@ -46,13 +46,54 @@ const formatDuration = (durationMs: number | null): string => {
 const formatCount = (count: number | null, suffix = '次'): string =>
 	count === null ? '—' : `${numberFormatter.format(count)} ${suffix}`;
 
-const bucketAriaLabel = (bucket: ListeningBucket): string =>
-	`${bucket.label}：${formatDuration(bucket.durationMs)}，${formatCount(bucket.recordCount, '条记录')}`;
-
-const getBarHeight = (value: number | null, maximum: number): string => {
-	if (value === null || maximum === 0) return '8%';
-	return `${Math.max(8, Math.round((value / maximum) * 100))}%`;
+const bucketAriaLabel = (bucket: ListeningBucket): string => {
+	const duration =
+		bucket.durationMs === null
+			? '时长不可用'
+			: formatDuration(bucket.durationMs);
+	const count =
+		bucket.recordCount === null
+			? '记录数不可用'
+			: formatCount(bucket.recordCount, '条记录');
+	return `${bucket.label}：${duration}，${count}`;
 };
+
+const getBarSize = (value: number, maximum: number): string => {
+	if (value === 0 || maximum <= 0) return '0%';
+	return `${Math.max(1, Math.round((value / maximum) * 100))}%`;
+};
+
+function VerticalBucketGeometry({
+	bucket,
+	maximum,
+	quantitativeClassName,
+}: {
+	bucket: ListeningBucket;
+	maximum: number;
+	quantitativeClassName: string;
+}) {
+	const title = bucketAriaLabel(bucket);
+	if (bucket.durationMs === null) {
+		return (
+			<div
+				aria-hidden='true'
+				title={title}
+				data-geometry='unavailable-marker'
+				className='h-1.5 w-full border-y border-dashed border-neutral-300/80 bg-[repeating-linear-gradient(135deg,rgba(163,163,163,0.5)_0_2px,transparent_2px_5px)]'
+			/>
+		);
+	}
+
+	return (
+		<div
+			aria-hidden='true'
+			title={title}
+			data-geometry='quantitative-bar'
+			className={quantitativeClassName}
+			style={{ height: getBarSize(bucket.durationMs, maximum) }}
+		/>
+	);
+}
 
 function LoadingFootprint() {
 	return (
@@ -76,15 +117,16 @@ function LoadingFootprint() {
 
 function CoverageNote({ footprint }: { footprint: NeteaseListeningFootprint }) {
 	const { coverage, state } = footprint;
-	const limitLabel = `最近 ${coverage.limit} 条记录`;
 	let detail: string;
 
-	if (!coverage.recentAvailable || coverage.recordCount === null) {
-		detail = `${limitLabel}暂时无法读取。`;
+	if (coverage.limit <= 0) {
+		detail = '近期记录覆盖范围暂时无法确认。';
+	} else if (!coverage.recentAvailable || coverage.recordCount === null) {
+		detail = `最近 ${coverage.limit} 条记录暂时无法读取。`;
 	} else if (coverage.truncated) {
-		detail = `${limitLabel}已取满 ${coverage.recordCount} 条；统计受接口上限限制。`;
+		detail = `最近 ${coverage.limit} 条记录已取满 ${coverage.recordCount} 条；统计受接口上限限制。`;
 	} else {
-		detail = `${limitLabel}接口返回 ${coverage.recordCount} 条；当前统计覆盖这些可用记录。`;
+		detail = `最近 ${coverage.limit} 条记录接口返回 ${coverage.recordCount} 条；当前统计覆盖这些可用记录。`;
 	}
 
 	const stateCopy =
@@ -147,18 +189,17 @@ function TodayCard({ footprint }: { footprint: NeteaseListeningFootprint }) {
 						key={`${bucket.label}-${index}`}
 						className='flex h-full min-w-0 items-end'
 					>
-						<div
-							aria-hidden='true'
-							title={bucketAriaLabel(bucket)}
-							className='w-full rounded-t-sm bg-linear-to-t from-primary-600 via-fuchsia-400 to-cyan-300 opacity-90 motion-safe:transition-[height] motion-safe:duration-500'
-							style={{ height: getBarHeight(bucket.durationMs, maximum) }}
+						<VerticalBucketGeometry
+							bucket={bucket}
+							maximum={maximum}
+							quantitativeClassName='w-full rounded-t-sm bg-linear-to-t from-primary-600 via-fuchsia-400 to-cyan-300 opacity-90 motion-safe:transition-[height] motion-safe:duration-500'
 						/>
 					</div>
 				))}
 			</div>
 			<div
 				aria-hidden='true'
-				className='relative mt-2 grid grid-cols-12 gap-1 text-center text-[9px] text-neutral-500 sm:gap-2 sm:text-[10px]'
+				className='relative mt-2 grid grid-cols-12 gap-1 text-center text-[9px] text-neutral-400 sm:gap-2 sm:text-[10px]'
 			>
 				{footprint.today.buckets.map((bucket, index) => (
 					<span key={`${bucket.label}-${index}`} className='truncate'>
@@ -263,11 +304,22 @@ function WeekComparison({
 							</span>
 						</div>
 						<div className='h-3 overflow-hidden rounded-full border border-white/10 bg-neutral-900'>
-							<div
-								aria-hidden='true'
-								className={`h-full rounded-full ${row.color} motion-safe:transition-[width] motion-safe:duration-500`}
-								style={{ width: getBarHeight(row.value, maximum) }}
-							/>
+							{row.value === null ? (
+								<div
+									aria-hidden='true'
+									title={`${row.label}：时长不可用`}
+									data-geometry='unavailable-marker'
+									className='h-full w-full bg-[repeating-linear-gradient(135deg,rgba(163,163,163,0.45)_0_3px,transparent_3px_7px)]'
+								/>
+							) : (
+								<div
+									aria-hidden='true'
+									title={`${row.label}：${formatDuration(row.value)}`}
+									data-geometry='quantitative-bar'
+									className={`h-full rounded-full ${row.color} motion-safe:transition-[width] motion-safe:duration-500`}
+									style={{ width: getBarSize(row.value, maximum) }}
+								/>
+							)}
 						</div>
 					</div>
 				))}
@@ -275,7 +327,7 @@ function WeekComparison({
 			<div className='mt-7 border-t border-white/10 pt-4'>
 				{footprint.weeklyHighlight ? (
 					<>
-						<p className='text-[11px] font-bold tracking-[0.2em] text-neutral-500'>
+						<p className='text-[11px] font-bold tracking-[0.2em] text-neutral-400'>
 							本周代表曲目
 						</p>
 						<a
@@ -325,10 +377,10 @@ function ReportChart({
 				>
 					<span className='sr-only'>{bucketAriaLabel(bucket)}</span>
 					<div className='flex min-h-0 flex-1 items-end justify-center'>
-						<div
-							aria-hidden='true'
-							className={`w-full max-w-10 rounded-t-md bg-linear-to-t ${accent} opacity-90 motion-safe:transition-[height] motion-safe:duration-500`}
-							style={{ height: getBarHeight(bucket.durationMs, maximum) }}
+						<VerticalBucketGeometry
+							bucket={bucket}
+							maximum={maximum}
+							quantitativeClassName={`w-full max-w-10 rounded-t-md bg-linear-to-t ${accent} opacity-90 motion-safe:transition-[height] motion-safe:duration-500`}
 						/>
 					</div>
 					<span className='mt-2 truncate text-[10px] text-neutral-400 sm:text-xs'>
@@ -342,9 +394,6 @@ function ReportChart({
 
 function ReportPanel({ footprint }: { footprint: NeteaseListeningFootprint }) {
 	const [period, setPeriod] = useState<ReportPeriod>('week');
-	const meta = reportMeta[period];
-	const report = footprint.reports[period];
-
 	const handleTabKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
 		const periods = Object.keys(reportMeta) as ReportPeriod[];
 		const currentIndex = periods.indexOf(period);
@@ -398,50 +447,61 @@ function ReportPanel({ footprint }: { footprint: NeteaseListeningFootprint }) {
 				</div>
 			</div>
 
-			<div
-				id={`listening-report-panel-${period}`}
-				role='tabpanel'
-				aria-labelledby={`listening-report-tab-${period}`}
-				className='mt-7'
-			>
-				<div className='flex flex-wrap items-baseline justify-between gap-3'>
-					<p className='text-2xl font-black'>{meta.title}</p>
-					<p className='text-2xl font-black tabular-nums text-white'>
-						{formatDuration(report.durationMs)}
-					</p>
-				</div>
-				<div className='mt-6 overflow-x-auto pb-1'>
-					<div className={report.buckets.length > 7 ? 'min-w-xl' : 'min-w-0'}>
-						<ReportChart slice={report} accent={meta.accent} />
+			{(Object.keys(reportMeta) as ReportPeriod[]).map((candidate) => {
+				const selected = candidate === period;
+				const meta = reportMeta[candidate];
+				const report = footprint.reports[candidate];
+				return (
+					<div
+						key={candidate}
+						id={`listening-report-panel-${candidate}`}
+						role='tabpanel'
+						aria-labelledby={`listening-report-tab-${candidate}`}
+						hidden={!selected}
+						className='mt-7'
+					>
+						<div className='flex flex-wrap items-baseline justify-between gap-3'>
+							<p className='text-2xl font-black'>{meta.title}</p>
+							<p className='text-2xl font-black tabular-nums text-white'>
+								{formatDuration(report.durationMs)}
+							</p>
+						</div>
+						<div className='mt-6 overflow-x-auto pb-1'>
+							<div
+								className={report.buckets.length > 7 ? 'min-w-xl' : 'min-w-0'}
+							>
+								<ReportChart slice={report} accent={meta.accent} />
+							</div>
+						</div>
+						<dl className='mt-6 grid grid-cols-2 gap-4 border-t border-white/10 pt-5 text-sm sm:grid-cols-4'>
+							<div>
+								<dt className='text-xs text-neutral-400'>播放记录</dt>
+								<dd className='mt-1 font-bold tabular-nums'>
+									{formatCount(report.recordCount, '条')}
+								</dd>
+							</div>
+							<div>
+								<dt className='text-xs text-neutral-400'>不同歌曲</dt>
+								<dd className='mt-1 font-bold tabular-nums'>
+									{formatCount(report.uniqueTrackCount, '首')}
+								</dd>
+							</div>
+							<div>
+								<dt className='text-xs text-neutral-400'>最常听歌手</dt>
+								<dd className='mt-1 truncate font-bold'>
+									{report.topArtist ?? '—'}
+								</dd>
+							</div>
+							<div>
+								<dt className='text-xs text-neutral-400'>最常听歌曲</dt>
+								<dd className='mt-1 truncate font-bold'>
+									{report.topTrack ?? '—'}
+								</dd>
+							</div>
+						</dl>
 					</div>
-				</div>
-				<dl className='mt-6 grid grid-cols-2 gap-4 border-t border-white/10 pt-5 text-sm sm:grid-cols-4'>
-					<div>
-						<dt className='text-xs text-neutral-500'>播放记录</dt>
-						<dd className='mt-1 font-bold tabular-nums'>
-							{formatCount(report.recordCount, '条')}
-						</dd>
-					</div>
-					<div>
-						<dt className='text-xs text-neutral-500'>不同歌曲</dt>
-						<dd className='mt-1 font-bold tabular-nums'>
-							{formatCount(report.uniqueTrackCount, '首')}
-						</dd>
-					</div>
-					<div>
-						<dt className='text-xs text-neutral-500'>最常听歌手</dt>
-						<dd className='mt-1 truncate font-bold'>
-							{report.topArtist ?? '—'}
-						</dd>
-					</div>
-					<div>
-						<dt className='text-xs text-neutral-500'>最常听歌曲</dt>
-						<dd className='mt-1 truncate font-bold'>
-							{report.topTrack ?? '—'}
-						</dd>
-					</div>
-				</dl>
-			</div>
+				);
+			})}
 		</article>
 	);
 }
@@ -485,7 +545,7 @@ export default function ListeningFootprint({
 					<WeekComparison footprint={footprint} />
 					<ReportPanel footprint={footprint} />
 				</div>
-				<p className='mt-5 text-right text-[11px] tracking-wide text-neutral-600'>
+				<p className='mt-5 text-right text-[11px] tracking-wide text-neutral-400'>
 					时区：Asia/Shanghai · 足迹数据每 5 分钟重新验证
 				</p>
 			</div>
