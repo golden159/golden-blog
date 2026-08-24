@@ -1,18 +1,19 @@
 'use client';
 
-import type { NeteaseListeningFootprint } from 'app/components/netease/footprint-types';
-import type { NeteaseActivityResponse } from 'app/components/netease/types';
+import type {
+	NeteaseActivityResponse,
+	NeteaseWeeklyRanking,
+} from 'app/components/netease/types';
 import Image from 'next/image';
 import { useState } from 'react';
-import { musicGenres, musicProfile } from '../content';
-import ListeningFootprint from './listening-footprint';
+import { musicGenres } from '../content';
+import ListeningWeeklyRanking from './listening-weekly-ranking';
 import {
-	musicStateLabels,
 	normalizeMusicActivity,
 	unavailableMusicActivity,
 	useMusicActivity,
 } from './music-activity';
-import { useMusicFootprint } from './music-footprint-data';
+import { useMusicWeeklyRanking } from './music-weekly-data';
 
 const albumArtPlaceholder = '/static/hobby/music-placeholder.svg';
 
@@ -27,7 +28,7 @@ const labels: Record<NeteaseActivityResponse['state'], string> = {
 const stateDescriptions: Record<NeteaseActivityResponse['state'], string> = {
 	recent: '15 分钟内有播放记录；这是最近听过，不代表当前正在播放。',
 	older: '有最近播放记录，但时间已经超过 15 分钟。',
-	weekly: '本周听歌汇总，不表示当前或最近播放。',
+	weekly: '本周听歌汇总。',
 	empty: '播放一首歌后，最近记录会在同步后自动更新。',
 	unavailable: '暂时无法读取网易云记录，请检查 Cookie 或稍后再试。',
 };
@@ -55,7 +56,7 @@ const formatDuration = (durationMs: number | null): string | null => {
 		return null;
 	}
 
-	const totalSeconds = Math.round(durationMs / 1000);
+	const totalSeconds = Math.floor(durationMs / 1000);
 	const minutes = Math.floor(totalSeconds / 60);
 	const seconds = String(totalSeconds % 60).padStart(2, '0');
 	return `${minutes}:${seconds}`;
@@ -86,15 +87,17 @@ function AlbumArt({ track }: { track: Track | null }) {
 
 type MusicDetailsProps = {
 	activity?: NeteaseActivityResponse;
-	footprint?: NeteaseListeningFootprint;
+	weeklyRanking?: NeteaseWeeklyRanking;
 };
 
 export default function MusicDetails({
 	activity,
-	footprint,
+	weeklyRanking,
 }: MusicDetailsProps) {
 	const { data: fetchedActivity } = useMusicActivity(activity === undefined);
-	const { data: fetchedFootprint } = useMusicFootprint(footprint === undefined);
+	const { data: fetchedWeeklyRanking } = useMusicWeeklyRanking(
+		weeklyRanking === undefined,
+	);
 	const data = normalizeMusicActivity(
 		activity ?? fetchedActivity ?? unavailableMusicActivity,
 	);
@@ -145,11 +148,6 @@ export default function MusicDetails({
 							<p className='mt-1 truncate text-sm text-gray-600 dark:text-gray-300'>
 								{track.artists.join(', ')} · {track.album}
 							</p>
-							{isWeekly && (
-								<p className='mt-2 text-sm text-gray-600 dark:text-gray-300'>
-									本周听歌汇总，不表示当前或最近播放。
-								</p>
-							)}
 						</>
 					) : (
 						<p className='mt-3 text-sm text-gray-600 dark:text-gray-300'>
@@ -157,20 +155,44 @@ export default function MusicDetails({
 						</p>
 					)}
 
-					<ul
-						aria-label='音乐标签'
-						data-testid='music-tags'
-						className='mt-4 flex flex-wrap gap-2'
-					>
-						{[...musicGenres, ...dynamicTags].map((tag) => (
-							<li
-								key={tag}
-								className='rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-gray-950/70 dark:text-gray-300 dark:ring-gray-700'
-							>
-								{tag}
-							</li>
-						))}
-					</ul>
+					<div className='mt-4 grid gap-3 sm:grid-cols-2'>
+						<div className='rounded-xl border border-gray-200/90 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-950/55'>
+							<p className='text-[11px] font-semibold tracking-[0.16em] text-gray-500 uppercase dark:text-gray-400'>
+								常听风格
+							</p>
+							<ul aria-label='常听风格' className='mt-2 flex flex-wrap gap-2'>
+								{musicGenres.map((genre) => (
+									<li
+										key={genre}
+										className='rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/[0.07] dark:text-gray-300'
+									>
+										{genre}
+									</li>
+								))}
+							</ul>
+						</div>
+
+						{track && (
+							<div className='rounded-xl border border-primary-200/80 bg-primary-50/70 p-3 dark:border-primary-300/20 dark:bg-primary-400/[0.08]'>
+								<p className='text-[11px] font-semibold tracking-[0.16em] text-primary-600 uppercase dark:text-primary-300'>
+									这首歌
+								</p>
+								<ul
+									aria-label='这首歌的标签'
+									className='mt-2 flex flex-wrap gap-2'
+								>
+									{dynamicTags.map((tag) => (
+										<li
+											key={tag}
+											className='rounded-full bg-white/85 px-3 py-1 text-xs font-semibold text-primary-700 ring-1 ring-primary-200/80 dark:bg-gray-950/60 dark:text-primary-200 dark:ring-primary-300/20'
+										>
+											{tag}
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
+					</div>
 
 					{track && (
 						<dl className='mt-5 grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400 sm:grid-cols-3'>
@@ -201,30 +223,9 @@ export default function MusicDetails({
 							记录时间：{playedAt}
 						</p>
 					)}
-
-					<div className='mt-5 flex flex-wrap items-center gap-x-4 gap-y-2'>
-						<p className='text-sm text-gray-600 dark:text-gray-300'>
-							网易云 User ID：{musicProfile.userId}
-						</p>
-						<a
-							href={musicProfile.url}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='text-sm text-primary-600 underline decoration-primary-500 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-primary-400'
-						>
-							打开网易云主页 ↗
-						</a>
-					</div>
-					<p className='mt-3 text-xs text-gray-500 dark:text-gray-400'>
-						状态：{musicStateLabels[data.state]} ·{' '}
-						{isWeekly
-							? '数据来自本周听歌汇总，不表示当前或最近播放'
-							: '数据来自最近播放记录，不代表当前正在播放'}{' '}
-						· 每 60 秒更新
-					</p>
 				</div>
 			</div>
-			<ListeningFootprint footprint={footprint ?? fetchedFootprint} />
+			<ListeningWeeklyRanking ranking={weeklyRanking ?? fetchedWeeklyRanking} />
 		</div>
 	);
 }

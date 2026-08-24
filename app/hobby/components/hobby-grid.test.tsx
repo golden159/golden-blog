@@ -135,6 +135,33 @@ describe('HobbyGrid', () => {
 		expect(screen.getByText('Game Accounts')).toBeInTheDocument();
 	});
 
+	it('places the Music profile at the bottom-right of the top summary', () => {
+		renderGrid();
+
+		const profileLink = screen.getByRole('link', { name: /网易云主页/ });
+		const musicTrigger = trigger('Music');
+		expect(profileLink).toHaveAttribute(
+			'href',
+			'https://y.music.163.com/m/user?id=3719820729',
+		);
+		expect(profileLink.parentElement).toHaveClass('justify-end', 'text-right');
+		expect(
+			musicTrigger.compareDocumentPosition(profileLink) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(
+			screen.queryByRole('region', { name: 'Music' }),
+		).not.toBeInTheDocument();
+
+		fireEvent.click(musicTrigger);
+		const musicPanel = screen.getByRole('region', { name: 'Music' });
+		expect(
+			profileLink.compareDocumentPosition(musicPanel) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(screen.getAllByRole('link', { name: /网易云主页/ })).toHaveLength(1);
+	});
+
 	it('matches trigger and panel identifiers', () => {
 		renderGrid();
 		const gamesTrigger = trigger('Games');
@@ -184,6 +211,66 @@ describe('HobbyGrid', () => {
 				'最近活跃',
 			),
 		);
+	});
+
+	it('loads weekly data on page mount for the closed Music cover', async () => {
+		const weeklyRanking = {
+			state: 'ready',
+			generatedAt: 1_800_000_000_000,
+			tracks: [
+				{
+					rank: 1,
+					title: '周榜歌曲',
+					artists: ['Artist'],
+					album: 'Album',
+					albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
+					songUrl: 'https://music.163.com/song?id=42',
+					durationMs: 180_000,
+					playCount: 3,
+					score: 100,
+				},
+			],
+		};
+		const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+			const url = String(input);
+			return new Response(
+				JSON.stringify(
+					url === '/api/hobby/netease/weekly'
+						? weeklyRanking
+						: { state: 'unavailable', track: null },
+				),
+				{ status: 200 },
+			);
+		});
+		vi.stubGlobal('fetch', fetchMock);
+
+		renderGrid();
+
+		const preview = await screen.findByTestId('music-preview-art');
+		await waitFor(() =>
+			expect(preview).toHaveAttribute('data-track-title', '周榜歌曲'),
+		);
+		await waitFor(() =>
+			expect(decodeURIComponent(preview.getAttribute('src') ?? '')).toContain(
+				'https://p1.music.126.net/weekly-cover.jpg',
+			),
+		);
+		expect(
+			fetchMock.mock.calls.filter(
+				([url]) => url === '/api/hobby/netease/weekly',
+			),
+		).toHaveLength(1);
+		expect(
+			screen.queryByRole('region', { name: 'Music' }),
+		).not.toBeInTheDocument();
+
+		fireEvent.click(trigger('Music'));
+		await screen.findByRole('list', { name: '网易云听歌周榜' });
+		expect(
+			fetchMock.mock.calls.filter(
+				([url]) => url === '/api/hobby/netease/weekly',
+			),
+		).toHaveLength(1);
 	});
 
 	it('shows the weekly favorite cover and title in the closed Music card', async () => {
@@ -269,7 +356,7 @@ describe('HobbyGrid', () => {
 		);
 	});
 
-	it('shares the parent activity request while loading the footprint separately', async () => {
+	it('loads activity and weekly ranking before Music opens', async () => {
 		const fetchMock = vi.fn().mockResolvedValue(
 			new Response(JSON.stringify({ state: 'empty', track: null }), {
 				status: 200,
@@ -278,20 +365,62 @@ describe('HobbyGrid', () => {
 		vi.stubGlobal('fetch', fetchMock);
 
 		renderGrid();
-		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+		expect(
+			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
+		).toHaveLength(1);
+		expect(
+			fetchMock.mock.calls.filter(
+				([url]) => url === '/api/hobby/netease/weekly',
+			),
+		).toHaveLength(1);
 		fireEvent.click(trigger('Music'));
 		await waitFor(() =>
 			expect(screen.getByTestId('music-state')).toHaveTextContent(
 				'暂无最近记录',
 			),
 		);
-		expect(
-			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
-		).toHaveLength(1);
-		expect(
-			fetchMock.mock.calls.filter(
-				([url]) => url === '/api/hobby/netease/footprint',
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+	});
+
+	it('deduplicates the parent activity request when Music opens in flight', async () => {
+		let resolveActivity: ((response: Response) => void) | undefined;
+		const pendingActivity = new Promise<Response>((resolve) => {
+			resolveActivity = resolve;
+		});
+		const fetchMock = vi.fn((input: RequestInfo | URL) =>
+			String(input) === '/api/hobby/netease'
+				? pendingActivity
+				: Promise.resolve(
+						new Response(
+							JSON.stringify({
+								state: 'unavailable',
+								generatedAt: 1_800_000_000_000,
+								tracks: [],
+							}),
+							{ status: 200 },
+						),
+					),
+		);
+		vi.stubGlobal('fetch', fetchMock);
+
+		renderGrid();
+		fireEvent.click(trigger('Music'));
+
+		await waitFor(() => {
+			expect(
+				fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
+			).toHaveLength(1);
+		});
+		resolveActivity?.(
+			new Response(JSON.stringify({ state: 'empty', track: null }), {
+				status: 200,
+			}),
+		);
+		await waitFor(() =>
+			expect(screen.getByTestId('music-state')).toHaveTextContent(
+				'暂无最近记录',
 			),
-		).toHaveLength(1);
+		);
 	});
 });
