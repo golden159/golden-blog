@@ -143,6 +143,65 @@ describe('normalizeWeeklyRanking', () => {
 		});
 	});
 
+	it.each([
+		Number.POSITIVE_INFINITY,
+		'not-a-duration',
+	])('keeps a valid song while dropping an unsafe duration %s', (duration) => {
+		const record = weeklyRecord(9);
+		const payload = {
+			code: 200,
+			weekData: [
+				{
+					...record,
+					song: { ...record.song, dt: duration },
+				},
+			],
+		};
+
+		expect(normalizeWeeklyRanking(payload, NOW)).toMatchObject({
+			state: 'ready',
+			tracks: [{ title: 'Track 9', durationMs: null }],
+		});
+		expect(normalizeWeeklyTrack(payload)).toEqual({
+			state: 'weekly',
+			track: {
+				title: 'Track 9',
+				artists: ['Artist 9'],
+				album: 'Album 9',
+				albumArtUrl: 'https://p1.music.126.net/cover-9.jpg',
+				songUrl: 'https://music.163.com/song?id=9',
+				playedAt: null,
+			},
+		});
+	});
+
+	it.each([
+		'https://attacker@p1.music.126.net/cover.jpg',
+		'https://p1.music.126.net:8443/cover.jpg',
+	])('drops credentialed or ported artwork %s', (picUrl) => {
+		const record = weeklyRecord(10);
+		const result = normalizeWeeklyRanking(
+			{
+				code: 200,
+				weekData: [
+					{
+						...record,
+						song: {
+							...record.song,
+							al: { ...record.song.al, picUrl },
+						},
+					},
+				],
+			},
+			NOW,
+		);
+
+		expect(result).toMatchObject({
+			state: 'ready',
+			tracks: [{ title: 'Track 10', albumArtUrl: null }],
+		});
+	});
+
 	it('returns unavailable when a non-empty list has no valid songs', () => {
 		expect(
 			normalizeWeeklyRanking(

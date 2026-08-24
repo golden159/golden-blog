@@ -147,7 +147,7 @@ describe('MusicDetails', () => {
 			'dark:text-primary-400',
 		);
 		expect(screen.getByText(/记录时间：/)).toBeInTheDocument();
-		expect(screen.getByText(/不代表当前正在播放/)).toBeInTheDocument();
+		expect(screen.queryByText(/状态：.*每 60 秒更新/)).not.toBeInTheDocument();
 		expect(
 			screen.getByRole('link', {
 				name: '在网易云音乐打开《夜に駆ける》（新窗口）',
@@ -189,6 +189,11 @@ describe('MusicDetails', () => {
 		expect(
 			screen.getByText('本周听歌汇总，不表示当前或最近播放。'),
 		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				'状态：本周常听 · 数据来自本周听歌汇总，不表示当前或最近播放 · 每 60 秒更新',
+			),
+		).not.toBeInTheDocument();
 		expect(screen.queryByText(/记录时间：/)).not.toBeInTheDocument();
 	});
 

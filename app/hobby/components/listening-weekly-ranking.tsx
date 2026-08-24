@@ -61,14 +61,14 @@ function RankingShell({
 						<p className='text-xs font-black tracking-[0.28em] text-primary-600 dark:text-primary-300'>
 							WEEKLY TOP 10
 						</p>
-						<h2
+						<h3
 							id='listening-weekly-ranking-title'
 							className='mt-2 bg-linear-to-r from-primary-600 via-fuchsia-500 to-cyan-500 bg-clip-text text-3xl font-black tracking-tight text-transparent sm:text-4xl dark:from-primary-300 dark:via-fuchsia-300 dark:to-cyan-300'
 						>
 							听歌周榜
-						</h2>
+						</h3>
 						<p className='mt-2 max-w-2xl text-sm leading-6 text-gray-600 dark:text-neutral-300'>
-							复刻成熟的歌曲排行列表，只呈现网易云周榜真实返回的字段。
+							这一周常听的歌，按网易云周榜顺序排列。
 						</p>
 					</div>
 					<span className='w-fit rounded-full border border-primary-300/70 bg-primary-50/90 px-3 py-1.5 text-xs font-bold text-primary-700 dark:border-primary-300/25 dark:bg-primary-400/10 dark:text-primary-200'>
@@ -95,14 +95,16 @@ function RankingRow({ track }: { track: WeeklyRankingTrack }) {
 				target='_blank'
 				rel='noopener noreferrer'
 				referrerPolicy='no-referrer'
-				aria-label={`在网易云音乐打开《${track.title}》（新窗口）`}
 				className='group grid min-w-0 grid-cols-[2rem_3rem_minmax(0,1fr)] items-center gap-3 rounded-xl px-3 py-3 outline-none transition-colors hover:bg-white/80 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset dark:hover:bg-white/[0.07] sm:grid-cols-[2.5rem_3rem_minmax(0,1fr)_auto] sm:px-4'
 			>
 				<span className='font-mono text-lg font-black tabular-nums text-primary-500 dark:text-primary-300'>
 					<span className='sr-only'>第 {track.rank} 名</span>
 					<span aria-hidden='true'>{visualRank}</span>
 				</span>
-				<WeeklyCover track={track} />
+				<WeeklyCover
+					key={track.albumArtUrl ?? albumArtPlaceholder}
+					track={track}
+				/>
 				<span className='min-w-0'>
 					<span className='block truncate text-base font-bold text-gray-900 transition-colors group-hover:text-primary-600 dark:text-white dark:group-hover:text-primary-300'>
 						{track.title}
@@ -128,6 +130,7 @@ function RankingRow({ track }: { track: WeeklyRankingTrack }) {
 						</span>
 					)}
 				</span>
+				<span className='sr-only'>（在网易云音乐中打开，新窗口）</span>
 			</a>
 		</li>
 	);

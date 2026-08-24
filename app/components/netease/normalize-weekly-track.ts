@@ -47,7 +47,13 @@ const normalizeImageUrl = (value: unknown): string | null => {
 		const trustedHost =
 			url.hostname === 'music.126.net' ||
 			url.hostname.endsWith('.music.126.net');
-		return url.protocol === 'https:' && trustedHost ? url.toString() : null;
+		return url.protocol === 'https:' &&
+			trustedHost &&
+			!url.username &&
+			!url.password &&
+			!url.port
+			? url.toString()
+			: null;
 	} catch {
 		return null;
 	}
@@ -68,11 +74,7 @@ const normalizeRankingEntry = (
 		.filter((artist): artist is string => artist !== null);
 	const album = asRecord(song?.al);
 	const durationMs = finiteNumber(song?.dt);
-	if (
-		song?.dt !== undefined &&
-		song.dt !== null &&
-		(durationMs === null || durationMs < 0)
-	) {
+	if (durationMs !== null && durationMs < 0) {
 		return null;
 	}
 

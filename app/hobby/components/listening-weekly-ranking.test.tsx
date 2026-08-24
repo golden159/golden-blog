@@ -37,7 +37,7 @@ describe('ListeningWeeklyRanking', () => {
 		render(<ListeningWeeklyRanking ranking={ranking} />);
 
 		expect(
-			screen.getByRole('heading', { name: '听歌周榜' }),
+			screen.getByRole('heading', { name: '听歌周榜', level: 3 }),
 		).toBeInTheDocument();
 		expect(screen.getByText('WEEKLY TOP 10')).toBeInTheDocument();
 		const list = screen.getByRole('list', { name: '网易云听歌周榜' });
@@ -54,9 +54,12 @@ describe('ListeningWeeklyRanking', () => {
 			'true',
 		);
 
-		const firstLink = within(rows[0]).getByRole('link', {
-			name: '在网易云音乐打开《夜に駆ける》（新窗口）',
-		});
+		const firstLink = within(rows[0]).getByRole('link');
+		expect(firstLink).toHaveAccessibleName(/第 1 名/);
+		expect(firstLink).toHaveAccessibleName(/YOASOBI/);
+		expect(firstLink).toHaveAccessibleName(/周榜指数 100/);
+		expect(firstLink).toHaveAccessibleName(/播放 8 次/);
+		expect(firstLink).toHaveAccessibleName(/新窗口/);
 		expect(firstLink).toHaveAttribute(
 			'href',
 			'https://music.163.com/song?id=1',
@@ -75,6 +78,39 @@ describe('ListeningWeeklyRanking', () => {
 				name: '群青 的专辑封面占位图',
 			}),
 		).toBeInTheDocument();
+	});
+
+	it('updates a cover when SWR returns a new artwork URL for the same song', () => {
+		const { rerender } = render(<ListeningWeeklyRanking ranking={ranking} />);
+		const originalCover = screen.getByRole('img', {
+			name: '夜に駆ける 的专辑封面',
+		});
+		expect(
+			decodeURIComponent(originalCover.getAttribute('src') ?? ''),
+		).toContain('https://p1.music.126.net/cover-1.jpg');
+
+		rerender(
+			<ListeningWeeklyRanking
+				ranking={{
+					...ranking,
+					tracks: [
+						{
+							...ranking.tracks[0],
+							albumArtUrl: 'https://p2.music.126.net/new-cover.jpg',
+						},
+						...ranking.tracks.slice(1),
+					],
+				}}
+			/>,
+		);
+
+		expect(
+			decodeURIComponent(
+				screen
+					.getByRole('img', { name: '夜に駆ける 的专辑封面' })
+					.getAttribute('src') ?? '',
+			),
+		).toContain('https://p2.music.126.net/new-cover.jpg');
 	});
 
 	it('does not render removed duration and period-report modules', () => {

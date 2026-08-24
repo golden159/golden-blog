@@ -9,7 +9,6 @@ import { useState } from 'react';
 import { musicGenres, musicProfile } from '../content';
 import ListeningWeeklyRanking from './listening-weekly-ranking';
 import {
-	musicStateLabels,
 	normalizeMusicActivity,
 	unavailableMusicActivity,
 	useMusicActivity,
@@ -57,7 +56,7 @@ const formatDuration = (durationMs: number | null): string | null => {
 		return null;
 	}
 
-	const totalSeconds = Math.round(durationMs / 1000);
+	const totalSeconds = Math.floor(durationMs / 1000);
 	const minutes = Math.floor(totalSeconds / 60);
 	const seconds = String(totalSeconds % 60).padStart(2, '0');
 	return `${minutes}:${seconds}`;
@@ -219,13 +218,6 @@ export default function MusicDetails({
 							打开网易云主页 ↗
 						</a>
 					</div>
-					<p className='mt-3 text-xs text-gray-500 dark:text-gray-400'>
-						状态：{musicStateLabels[data.state]} ·{' '}
-						{isWeekly
-							? '数据来自本周听歌汇总，不表示当前或最近播放'
-							: '数据来自最近播放记录，不代表当前正在播放'}{' '}
-						· 每 60 秒更新
-					</p>
 				</div>
 			</div>
 			<ListeningWeeklyRanking ranking={weeklyRanking ?? fetchedWeeklyRanking} />

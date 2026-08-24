@@ -294,4 +294,45 @@ describe('HobbyGrid', () => {
 			),
 		).toHaveLength(1);
 	});
+
+	it('deduplicates the parent activity request when Music opens in flight', async () => {
+		let resolveActivity: ((response: Response) => void) | undefined;
+		const pendingActivity = new Promise<Response>((resolve) => {
+			resolveActivity = resolve;
+		});
+		const fetchMock = vi.fn((input: RequestInfo | URL) =>
+			String(input) === '/api/hobby/netease'
+				? pendingActivity
+				: Promise.resolve(
+						new Response(
+							JSON.stringify({
+								state: 'unavailable',
+								generatedAt: 1_800_000_000_000,
+								tracks: [],
+							}),
+							{ status: 200 },
+						),
+					),
+		);
+		vi.stubGlobal('fetch', fetchMock);
+
+		renderGrid();
+		fireEvent.click(trigger('Music'));
+
+		await waitFor(() => {
+			expect(
+				fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
+			).toHaveLength(1);
+		});
+		resolveActivity?.(
+			new Response(JSON.stringify({ state: 'empty', track: null }), {
+				status: 200,
+			}),
+		);
+		await waitFor(() =>
+			expect(screen.getByTestId('music-state')).toHaveTextContent(
+				'暂无最近记录',
+			),
+		);
+	});
 });
