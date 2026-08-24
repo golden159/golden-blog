@@ -421,7 +421,7 @@ function ReportPanel({ footprint }: { footprint: NeteaseListeningFootprint }) {
 	};
 
 	return (
-		<article className='rounded-3xl border border-white/10 bg-white/6 p-5 sm:p-6 lg:col-span-7'>
+		<article className='min-w-0 rounded-3xl border border-white/10 bg-white/6 p-5 sm:p-6 lg:col-span-7'>
 			<div className='flex flex-wrap items-center justify-between gap-4'>
 				<div>
 					<p className='text-xs font-bold tracking-[0.24em] text-violet-300'>
@@ -467,7 +467,7 @@ function ReportPanel({ footprint }: { footprint: NeteaseListeningFootprint }) {
 						role='tabpanel'
 						aria-labelledby={`listening-report-tab-${candidate}`}
 						hidden={!selected}
-						className='mt-7'
+						className='mt-7 min-w-0'
 					>
 						<div className='flex flex-wrap items-baseline justify-between gap-3'>
 							<p className='text-2xl font-black'>{meta.title}</p>
@@ -475,7 +475,7 @@ function ReportPanel({ footprint }: { footprint: NeteaseListeningFootprint }) {
 								{formatDuration(report.durationMs)}
 							</p>
 						</div>
-						<div className='mt-6 overflow-x-auto pb-1'>
+						<div className='mt-6 min-w-0 max-w-full overflow-x-auto pb-1'>
 							<div
 								className={report.buckets.length > 7 ? 'min-w-xl' : 'min-w-0'}
 							>

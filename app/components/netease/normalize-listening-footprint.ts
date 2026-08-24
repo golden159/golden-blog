@@ -91,8 +91,9 @@ const finiteNumber = (value: unknown): number | null => {
 
 const validId = (value: unknown): string | null => {
 	if (typeof value === 'number')
-		return Number.isFinite(value) ? String(value) : null;
-	return text(value);
+		return Number.isSafeInteger(value) && value >= 0 ? String(value) : null;
+	const candidate = text(value);
+	return candidate && /^\d+$/.test(candidate) ? candidate : null;
 };
 
 const normalizeImageUrl = (value: unknown): string | null => {
@@ -155,16 +156,17 @@ const inRange = (record: ListeningRecord, start: number, end: number) =>
 	record.playedAt >= start && record.playedAt < end;
 
 const chooseTop = (
-	values: Array<{ name: string; playedAt: number; index: number }>,
+	values: Array<{ key: string; name: string; playedAt: number; index: number }>,
 ): string | null => {
 	const counts = new Map<
 		string,
-		{ count: number; playedAt: number; index: number }
+		{ name: string; count: number; playedAt: number; index: number }
 	>();
 	for (const value of values) {
-		const existing = counts.get(value.name);
+		const existing = counts.get(value.key);
 		if (!existing) {
-			counts.set(value.name, {
+			counts.set(value.key, {
+				name: value.name,
 				count: 1,
 				playedAt: value.playedAt,
 				index: value.index,
@@ -187,7 +189,7 @@ const chooseTop = (
 		playedAt: number;
 		index: number;
 	} | null = null;
-	for (const [name, value] of counts) {
+	for (const value of counts.values()) {
 		if (
 			!top ||
 			value.count > top.count ||
@@ -196,7 +198,7 @@ const chooseTop = (
 				value.playedAt === top.playedAt &&
 				value.index < top.index)
 		) {
-			top = { name, ...value };
+			top = value;
 		}
 	}
 	return top?.name ?? null;
@@ -222,6 +224,7 @@ const aggregateSlice = (
 	slice.topArtist = chooseTop(
 		records.flatMap((record) =>
 			record.artists.map((name) => ({
+				key: name,
 				name,
 				playedAt: record.playedAt,
 				index: record.index,
@@ -230,6 +233,7 @@ const aggregateSlice = (
 	);
 	slice.topTrack = chooseTop(
 		records.map((record) => ({
+			key: record.trackId,
 			name: record.title,
 			playedAt: record.playedAt,
 			index: record.index,
@@ -324,17 +328,19 @@ export function normalizeListeningFootprint({
 		: 100;
 	const recentRoot = asRecord(recentPayload);
 	const rawRecentList = asRecord(recentRoot?.data)?.list;
-	const recentAvailable =
+	const recentPayloadAvailable =
 		hasSuccessfulCode(recentRoot) && Array.isArray(rawRecentList);
-	const recentList = recentAvailable
+	const recentList = recentPayloadAvailable
 		? rawRecentList.slice(0, effectiveRecentLimit)
 		: [];
 	const safeNow = Number.isFinite(now) ? now : Date.now();
-	const records = recentAvailable
+	const records = recentPayloadAvailable
 		? recentList
 				.map((record, index) => normalizeRecentRecord(record, index, safeNow))
 				.filter((record): record is ListeningRecord => record !== null)
 		: [];
+	const recentAvailable =
+		recentPayloadAvailable && (recentList.length === 0 || records.length > 0);
 	const recentTotal = finiteNumber(asRecord(recentRoot?.data)?.total);
 
 	const weeklyRoot = asRecord(weeklyPayload);
@@ -346,13 +352,9 @@ export function normalizeListeningFootprint({
 				.map((entry) => normalizeFootprintTrack(asRecord(entry)?.song))
 				.filter((track): track is FootprintTrack => track !== null)
 		: [];
-	const weeklyDurations = weeklyAvailable
-		? weeklyData
-				.map((entry) => finiteNumber(asRecord(asRecord(entry)?.song)?.dt))
-				.filter(
-					(duration): duration is number => duration !== null && duration >= 0,
-				)
-		: [];
+	const weeklyDurations = weeklyTracks
+		.map((track) => track.durationMs)
+		.filter((duration): duration is number => duration !== null);
 
 	const detailRoot = asRecord(detailPayload);
 	const listenCount = hasSuccessfulCode(detailRoot)

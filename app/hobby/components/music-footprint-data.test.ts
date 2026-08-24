@@ -108,6 +108,41 @@ const withSongUrl = (songUrl: string) => ({
 	weeklyHighlight: { ...validFootprint.weeklyHighlight, songUrl },
 });
 
+const unavailableSlice = <T extends (typeof validFootprint)['today']>(
+	slice: T,
+) => ({
+	...slice,
+	durationMs: null,
+	recordCount: null,
+	uniqueTrackCount: null,
+	topArtist: null,
+	topTrack: null,
+	buckets: slice.buckets.map((bucket) => ({
+		...bucket,
+		durationMs: null,
+		recordCount: null,
+	})),
+});
+
+const withUnavailableRecent = (state: 'partial' | 'ready' = 'partial') => ({
+	...validFootprint,
+	state,
+	coverage: {
+		...validFootprint.coverage,
+		recentAvailable: false,
+		recordCount: null,
+		oldestPlayedAt: null,
+		truncated: false,
+	},
+	today: unavailableSlice(validFootprint.today),
+	week: { durationMs: null, mondayDurationMs: null, recordCount: null },
+	reports: {
+		week: unavailableSlice(validFootprint.reports.week),
+		month: unavailableSlice(validFootprint.reports.month),
+		year: unavailableSlice(validFootprint.reports.year),
+	},
+});
+
 afterEach(() => {
 	vi.unstubAllGlobals();
 });
@@ -119,27 +154,7 @@ describe('normalizeMusicFootprint', () => {
 
 	it('preserves null values for unavailable exact statistics', () => {
 		const partialFootprint = {
-			...validFootprint,
-			state: 'partial' as const,
-			coverage: {
-				...validFootprint.coverage,
-				recentAvailable: false,
-				recordCount: null,
-				oldestPlayedAt: null,
-			},
-			today: {
-				...validFootprint.today,
-				durationMs: null,
-				recordCount: null,
-				uniqueTrackCount: null,
-				topArtist: null,
-				topTrack: null,
-				buckets: validFootprint.today.buckets.map((bucket) => ({
-					...bucket,
-					durationMs: null,
-					recordCount: null,
-				})),
-			},
+			...withUnavailableRecent(),
 			lifetime: {
 				listenCount: null,
 				estimatedDurationMs: null,
@@ -150,6 +165,95 @@ describe('normalizeMusicFootprint', () => {
 		};
 
 		expect(normalizeMusicFootprint(partialFootprint)).toEqual(partialFootprint);
+	});
+
+	it.each([
+		99, 101,
+	])('fails closed when the coverage limit is %i instead of the 100-record contract', (limit) => {
+		const payload = {
+			...validFootprint,
+			coverage: { ...validFootprint.coverage, limit },
+		};
+
+		expect(normalizeMusicFootprint(payload)).toEqual(unavailableMusicFootprint);
+	});
+
+	it('fails closed when coverage record count exceeds its limit', () => {
+		const payload = {
+			...validFootprint,
+			coverage: { ...validFootprint.coverage, recordCount: 101 },
+		};
+
+		expect(normalizeMusicFootprint(payload)).toEqual(unavailableMusicFootprint);
+	});
+
+	it('fails closed when ready state claims recent history is unavailable', () => {
+		expect(normalizeMusicFootprint(withUnavailableRecent('ready'))).toEqual(
+			unavailableMusicFootprint,
+		);
+	});
+
+	it('fails closed when unavailable recent history carries numeric exact values', () => {
+		const payload = {
+			...withUnavailableRecent(),
+			today: {
+				...unavailableSlice(validFootprint.today),
+				durationMs: 0,
+				buckets: unavailableSlice(validFootprint.today).buckets.map(
+					(bucket, index) => ({
+						...bucket,
+						durationMs: index === 0 ? 0 : null,
+					}),
+				),
+			},
+		};
+
+		expect(normalizeMusicFootprint(payload)).toEqual(unavailableMusicFootprint);
+	});
+
+	it('fails closed when week duration disagrees with the weekly report', () => {
+		const payload = {
+			...validFootprint,
+			week: { ...validFootprint.week, durationMs: 1 },
+		};
+
+		expect(normalizeMusicFootprint(payload)).toEqual(unavailableMusicFootprint);
+	});
+
+	it.each([
+		['missing estimate basis', { ...validFootprint.lifetime, basis: null }],
+		['missing listen count', { ...validFootprint.lifetime, listenCount: null }],
+		[
+			'incorrect estimated duration',
+			{ ...validFootprint.lifetime, estimatedDurationMs: 6_000_001 },
+		],
+		[
+			'orphaned unavailable basis',
+			{
+				listenCount: 100,
+				estimatedDurationMs: null,
+				sampleDurationMs: null,
+				basis: 'weekly-median',
+			},
+		],
+	] as const)('fails closed for a lifetime estimate with %s', (_case, lifetime) => {
+		expect(normalizeMusicFootprint({ ...validFootprint, lifetime })).toEqual(
+			unavailableMusicFootprint,
+		);
+	});
+
+	it('accepts a known listen count with a coherently unavailable estimate', () => {
+		const payload = {
+			...validFootprint,
+			lifetime: {
+				listenCount: 100,
+				estimatedDurationMs: null,
+				sampleDurationMs: null,
+				basis: null,
+			},
+		};
+
+		expect(normalizeMusicFootprint(payload)).toEqual(payload);
 	});
 
 	it('accepts a weekly highlight with one decimal NetEase song ID', () => {

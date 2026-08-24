@@ -162,6 +162,48 @@ describe('normalizeListeningFootprint', () => {
 		expect(JSON.stringify(result)).not.toContain('Bad Duration');
 	});
 
+	it('marks a nonempty recent response unavailable when every record is malformed', () => {
+		const result = normalizeListeningFootprint({
+			recentPayload: {
+				code: 200,
+				data: {
+					total: 2,
+					list: [
+						{
+							playTime: 'not-a-time',
+							data: { id: 7, name: 'Bad Time', dt: 50 },
+						},
+						{ playTime: now, data: { id: 8, name: 'Bad Duration', dt: -1 } },
+					],
+				},
+			},
+			weeklyPayload: weeklyFixture,
+			detailPayload: { code: 200, listenSongs: 10 },
+			now,
+			recentLimit: 100,
+		});
+
+		expect(result).toMatchObject({
+			state: 'partial',
+			coverage: {
+				recentAvailable: false,
+				recordCount: null,
+				oldestPlayedAt: null,
+			},
+			today: { durationMs: null, recordCount: null },
+			week: { durationMs: null, mondayDurationMs: null, recordCount: null },
+			lifetime: { basis: 'weekly-median' },
+		});
+		expect(
+			result.today.buckets.every((bucket) => bucket.durationMs === null),
+		).toBe(true);
+		expect(
+			result.reports.year.buckets.every(
+				(bucket) => bucket.recordCount === null,
+			),
+		).toBe(true);
+	});
+
 	it('uses trusted artwork for the weekly highlight', () => {
 		const result = normalizeListeningFootprint({
 			recentPayload: null,
@@ -189,6 +231,92 @@ describe('normalizeListeningFootprint', () => {
 
 		expect(result.reports.year.topArtist).toBe('Today Artist');
 		expect(result.reports.year.topTrack).toBe('Today Track');
+	});
+
+	it('counts top tracks by song ID instead of merging equal display titles', () => {
+		const makeRecord = (id: number, name: string, playTime: number) => ({
+			playTime,
+			data: { id, name, ar: [{ name: 'Artist' }], dt: 1_000 },
+		});
+		const result = normalizeListeningFootprint({
+			recentPayload: {
+				data: {
+					list: [
+						makeRecord(101, '同名歌曲', now),
+						makeRecord(202, '同名歌曲', now - 1),
+						makeRecord(303, '真正最常听', now - 2),
+						makeRecord(303, '真正最常听', now - 3),
+					],
+				},
+			},
+			weeklyPayload: null,
+			detailPayload: null,
+			now,
+			recentLimit: 100,
+		});
+
+		expect(result.today.uniqueTrackCount).toBe(3);
+		expect(result.today.topTrack).toBe('真正最常听');
+	});
+
+	it('accepts only canonical decimal song IDs and skips bad weekly candidates', () => {
+		const result = normalizeListeningFootprint({
+			recentPayload: {
+				data: {
+					list: [
+						{
+							playTime: now,
+							data: { id: -1, name: 'Negative ID', ar: [], dt: 1_000 },
+						},
+						{
+							playTime: now,
+							data: { id: '12.5', name: 'Decimal ID', ar: [], dt: 1_000 },
+						},
+						{
+							playTime: now,
+							data: { id: '00123', name: 'Canonical ID', ar: [], dt: 1_000 },
+						},
+					],
+				},
+			},
+			weeklyPayload: {
+				weekData: [
+					{ song: { id: 'track', name: 'Text ID', ar: [], al: {}, dt: 9_000 } },
+					{
+						song: {
+							id: 3.14,
+							name: 'Number Decimal',
+							ar: [],
+							al: {},
+							dt: 8_000,
+						},
+					},
+					{
+						song: {
+							id: '00456',
+							name: 'Valid Candidate',
+							ar: [{ name: 'Valid Artist' }],
+							al: { name: 'Valid Album' },
+							dt: 7_000,
+						},
+					},
+				],
+			},
+			detailPayload: { code: 200, listenSongs: 2 },
+			now,
+			recentLimit: 100,
+		});
+
+		expect(result.coverage.recordCount).toBe(1);
+		expect(result.today.topTrack).toBe('Canonical ID');
+		expect(result.weeklyHighlight).toMatchObject({
+			title: 'Valid Candidate',
+			songUrl: 'https://music.163.com/song?id=00456',
+		});
+		expect(result.lifetime).toMatchObject({
+			basis: 'recent-median',
+			sampleDurationMs: 1_000,
+		});
 	});
 
 	it('emits literal bucket counts for every time range', () => {

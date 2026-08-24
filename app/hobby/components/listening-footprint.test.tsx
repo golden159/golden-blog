@@ -145,6 +145,26 @@ describe('ListeningFootprint', () => {
 		expect(within(yearPanel).getByText('年报告歌曲')).toBeInTheDocument();
 	});
 
+	it('lets the report grid item shrink while keeping the year chart in its own scroller', () => {
+		render(<ListeningFootprint footprint={validFootprint} />);
+		fireEvent.click(screen.getByRole('tab', { name: '年' }));
+
+		const reportHeading = screen.getByRole('heading', {
+			name: '周/月/年聆听报告',
+		});
+		const reportCard = reportHeading.closest('article');
+		expect(reportCard).toHaveClass('min-w-0');
+
+		const yearPanel = screen.getByRole('tabpanel', { name: '年' });
+		const chart = within(yearPanel).getByRole('list', {
+			name: '所选报告时段分布',
+		});
+		const chartCanvas = chart.parentElement;
+		const scroller = chartCanvas?.parentElement;
+		expect(chartCanvas).toHaveClass('min-w-xl');
+		expect(scroller).toHaveClass('min-w-0', 'max-w-full', 'overflow-x-auto');
+	});
+
 	it('distinguishes unavailable exact values from honest zero values', () => {
 		const footprint: NeteaseListeningFootprint = {
 			...validFootprint,

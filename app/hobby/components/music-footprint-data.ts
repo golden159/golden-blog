@@ -27,12 +27,6 @@ const isNonNegativeIntegerOrNull = (value: unknown): value is number | null =>
 	isNonNegativeNumberOrNull(value) &&
 	(value === null || Number.isInteger(value));
 
-const isNonNegativeInteger = (value: unknown): value is number =>
-	typeof value === 'number' &&
-	Number.isFinite(value) &&
-	value >= 0 &&
-	Number.isInteger(value);
-
 const isSafeTimestampOrNull = (value: unknown): value is number | null =>
 	value === null ||
 	(typeof value === 'number' &&
@@ -126,6 +120,36 @@ const normalizeSlice = (
 	};
 };
 
+const hasUnavailableExactValues = (slice: ListeningSlice): boolean =>
+	slice.durationMs === null &&
+	slice.recordCount === null &&
+	slice.uniqueTrackCount === null &&
+	slice.topArtist === null &&
+	slice.topTrack === null &&
+	slice.buckets.every(
+		(bucket) => bucket.durationMs === null && bucket.recordCount === null,
+	);
+
+const hasCoherentLifetimeEstimate = (lifetime: UnknownRecord): boolean => {
+	const { basis, estimatedDurationMs, listenCount, sampleDurationMs } =
+		lifetime;
+	if (
+		estimatedDurationMs === null &&
+		sampleDurationMs === null &&
+		basis === null
+	) {
+		return true;
+	}
+
+	return (
+		typeof listenCount === 'number' &&
+		typeof estimatedDurationMs === 'number' &&
+		typeof sampleDurationMs === 'number' &&
+		(basis === 'recent-median' || basis === 'weekly-median') &&
+		estimatedDurationMs === listenCount * sampleDurationMs
+	);
+};
+
 const normalizeWeeklyHighlight = (value: unknown): FootprintTrack | null => {
 	if (value === null) return null;
 	const track = asRecord(value);
@@ -211,7 +235,8 @@ export const normalizeMusicFootprint = (
 		typeof coverage.recentAvailable !== 'boolean' ||
 		!isNonNegativeIntegerOrNull(coverage.recordCount) ||
 		!isSafeTimestampOrNull(coverage.oldestPlayedAt) ||
-		!isNonNegativeInteger(coverage.limit) ||
+		coverage.limit !== 100 ||
+		(coverage.recordCount !== null && coverage.recordCount > coverage.limit) ||
 		typeof coverage.truncated !== 'boolean' ||
 		!week ||
 		!isNonNegativeNumberOrNull(week.durationMs) ||
@@ -239,7 +264,20 @@ export const normalizeMusicFootprint = (
 		!reportWeek ||
 		!reportMonth ||
 		!reportYear ||
-		(root.weeklyHighlight !== null && !weeklyHighlight)
+		(root.weeklyHighlight !== null && !weeklyHighlight) ||
+		(root.state === 'ready' && !coverage.recentAvailable) ||
+		(!coverage.recentAvailable &&
+			(coverage.recordCount !== null ||
+				coverage.oldestPlayedAt !== null ||
+				week.durationMs !== null ||
+				week.mondayDurationMs !== null ||
+				week.recordCount !== null ||
+				!hasUnavailableExactValues(today) ||
+				!hasUnavailableExactValues(reportWeek) ||
+				!hasUnavailableExactValues(reportMonth) ||
+				!hasUnavailableExactValues(reportYear))) ||
+		week.durationMs !== reportWeek.durationMs ||
+		!hasCoherentLifetimeEstimate(lifetime)
 	) {
 		return unavailableMusicFootprint;
 	}
