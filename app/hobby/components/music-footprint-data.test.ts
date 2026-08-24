@@ -103,6 +103,11 @@ const withArtwork = (albumArtUrl: string) => ({
 	weeklyHighlight: { ...validFootprint.weeklyHighlight, albumArtUrl },
 });
 
+const withSongUrl = (songUrl: string) => ({
+	...validFootprint,
+	weeklyHighlight: { ...validFootprint.weeklyHighlight, songUrl },
+});
+
 afterEach(() => {
 	vi.unstubAllGlobals();
 });
@@ -145,6 +150,22 @@ describe('normalizeMusicFootprint', () => {
 		};
 
 		expect(normalizeMusicFootprint(partialFootprint)).toEqual(partialFootprint);
+	});
+
+	it('accepts a weekly highlight with one decimal NetEase song ID', () => {
+		const footprint = withSongUrl('https://music.163.com/song?id=00123');
+
+		expect(normalizeMusicFootprint(footprint)).toEqual(footprint);
+	});
+
+	it.each([
+		['an empty song ID', 'https://music.163.com/song?id='],
+		['an alphabetic song ID', 'https://music.163.com/song?id=track'],
+		['duplicate song IDs', 'https://music.163.com/song?id=123&id=456'],
+	])('fails closed for %s', (_case, songUrl) => {
+		expect(normalizeMusicFootprint(withSongUrl(songUrl))).toEqual(
+			unavailableMusicFootprint,
+		);
 	});
 
 	it.each([

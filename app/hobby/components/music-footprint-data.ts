@@ -65,11 +65,13 @@ const isTrustedSongUrl = (value: unknown): value is string => {
 
 	try {
 		const url = new URL(value);
+		const songIds = url.searchParams.getAll('id');
 		return (
 			url.protocol === 'https:' &&
 			url.hostname === 'music.163.com' &&
 			url.pathname === '/song' &&
-			url.searchParams.has('id')
+			songIds.length === 1 &&
+			/^\d+$/.test(songIds[0])
 		);
 	} catch {
 		return false;
