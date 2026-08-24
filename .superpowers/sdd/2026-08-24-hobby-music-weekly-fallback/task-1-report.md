@@ -23,7 +23,7 @@ Status: DONE_WITH_CONCERNS
 
 ## Commit
 
-`01fed5b` (`feat(netease): normalize weekly listening track`)
+`385206f` (`feat(netease): normalize weekly listening track`)
 
 ## Concerns
 
