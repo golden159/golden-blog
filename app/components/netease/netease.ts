@@ -1,4 +1,5 @@
 import 'server-only';
+import { buildNeteaseApiUrl, parseNeteaseApiBaseUrl } from './netease-api-url';
 import { normalizeRecentTrack } from './normalize-recent-track';
 import { normalizeWeeklyTrack } from './normalize-weekly-track';
 import type { NeteaseActivityResponse } from './types';
@@ -20,26 +21,6 @@ type FetchNeteaseOptions = {
 	now?: number;
 };
 
-const isLoopbackHostname = (hostname: string): boolean => {
-	const normalized = hostname.toLowerCase().replace(/^\[|\]$/g, '');
-	if (normalized === 'localhost' || normalized === '::1') {
-		return true;
-	}
-
-	const octets = normalized.split('.');
-	return (
-		octets.length === 4 &&
-		octets[0] === '127' &&
-		octets.every((octet) => /^\d{1,3}$/.test(octet) && Number(octet) <= 255)
-	);
-};
-
-const canSendSecretTo = (url: URL, nodeEnv: string | undefined): boolean =>
-	url.protocol === 'https:' ||
-	(url.protocol === 'http:' &&
-		nodeEnv !== 'production' &&
-		isLoopbackHostname(url.hostname));
-
 export async function fetchNeteaseActivity({
 	env = process.env as NeteaseEnv,
 	fetchImpl = fetch,
@@ -53,20 +34,14 @@ export async function fetchNeteaseActivity({
 		return unavailableActivity();
 	}
 
-	let baseUrl: URL;
-	try {
-		baseUrl = new URL(rawBaseUrl);
-	} catch {
-		return unavailableActivity();
-	}
-
-	if (!canSendSecretTo(baseUrl, env.NODE_ENV)) {
+	const baseUrl = parseNeteaseApiBaseUrl(rawBaseUrl, env.NODE_ENV);
+	if (!baseUrl) {
 		return unavailableActivity();
 	}
 
 	let recentActivity: NeteaseActivityResponse = unavailableActivity();
 	if (cookie) {
-		const recentUrl = new URL('/record/recent/song', baseUrl);
+		const recentUrl = buildNeteaseApiUrl(baseUrl, '/record/recent/song');
 		try {
 			const response = await fetchImpl(recentUrl.toString(), {
 				method: 'POST',
@@ -100,7 +75,7 @@ export async function fetchNeteaseActivity({
 	}
 
 	try {
-		const weeklyUrl = new URL('/user/record', baseUrl);
+		const weeklyUrl = buildNeteaseApiUrl(baseUrl, '/user/record');
 		weeklyUrl.searchParams.set('uid', userId);
 		weeklyUrl.searchParams.set('type', '1');
 		const response = await fetchImpl(weeklyUrl.toString(), {

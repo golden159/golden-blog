@@ -112,6 +112,42 @@ describe('fetchNeteaseActivity', () => {
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 
+	it('preserves a configured API path prefix for recent activity', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					data: {
+						list: [
+							{
+								playTime: 1_800_000_000_000,
+								data: {
+									id: 7,
+									name: 'Track',
+									ar: [{ name: 'Artist' }],
+									al: { name: 'Album', picUrl: null },
+								},
+							},
+						],
+					},
+				}),
+				{ status: 200 },
+			),
+		);
+
+		await fetchNeteaseActivity({
+			env: {
+				...env,
+				NETEASE_API_BASE_URL: 'https://netease.internal.example/api',
+			},
+			fetchImpl: fetchImpl as typeof fetch,
+			now: 1_800_000_000_001,
+		});
+
+		expect(fetchImpl.mock.calls[0][0]).toBe(
+			'https://netease.internal.example/api/record/recent/song',
+		);
+	});
+
 	it('skips recent and fetches public weekly activity when the cookie is missing', async () => {
 		const fetchImpl = vi.fn().mockResolvedValue(
 			new Response(
