@@ -44,6 +44,29 @@ describe('normalizeRecentTrack', () => {
 		);
 	});
 
+	it('keeps the song duration for a richer Music card', () => {
+		const result = normalizeRecentTrack(
+			{
+				...payload(NOW),
+				data: {
+					...payload(NOW).data,
+					list: [
+						{
+							...payload(NOW).data.list[0],
+							data: {
+								...payload(NOW).data.list[0].data,
+								dt: 215_000,
+							},
+						},
+					],
+				},
+			},
+			NOW,
+		);
+
+		expect(result.track?.durationMs).toBe(215_000);
+	});
+
 	it('returns empty for a valid empty list', () => {
 		expect(
 			normalizeRecentTrack({ code: 200, data: { total: 0, list: [] } }, NOW),

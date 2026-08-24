@@ -126,7 +126,6 @@ describe('fetchNeteaseActivity', () => {
 			'x-apicache-bypass': '1',
 		});
 		expect([...body.entries()]).toEqual([
-			['cookie', env.NETEASE_MUSIC_COOKIE],
 			['limit', '1'],
 			['timestamp', '1800000000001'],
 			['uid', env.NETEASE_USER_ID],

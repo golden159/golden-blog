@@ -62,11 +62,12 @@ export async function fetchNeteaseActivity({
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
+				// Keep the credential in the standard header. The upstream's
+				// form-cookie parser splits values on every "=" and can truncate it.
 				Cookie: cookie,
 				'x-apicache-bypass': '1',
 			},
 			body: new URLSearchParams({
-				cookie,
 				limit: '1',
 				timestamp: String(now),
 				uid: userId,

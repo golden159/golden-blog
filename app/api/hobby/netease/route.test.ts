@@ -24,7 +24,7 @@ describe('GET /api/hobby/netease', () => {
 			track: null,
 		});
 		expect(response.headers.get('cache-control')).toBe(
-			'public, s-maxage=60, stale-while-revalidate=300',
+			'public, s-maxage=30, stale-while-revalidate=60',
 		);
 	});
 });

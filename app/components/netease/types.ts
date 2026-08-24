@@ -5,6 +5,7 @@ export type RecentTrack = {
 	albumArtUrl: string | null;
 	songUrl: string;
 	playedAt: number | null;
+	durationMs?: number;
 };
 
 export type NeteaseActivityResponse = {

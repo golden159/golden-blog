@@ -1,12 +1,40 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from '@testing-library/react';
+import { SWRConfig } from 'swr';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import HobbyGrid from './hobby-grid';
 
 const trigger = (name: string) => screen.getByRole('button', { name });
+const renderGrid = () =>
+	render(
+		<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+			<HobbyGrid />
+		</SWRConfig>,
+	);
 
 describe('HobbyGrid', () => {
+	beforeEach(() => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(
+				new Response(JSON.stringify({ state: 'empty', track: null }), {
+					status: 200,
+				}),
+			),
+		);
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
 	it('renders five closed categories initially', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 
 		for (const title of ['Games', 'Anime', 'Music', 'Food', 'Travel']) {
 			const heading = screen.getByRole('heading', { name: title, level: 2 });
@@ -19,7 +47,7 @@ describe('HobbyGrid', () => {
 	});
 
 	it('uses native accordion headings that contain title-only buttons', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 
 		const heading = screen.getByRole('heading', { name: 'Games', level: 2 });
 		const gamesTrigger = within(heading).getByRole('button', { name: 'Games' });
@@ -37,7 +65,7 @@ describe('HobbyGrid', () => {
 	});
 
 	it('keeps category visuals within phrasing-content markup', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 
 		for (const button of screen.getAllByRole('button')) {
 			expect(button.querySelector('div, p')).toBeNull();
@@ -45,7 +73,7 @@ describe('HobbyGrid', () => {
 	});
 
 	it('keeps only one category open at a time', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 
 		fireEvent.click(trigger('Games'));
 		expect(trigger('Games')).toHaveAttribute('aria-expanded', 'true');
@@ -66,7 +94,7 @@ describe('HobbyGrid', () => {
 	});
 
 	it('hides an exiting panel and makes its descendants inert immediately', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 
 		fireEvent.click(trigger('Games'));
 		expect(screen.getByRole('link', { name: /Steam/ })).toBeInTheDocument();
@@ -90,7 +118,7 @@ describe('HobbyGrid', () => {
 	});
 
 	it('closes a category when its open trigger is selected again', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 
 		fireEvent.click(trigger('Games'));
 		fireEvent.click(trigger('Games'));
@@ -99,7 +127,7 @@ describe('HobbyGrid', () => {
 	});
 
 	it('shows the Games account section only after Games opens', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 		expect(screen.queryByText('Game Accounts')).not.toBeInTheDocument();
 
 		fireEvent.click(trigger('Games'));
@@ -108,7 +136,7 @@ describe('HobbyGrid', () => {
 	});
 
 	it('matches trigger and panel identifiers', () => {
-		render(<HobbyGrid />);
+		renderGrid();
 		const gamesTrigger = trigger('Games');
 
 		fireEvent.click(gamesTrigger);
@@ -116,5 +144,44 @@ describe('HobbyGrid', () => {
 
 		expect(gamesTrigger).toHaveAttribute('aria-controls', panel.id);
 		expect(panel).toHaveAttribute('aria-labelledby', gamesTrigger.id);
+	});
+
+	it('shows the latest album art and freshness in the closed Music card', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(
+				new Response(
+					JSON.stringify({
+						state: 'recent',
+						track: {
+							title: '夜に駆ける',
+							artists: ['YOASOBI'],
+							album: 'THE BOOK',
+							albumArtUrl: 'https://p1.music.126.net/cover.jpg',
+							songUrl: 'https://music.163.com/song?id=12345',
+							playedAt: 1_800_000_000_000,
+						},
+					}),
+					{ status: 200 },
+				),
+			),
+		);
+
+		renderGrid();
+
+		const preview = await screen.findByTestId('music-preview-art');
+		await waitFor(() =>
+			expect(preview).toHaveAttribute('data-track-title', '夜に駆ける'),
+		);
+		await waitFor(() =>
+			expect(decodeURIComponent(preview.getAttribute('src') ?? '')).toContain(
+				'https://p1.music.126.net/cover.jpg',
+			),
+		);
+		await waitFor(() =>
+			expect(screen.getByTestId('music-preview-status')).toHaveTextContent(
+				'最近活跃',
+			),
+		);
 	});
 });
