@@ -1,5 +1,6 @@
 import 'server-only';
 import { normalizeRecentTrack } from './normalize-recent-track';
+import { normalizeWeeklyTrack } from './normalize-weekly-track';
 import type { NeteaseActivityResponse } from './types';
 import { unavailableActivity } from './types';
 
@@ -52,13 +53,20 @@ export async function fetchNeteaseActivity({
 		return unavailableActivity();
 	}
 
+	let recentUrl: URL;
 	try {
-		const upstreamUrl = new URL(`${baseUrl}/record/recent/song`);
-		if (!canSendSecretTo(upstreamUrl, env.NODE_ENV)) {
-			return unavailableActivity();
-		}
+		recentUrl = new URL(`${baseUrl}/record/recent/song`);
+	} catch {
+		return unavailableActivity();
+	}
 
-		const response = await fetchImpl(upstreamUrl.toString(), {
+	if (!canSendSecretTo(recentUrl, env.NODE_ENV)) {
+		return unavailableActivity();
+	}
+
+	let recentActivity: NeteaseActivityResponse;
+	try {
+		const response = await fetchImpl(recentUrl.toString(), {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
@@ -77,12 +85,35 @@ export async function fetchNeteaseActivity({
 			signal: AbortSignal.timeout(5000),
 		});
 
+		recentActivity = response.ok
+			? normalizeRecentTrack(await response.json(), now)
+			: unavailableActivity();
+	} catch {
+		recentActivity = unavailableActivity();
+	}
+
+	if (recentActivity.state === 'recent' || recentActivity.state === 'older') {
+		return recentActivity;
+	}
+
+	try {
+		const weeklyUrl = new URL(`${baseUrl}/user/record`);
+		weeklyUrl.searchParams.set('uid', userId);
+		weeklyUrl.searchParams.set('type', '1');
+		const response = await fetchImpl(weeklyUrl.toString(), {
+			method: 'GET',
+			cache: 'no-store',
+			redirect: 'error',
+			signal: AbortSignal.timeout(5000),
+		});
+
 		if (!response.ok) {
-			return unavailableActivity();
+			return recentActivity;
 		}
 
-		return normalizeRecentTrack(await response.json(), now);
+		const weeklyActivity = normalizeWeeklyTrack(await response.json());
+		return weeklyActivity.state === 'weekly' ? weeklyActivity : recentActivity;
 	} catch {
-		return unavailableActivity();
+		return recentActivity;
 	}
 }

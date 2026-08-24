@@ -64,7 +64,24 @@ describe('fetchNeteaseActivity', () => {
 		const fetchImpl = vi
 			.fn()
 			.mockResolvedValue(
-				new Response(JSON.stringify({ data: { list: [] } }), { status: 200 }),
+				new Response(
+					JSON.stringify({
+						data: {
+							list: [
+								{
+									playTime: 1_800_000_000_000,
+									data: {
+										id: 7,
+										name: 'Track',
+										ar: [{ name: 'Artist' }],
+										al: { name: 'Album', picUrl: null },
+									},
+								},
+							],
+						},
+					}),
+					{ status: 200 },
+				),
 			);
 
 		const result = await fetchNeteaseActivity({
@@ -74,10 +91,142 @@ describe('fetchNeteaseActivity', () => {
 				NODE_ENV: 'development',
 			},
 			fetchImpl: fetchImpl as typeof fetch,
+			now: 1_800_000_000_001,
 		});
 
-		expect(result).toEqual({ state: 'empty', track: null });
+		expect(result.state).toBe('recent');
 		expect(fetchImpl).toHaveBeenCalledTimes(1);
+	});
+
+	it('returns unavailable without fetching for a malformed base URL', async () => {
+		const fetchImpl = vi.fn();
+
+		await expect(
+			fetchNeteaseActivity({
+				env: { ...env, NETEASE_API_BASE_URL: 'not a URL' },
+				fetchImpl: fetchImpl as typeof fetch,
+			}),
+		).resolves.toEqual({ state: 'unavailable', track: null });
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it('falls back to weekly activity without forwarding the music cookie', async () => {
+		const timeoutSignal = new AbortController().signal;
+		const timeoutSpy = vi
+			.spyOn(AbortSignal, 'timeout')
+			.mockReturnValue(timeoutSignal);
+		const fetchImpl = vi
+			.fn()
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: { list: [] } }), { status: 200 }),
+			)
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						weekData: [
+							{
+								song: {
+									id: 42,
+									name: 'Weekly Track',
+									ar: [{ name: 'Weekly Artist' }],
+									al: {
+										name: 'Weekly Album',
+										picUrl: 'https://music.126.net/weekly.jpg',
+									},
+									dt: 210_000,
+								},
+							},
+						],
+					}),
+					{ status: 200 },
+				),
+			);
+
+		const result = await fetchNeteaseActivity({
+			env,
+			fetchImpl: fetchImpl as typeof fetch,
+		});
+
+		expect(result).toEqual({
+			state: 'weekly',
+			track: {
+				title: 'Weekly Track',
+				artists: ['Weekly Artist'],
+				album: 'Weekly Album',
+				albumArtUrl: 'https://music.126.net/weekly.jpg',
+				songUrl: 'https://music.163.com/song?id=42',
+				playedAt: null,
+				durationMs: 210_000,
+			},
+		});
+		expect(fetchImpl).toHaveBeenCalledTimes(2);
+
+		const fallbackRequest = fetchImpl.mock.calls[1];
+		const fallbackOptions = fallbackRequest[1];
+		expect(fallbackRequest[0]).toBe(
+			'https://netease.internal.example/user/record?uid=3719820729&type=1',
+		);
+		expect(fallbackOptions?.method).toBe('GET');
+		expect(fallbackOptions?.headers).toBeUndefined();
+		expect(fallbackOptions?.body).toBeUndefined();
+		expect(fallbackOptions?.cache).toBe('no-store');
+		expect(fallbackOptions?.redirect).toBe('error');
+		expect(fallbackOptions?.signal).toBe(timeoutSignal);
+		expect(timeoutSpy).toHaveBeenCalledTimes(2);
+		expect(timeoutSpy).toHaveBeenNthCalledWith(2, 5000);
+	});
+
+	it('returns empty when recent and weekly activity lists are both valid and empty', async () => {
+		const fetchImpl = vi
+			.fn()
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: { list: [] } }), { status: 200 }),
+			)
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ weekData: [] }), { status: 200 }),
+			);
+
+		expect(
+			await fetchNeteaseActivity({
+				env,
+				fetchImpl: fetchImpl as typeof fetch,
+			}),
+		).toEqual({ state: 'empty', track: null });
+		expect(fetchImpl).toHaveBeenCalledTimes(2);
+	});
+
+	it('falls back to weekly activity when the recent request is unavailable', async () => {
+		const fetchImpl = vi
+			.fn()
+			.mockResolvedValueOnce(new Response(null, { status: 500 }))
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						weekData: [
+							{
+								song: {
+									id: '99',
+									name: 'Fallback Track',
+									ar: [{ name: 'Fallback Artist' }],
+									al: { name: 'Fallback Album', picUrl: null },
+								},
+							},
+						],
+					}),
+					{ status: 200 },
+				),
+			);
+
+		expect(
+			await fetchNeteaseActivity({
+				env,
+				fetchImpl: fetchImpl as typeof fetch,
+			}),
+		).toMatchObject({
+			state: 'weekly',
+			track: { title: 'Fallback Track' },
+		});
+		expect(fetchImpl).toHaveBeenCalledTimes(2);
 	});
 
 	it('posts the secret server-side but returns only normalized public data', async () => {
