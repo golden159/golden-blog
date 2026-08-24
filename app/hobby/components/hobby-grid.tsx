@@ -1,5 +1,6 @@
 'use client';
 
+import type { NeteaseActivityResponse } from 'app/components/netease/types';
 import { useState } from 'react';
 import { hobbyCategories } from '../content';
 import type { HobbyId } from '../types';
@@ -7,10 +8,15 @@ import AnimeDetails from './anime-details';
 import FoodDetails from './food-details';
 import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
+import { useMusicActivity } from './music-activity';
 import MusicDetails from './music-details';
 import TravelDetails from './travel-details';
 
-function renderDetails(id: HobbyId, summary: string) {
+function renderDetails(
+	id: HobbyId,
+	summary: string,
+	musicActivity?: NeteaseActivityResponse,
+) {
 	if (id === 'games') {
 		return <GameDetails />;
 	}
@@ -18,7 +24,7 @@ function renderDetails(id: HobbyId, summary: string) {
 		return <AnimeDetails />;
 	}
 	if (id === 'music') {
-		return <MusicDetails />;
+		return <MusicDetails activity={musicActivity} />;
 	}
 	if (id === 'food') {
 		return <FoodDetails />;
@@ -33,6 +39,7 @@ function renderDetails(id: HobbyId, summary: string) {
 
 export default function HobbyGrid() {
 	const [activeCategory, setActiveCategory] = useState<HobbyId | null>(null);
+	const { data: musicActivity } = useMusicActivity();
 
 	return (
 		<section
@@ -47,13 +54,14 @@ export default function HobbyGrid() {
 						key={category.id}
 						category={category}
 						isOpen={isOpen}
+						musicActivity={category.id === 'music' ? musicActivity : undefined}
 						onToggle={() =>
 							setActiveCategory((current) =>
 								current === category.id ? null : category.id,
 							)
 						}
 					>
-						{renderDetails(category.id, category.summary)}
+						{renderDetails(category.id, category.summary, musicActivity)}
 					</HobbyCard>
 				);
 			})}

@@ -1,5 +1,6 @@
 'use client';
 
+import type { NeteaseActivityResponse } from 'app/components/netease/types';
 import classNames from 'classnames';
 import {
 	AnimatePresence,
@@ -15,6 +16,7 @@ type HobbyCardProps = {
 	category: HobbyCategory;
 	isOpen: boolean;
 	onToggle: () => void;
+	musicActivity?: NeteaseActivityResponse;
 	children: ReactNode;
 };
 
@@ -57,6 +59,7 @@ export default function HobbyCard({
 	category,
 	isOpen,
 	onToggle,
+	musicActivity,
 	children,
 }: HobbyCardProps) {
 	const prefersReducedMotion = useReducedMotion() === true;
@@ -106,7 +109,7 @@ export default function HobbyCard({
 				<p className='mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300 md:text-base'>
 					{category.summary}
 				</p>
-				<CategoryVisual id={category.id} />
+				<CategoryVisual id={category.id} musicActivity={musicActivity} />
 			</div>
 
 			<AnimatePresence initial={false}>

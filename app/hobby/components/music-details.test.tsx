@@ -76,6 +76,7 @@ describe('MusicDetails', () => {
 			'dark:text-primary-400',
 		);
 		expect(screen.getByText(/记录时间：/)).toBeInTheDocument();
+		expect(screen.getByText(/不代表当前正在播放/)).toBeInTheDocument();
 		expect(
 			screen.getByRole('link', {
 				name: '在网易云音乐打开《夜に駆ける》（新窗口）',
@@ -165,5 +166,36 @@ describe('MusicDetails', () => {
 		expect(
 			decodeURIComponent(changedTrackImage.getAttribute('src') ?? ''),
 		).toContain('https://p2.music.126.net/new-cover.jpg');
+	});
+
+	it('does not throw for an invalid playback timestamp', () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(
+				new Response(JSON.stringify({ state: 'unavailable', track: null }), {
+					status: 200,
+				}),
+			),
+		);
+
+		expect(() =>
+			render(
+				<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+					<MusicDetails
+						activity={{
+							state: 'older',
+							track: {
+								title: 'Track',
+								artists: ['Artist'],
+								album: 'Album',
+								albumArtUrl: null,
+								songUrl: 'https://music.163.com/song?id=1',
+								playedAt: 1e20,
+							},
+						}}
+					/>
+				</SWRConfig>,
+			),
+		).not.toThrow();
 	});
 });

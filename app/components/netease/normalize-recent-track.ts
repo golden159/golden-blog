@@ -40,6 +40,19 @@ const validId = (value: unknown): string | null => {
 	return text(value);
 };
 
+const finiteNumber = (value: unknown): number | null => {
+	if (typeof value === 'number') {
+		return Number.isFinite(value) ? value : null;
+	}
+	if (typeof value === 'string' && value.trim().length > 0) {
+		const parsed = Number(value);
+		return Number.isFinite(parsed) ? parsed : null;
+	}
+	return null;
+};
+
+const MAX_DATE_MS = 8.64e15;
+
 export function normalizeRecentTrack(
 	payload: unknown,
 	now = Date.now(),
@@ -69,25 +82,34 @@ export function normalizeRecentTrack(
 		.map((artist) => text(asRecord(artist)?.name))
 		.filter((artist): artist is string => artist !== null);
 	const album = asRecord(song?.al);
-	const playedAt =
-		typeof record?.playTime === 'number' && Number.isFinite(record.playTime)
-			? record.playTime
-			: null;
+	const rawPlayedAt = record?.playTime;
+	const playedAt = finiteNumber(rawPlayedAt);
+	if (
+		rawPlayedAt !== undefined &&
+		rawPlayedAt !== null &&
+		(playedAt === null || Math.abs(playedAt) > MAX_DATE_MS)
+	) {
+		return unavailableActivity();
+	}
+	const durationMs = finiteNumber(song?.dt);
 	const elapsed = playedAt === null ? null : now - playedAt;
 	const state =
 		elapsed !== null && elapsed >= 0 && elapsed <= RECENT_WINDOW_MS
 			? 'recent'
 			: 'older';
 
+	const track = {
+		title,
+		artists: artists.length > 0 ? artists : ['未知歌手'],
+		album: text(album?.name) ?? '未知专辑',
+		albumArtUrl: normalizeImageUrl(album?.picUrl),
+		songUrl: `https://music.163.com/song?id=${encodeURIComponent(id)}`,
+		playedAt,
+		...(durationMs !== null ? { durationMs } : {}),
+	};
+
 	return {
 		state,
-		track: {
-			title,
-			artists: artists.length > 0 ? artists : ['未知歌手'],
-			album: text(album?.name) ?? '未知专辑',
-			albumArtUrl: normalizeImageUrl(album?.picUrl),
-			songUrl: `https://music.163.com/song?id=${encodeURIComponent(id)}`,
-			playedAt,
-		},
+		track,
 	};
 }
