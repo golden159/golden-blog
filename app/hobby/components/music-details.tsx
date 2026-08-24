@@ -1,15 +1,18 @@
 'use client';
 
+import type { NeteaseListeningFootprint } from 'app/components/netease/footprint-types';
 import type { NeteaseActivityResponse } from 'app/components/netease/types';
 import Image from 'next/image';
 import { useState } from 'react';
 import { musicGenres, musicProfile } from '../content';
+import ListeningFootprint from './listening-footprint';
 import {
 	musicStateLabels,
 	normalizeMusicActivity,
 	unavailableMusicActivity,
 	useMusicActivity,
 } from './music-activity';
+import { useMusicFootprint } from './music-footprint-data';
 
 const albumArtPlaceholder = '/static/hobby/music-placeholder.svg';
 
@@ -83,10 +86,15 @@ function AlbumArt({ track }: { track: Track | null }) {
 
 type MusicDetailsProps = {
 	activity?: NeteaseActivityResponse;
+	footprint?: NeteaseListeningFootprint;
 };
 
-export default function MusicDetails({ activity }: MusicDetailsProps) {
+export default function MusicDetails({
+	activity,
+	footprint,
+}: MusicDetailsProps) {
 	const { data: fetchedActivity } = useMusicActivity(activity === undefined);
+	const { data: fetchedFootprint } = useMusicFootprint(footprint === undefined);
 	const data = normalizeMusicActivity(
 		activity ?? fetchedActivity ?? unavailableMusicActivity,
 	);
@@ -216,6 +224,7 @@ export default function MusicDetails({ activity }: MusicDetailsProps) {
 					</p>
 				</div>
 			</div>
+			<ListeningFootprint footprint={footprint ?? fetchedFootprint} />
 		</div>
 	);
 }
