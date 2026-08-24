@@ -62,6 +62,7 @@ export function normalizeWeeklyTrack(
 		.filter((artist): artist is string => artist !== null);
 	const album = asRecord(song?.al);
 	const durationMs = finiteNumber(song?.dt);
+	if (durationMs !== null && durationMs < 0) return unavailableActivity();
 
 	return {
 		state: 'weekly',

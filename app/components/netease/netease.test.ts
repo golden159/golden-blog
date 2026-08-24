@@ -12,7 +12,6 @@ const env = {
 
 const incompleteEnvironments = [
 	['base URL', { ...env, NETEASE_API_BASE_URL: '' }],
-	['cookie', { ...env, NETEASE_MUSIC_COOKIE: '' }],
 	['user ID', { ...env, NETEASE_USER_ID: '' }],
 ] as const;
 
@@ -96,16 +95,59 @@ describe('fetchNeteaseActivity', () => {
 		expect(fetchImpl).toHaveBeenCalledTimes(1);
 	});
 
-	it('returns unavailable without fetching for a malformed base URL', async () => {
+	it.each([
+		'not a URL',
+		'https:',
+		'https:/',
+		'https://',
+	])('returns unavailable without fetching for malformed base URL %s', async (baseUrl) => {
 		const fetchImpl = vi.fn();
 
 		await expect(
 			fetchNeteaseActivity({
-				env: { ...env, NETEASE_API_BASE_URL: 'not a URL' },
+				env: { ...env, NETEASE_API_BASE_URL: baseUrl },
 				fetchImpl: fetchImpl as typeof fetch,
 			}),
 		).resolves.toEqual({ state: 'unavailable', track: null });
 		expect(fetchImpl).not.toHaveBeenCalled();
+	});
+
+	it('skips recent and fetches public weekly activity when the cookie is missing', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					weekData: [
+						{
+							song: {
+								id: 42,
+								name: 'Weekly Track',
+								ar: [{ name: 'Weekly Artist' }],
+								al: { name: 'Weekly Album', picUrl: null },
+							},
+						},
+					],
+				}),
+				{ status: 200 },
+			),
+		);
+
+		const result = await fetchNeteaseActivity({
+			env: { ...env, NETEASE_MUSIC_COOKIE: '' },
+			fetchImpl: fetchImpl as typeof fetch,
+		});
+
+		expect(result).toMatchObject({
+			state: 'weekly',
+			track: { title: 'Weekly Track' },
+		});
+		expect(fetchImpl).toHaveBeenCalledTimes(1);
+		const [requestUrl, requestOptions] = fetchImpl.mock.calls[0];
+		expect(requestUrl).toBe(
+			'https://netease.internal.example/user/record?uid=3719820729&type=1',
+		);
+		expect(requestOptions?.method).toBe('GET');
+		expect(requestOptions?.headers).toBeUndefined();
+		expect(requestOptions?.body).toBeUndefined();
 	});
 
 	it('falls back to weekly activity without forwarding the music cookie', async () => {

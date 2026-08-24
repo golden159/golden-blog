@@ -47,4 +47,20 @@ describe('normalizeWeeklyTrack', () => {
 			track: null,
 		});
 	});
+
+	it('returns unavailable for a negative weekly track duration', () => {
+		expect(
+			normalizeWeeklyTrack({
+				weekData: [
+					{
+						song: {
+							id: 12345,
+							name: 'Invalid Duration Track',
+							dt: -1,
+						},
+					},
+				],
+			}),
+		).toEqual({ state: 'unavailable', track: null });
+	});
 });

@@ -45,59 +45,62 @@ export async function fetchNeteaseActivity({
 	fetchImpl = fetch,
 	now = Date.now(),
 }: FetchNeteaseOptions = {}): Promise<NeteaseActivityResponse> {
-	const baseUrl = env.NETEASE_API_BASE_URL?.replace(/\/+$/, '');
+	const rawBaseUrl = env.NETEASE_API_BASE_URL;
 	const cookie = env.NETEASE_MUSIC_COOKIE;
 	const userId = env.NETEASE_USER_ID;
 
-	if (!baseUrl || !cookie || !userId) {
+	if (!rawBaseUrl || !userId) {
 		return unavailableActivity();
 	}
 
-	let recentUrl: URL;
+	let baseUrl: URL;
 	try {
-		recentUrl = new URL(`${baseUrl}/record/recent/song`);
+		baseUrl = new URL(rawBaseUrl);
 	} catch {
 		return unavailableActivity();
 	}
 
-	if (!canSendSecretTo(recentUrl, env.NODE_ENV)) {
+	if (!canSendSecretTo(baseUrl, env.NODE_ENV)) {
 		return unavailableActivity();
 	}
 
-	let recentActivity: NeteaseActivityResponse;
-	try {
-		const response = await fetchImpl(recentUrl.toString(), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-				// Keep the credential in the standard header. The upstream's
-				// form-cookie parser splits values on every "=" and can truncate it.
-				Cookie: cookie,
-				'x-apicache-bypass': '1',
-			},
-			body: new URLSearchParams({
-				limit: '1',
-				timestamp: String(now),
-				uid: userId,
-			}),
-			cache: 'no-store',
-			redirect: 'error',
-			signal: AbortSignal.timeout(5000),
-		});
+	let recentActivity: NeteaseActivityResponse = unavailableActivity();
+	if (cookie) {
+		const recentUrl = new URL('/record/recent/song', baseUrl);
+		try {
+			const response = await fetchImpl(recentUrl.toString(), {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					// Keep the credential in the standard header. The upstream's
+					// form-cookie parser splits values on every "=" and can truncate it.
+					Cookie: cookie,
+					'x-apicache-bypass': '1',
+				},
+				body: new URLSearchParams({
+					limit: '1',
+					timestamp: String(now),
+					uid: userId,
+				}),
+				cache: 'no-store',
+				redirect: 'error',
+				signal: AbortSignal.timeout(5000),
+			});
 
-		recentActivity = response.ok
-			? normalizeRecentTrack(await response.json(), now)
-			: unavailableActivity();
-	} catch {
-		recentActivity = unavailableActivity();
+			recentActivity = response.ok
+				? normalizeRecentTrack(await response.json(), now)
+				: unavailableActivity();
+		} catch {
+			recentActivity = unavailableActivity();
+		}
+
+		if (recentActivity.state === 'recent' || recentActivity.state === 'older') {
+			return recentActivity;
+		}
 	}
 
-	if (recentActivity.state === 'recent' || recentActivity.state === 'older') {
-		return recentActivity;
-	}
-
 	try {
-		const weeklyUrl = new URL(`${baseUrl}/user/record`);
+		const weeklyUrl = new URL('/user/record', baseUrl);
 		weeklyUrl.searchParams.set('uid', userId);
 		weeklyUrl.searchParams.set('type', '1');
 		const response = await fetchImpl(weeklyUrl.toString(), {
