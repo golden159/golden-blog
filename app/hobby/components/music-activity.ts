@@ -14,6 +14,7 @@ export const musicStateLabels: Record<
 > = {
 	recent: '最近活跃',
 	older: '最近听过',
+	weekly: '本周常听',
 	empty: '暂无记录',
 	unavailable: '暂时不可用',
 };
@@ -24,6 +25,7 @@ export const musicPreviewLabels: Record<
 > = {
 	recent: '最近播放',
 	older: '最近听过',
+	weekly: '本周常听',
 	empty: '暂无最近歌曲',
 	unavailable: '暂时无法获取',
 };
@@ -41,6 +43,7 @@ const isActivityState = (
 ): value is NeteaseActivityResponse['state'] =>
 	value === 'recent' ||
 	value === 'older' ||
+	value === 'weekly' ||
 	value === 'empty' ||
 	value === 'unavailable';
 

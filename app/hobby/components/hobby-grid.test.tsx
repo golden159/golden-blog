@@ -186,6 +186,44 @@ describe('HobbyGrid', () => {
 		);
 	});
 
+	it('shows the weekly favorite cover and title in the closed Music card', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(
+				new Response(
+					JSON.stringify({
+						state: 'weekly',
+						track: {
+							title: 'アイドル',
+							artists: ['YOASOBI'],
+							album: 'アイドル',
+							albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
+							songUrl: 'https://music.163.com/song?id=54321',
+							playedAt: null,
+						},
+					}),
+					{ status: 200 },
+				),
+			),
+		);
+
+		renderGrid();
+
+		const preview = await screen.findByTestId('music-preview-art');
+		await waitFor(() =>
+			expect(preview).toHaveAttribute('data-track-title', 'アイドル'),
+		);
+		expect(preview).toHaveAttribute('alt', 'アイドル 的专辑封面');
+		await waitFor(() =>
+			expect(decodeURIComponent(preview.getAttribute('src') ?? '')).toContain(
+				'https://p1.music.126.net/weekly-cover.jpg',
+			),
+		);
+		expect(screen.getByTestId('music-preview-status')).toHaveTextContent(
+			'本周常听',
+		);
+	});
+
 	it('uses an honest fallback label when the recent list is empty', async () => {
 		renderGrid();
 

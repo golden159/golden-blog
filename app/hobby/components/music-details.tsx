@@ -16,6 +16,7 @@ const albumArtPlaceholder = '/static/hobby/music-placeholder.svg';
 const labels: Record<NeteaseActivityResponse['state'], string> = {
 	recent: 'Recently active · 最近活跃',
 	older: 'Last listened · 最近听过',
+	weekly: 'Weekly favorite · 本周常听',
 	empty: 'No recent track · 暂无最近记录',
 	unavailable: 'Unavailable · 暂时无法获取',
 };
@@ -23,6 +24,7 @@ const labels: Record<NeteaseActivityResponse['state'], string> = {
 const stateDescriptions: Record<NeteaseActivityResponse['state'], string> = {
 	recent: '15 分钟内有播放记录；这是最近听过，不代表当前正在播放。',
 	older: '有最近播放记录，但时间已经超过 15 分钟。',
+	weekly: '本周听歌汇总，不表示当前或最近播放。',
 	empty: '播放一首歌后，最近记录会在同步后自动更新。',
 	unavailable: '暂时无法读取网易云记录，请检查 Cookie 或稍后再试。',
 };
@@ -91,6 +93,7 @@ export default function MusicDetails({ activity }: MusicDetailsProps) {
 	const { track } = data;
 	const playedAt = formatPlayedAt(track?.playedAt ?? null);
 	const duration = formatDuration(track?.durationMs ?? null);
+	const isWeekly = data.state === 'weekly';
 	const albumArtKey = `${track?.songUrl ?? 'no-track'}:${track?.albumArtUrl ?? albumArtPlaceholder}`;
 	const dynamicTags = track
 		? [track.artists[0], track.album].filter(
@@ -116,7 +119,7 @@ export default function MusicDetails({ activity }: MusicDetailsProps) {
 							{labels[data.state]}
 						</p>
 						<span className='rounded-full border border-gray-200 bg-white/70 px-2.5 py-1 text-[11px] text-gray-500 dark:border-gray-700 dark:bg-gray-950/60 dark:text-gray-400'>
-							最近播放记录
+							{isWeekly ? '本周听歌汇总' : '最近播放记录'}
 						</span>
 					</div>
 
@@ -134,6 +137,11 @@ export default function MusicDetails({ activity }: MusicDetailsProps) {
 							<p className='mt-1 truncate text-sm text-gray-600 dark:text-gray-300'>
 								{track.artists.join(', ')} · {track.album}
 							</p>
+							{isWeekly && (
+								<p className='mt-2 text-sm text-gray-600 dark:text-gray-300'>
+									本周听歌汇总，不表示当前或最近播放。
+								</p>
+							)}
 						</>
 					) : (
 						<p className='mt-3 text-sm text-gray-600 dark:text-gray-300'>
@@ -200,8 +208,11 @@ export default function MusicDetails({ activity }: MusicDetailsProps) {
 						</a>
 					</div>
 					<p className='mt-3 text-xs text-gray-500 dark:text-gray-400'>
-						状态：{musicStateLabels[data.state]} · 数据来自最近播放记录，
-						不代表当前正在播放 · 每 60 秒更新
+						状态：{musicStateLabels[data.state]} ·{' '}
+						{isWeekly
+							? '数据来自本周听歌汇总，不表示当前或最近播放'
+							: '数据来自最近播放记录，不代表当前正在播放'}{' '}
+						· 每 60 秒更新
 					</p>
 				</div>
 			</div>

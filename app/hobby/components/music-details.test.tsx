@@ -94,6 +94,33 @@ describe('MusicDetails', () => {
 		);
 	});
 
+	it('renders a weekly favorite as an aggregate without a record time', () => {
+		render(
+			<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+				<MusicDetails
+					activity={{
+						state: 'weekly',
+						track: {
+							title: 'アイドル',
+							artists: ['YOASOBI'],
+							album: 'アイドル',
+							albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
+							songUrl: 'https://music.163.com/song?id=54321',
+							playedAt: null,
+						},
+					}}
+				/>
+			</SWRConfig>,
+		);
+
+		expect(screen.getByText('Weekly favorite · 本周常听')).toBeInTheDocument();
+		expect(screen.getByText('本周听歌汇总')).toBeInTheDocument();
+		expect(
+			screen.getByText('本周听歌汇总，不表示当前或最近播放。'),
+		).toBeInTheDocument();
+		expect(screen.queryByText(/记录时间：/)).not.toBeInTheDocument();
+	});
+
 	it.each([
 		['empty', 'No recent track · 暂无最近记录'],
 		['unavailable', 'Unavailable · 暂时无法获取'],

@@ -51,6 +51,35 @@ describe('fetchMusicActivity', () => {
 		expect(result.track?.title).toBe('夜に駆ける');
 	});
 
+	it('keeps a valid weekly favorite with no playback timestamp', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(
+				new Response(
+					JSON.stringify({
+						state: 'weekly',
+						track: {
+							title: 'アイドル',
+							artists: ['YOASOBI'],
+							album: 'アイドル',
+							albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
+							songUrl: 'https://music.163.com/song?id=54321',
+							playedAt: null,
+						},
+					}),
+					{ status: 200 },
+				),
+			),
+		);
+
+		const result = await fetchMusicActivity('/api/hobby/netease');
+		expect(result.state).toBe('weekly');
+		expect(result.track).toMatchObject({
+			title: 'アイドル',
+			playedAt: null,
+		});
+	});
+
 	it('rejects untrusted image and song URLs in a public response', async () => {
 		vi.stubGlobal(
 			'fetch',
