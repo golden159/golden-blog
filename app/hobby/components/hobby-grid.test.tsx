@@ -213,6 +213,66 @@ describe('HobbyGrid', () => {
 		);
 	});
 
+	it('loads weekly data on page mount for the closed Music cover', async () => {
+		const weeklyRanking = {
+			state: 'ready',
+			generatedAt: 1_800_000_000_000,
+			tracks: [
+				{
+					rank: 1,
+					title: '周榜歌曲',
+					artists: ['Artist'],
+					album: 'Album',
+					albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
+					songUrl: 'https://music.163.com/song?id=42',
+					durationMs: 180_000,
+					playCount: 3,
+					score: 100,
+				},
+			],
+		};
+		const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+			const url = String(input);
+			return new Response(
+				JSON.stringify(
+					url === '/api/hobby/netease/weekly'
+						? weeklyRanking
+						: { state: 'unavailable', track: null },
+				),
+				{ status: 200 },
+			);
+		});
+		vi.stubGlobal('fetch', fetchMock);
+
+		renderGrid();
+
+		const preview = await screen.findByTestId('music-preview-art');
+		await waitFor(() =>
+			expect(preview).toHaveAttribute('data-track-title', '周榜歌曲'),
+		);
+		await waitFor(() =>
+			expect(decodeURIComponent(preview.getAttribute('src') ?? '')).toContain(
+				'https://p1.music.126.net/weekly-cover.jpg',
+			),
+		);
+		expect(
+			fetchMock.mock.calls.filter(
+				([url]) => url === '/api/hobby/netease/weekly',
+			),
+		).toHaveLength(1);
+		expect(
+			screen.queryByRole('region', { name: 'Music' }),
+		).not.toBeInTheDocument();
+
+		fireEvent.click(trigger('Music'));
+		await screen.findByRole('list', { name: '网易云听歌周榜' });
+		expect(
+			fetchMock.mock.calls.filter(
+				([url]) => url === '/api/hobby/netease/weekly',
+			),
+		).toHaveLength(1);
+	});
+
 	it('shows the weekly favorite cover and title in the closed Music card', async () => {
 		vi.stubGlobal(
 			'fetch',
@@ -296,7 +356,7 @@ describe('HobbyGrid', () => {
 		);
 	});
 
-	it('shares the parent activity request while loading the weekly ranking separately', async () => {
+	it('loads activity and weekly ranking before Music opens', async () => {
 		const fetchMock = vi.fn().mockResolvedValue(
 			new Response(JSON.stringify({ state: 'empty', track: null }), {
 				status: 200,
@@ -305,13 +365,7 @@ describe('HobbyGrid', () => {
 		vi.stubGlobal('fetch', fetchMock);
 
 		renderGrid();
-		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-		fireEvent.click(trigger('Music'));
-		await waitFor(() =>
-			expect(screen.getByTestId('music-state')).toHaveTextContent(
-				'暂无最近记录',
-			),
-		);
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
 		expect(
 			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
 		).toHaveLength(1);
@@ -320,6 +374,13 @@ describe('HobbyGrid', () => {
 				([url]) => url === '/api/hobby/netease/weekly',
 			),
 		).toHaveLength(1);
+		fireEvent.click(trigger('Music'));
+		await waitFor(() =>
+			expect(screen.getByTestId('music-state')).toHaveTextContent(
+				'暂无最近记录',
+			),
+		);
+		expect(fetchMock).toHaveBeenCalledTimes(2);
 	});
 
 	it('deduplicates the parent activity request when Music opens in flight', async () => {
