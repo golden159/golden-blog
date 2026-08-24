@@ -121,6 +121,28 @@ describe('MusicDetails', () => {
 		expect(screen.queryByText(/记录时间：/)).not.toBeInTheDocument();
 	});
 
+	it('hides an inconsistent weekly playback timestamp', () => {
+		render(
+			<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+				<MusicDetails
+					activity={{
+						state: 'weekly',
+						track: {
+							title: 'アイドル',
+							artists: ['YOASOBI'],
+							album: 'アイドル',
+							albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
+							songUrl: 'https://music.163.com/song?id=54321',
+							playedAt: 1_800_000_000_000,
+						},
+					}}
+				/>
+			</SWRConfig>,
+		);
+
+		expect(screen.queryByText(/记录时间：/)).not.toBeInTheDocument();
+	});
+
 	it.each([
 		['empty', 'No recent track · 暂无最近记录'],
 		['unavailable', 'Unavailable · 暂时无法获取'],

@@ -91,9 +91,9 @@ export default function MusicDetails({ activity }: MusicDetailsProps) {
 		activity ?? fetchedActivity ?? unavailableMusicActivity,
 	);
 	const { track } = data;
-	const playedAt = formatPlayedAt(track?.playedAt ?? null);
-	const duration = formatDuration(track?.durationMs ?? null);
 	const isWeekly = data.state === 'weekly';
+	const playedAt = isWeekly ? null : formatPlayedAt(track?.playedAt ?? null);
+	const duration = formatDuration(track?.durationMs ?? null);
 	const albumArtKey = `${track?.songUrl ?? 'no-track'}:${track?.albumArtUrl ?? albumArtPlaceholder}`;
 	const dynamicTags = track
 		? [track.artists[0], track.album].filter(

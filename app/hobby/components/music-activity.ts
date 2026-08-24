@@ -146,7 +146,7 @@ export const normalizeMusicActivity = (
 			album: rawTrack.album,
 			albumArtUrl,
 			songUrl: rawTrack.songUrl,
-			playedAt: rawTrack.playedAt,
+			playedAt: state === 'weekly' ? null : rawTrack.playedAt,
 			...(durationMs !== undefined ? { durationMs } : {}),
 		},
 	};

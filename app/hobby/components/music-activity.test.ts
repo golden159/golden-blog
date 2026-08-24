@@ -80,6 +80,34 @@ describe('fetchMusicActivity', () => {
 		});
 	});
 
+	it('removes a playback timestamp from an inconsistent weekly favorite', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(
+				new Response(
+					JSON.stringify({
+						state: 'weekly',
+						track: {
+							title: 'アイドル',
+							artists: ['YOASOBI'],
+							album: 'アイドル',
+							albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
+							songUrl: 'https://music.163.com/song?id=54321',
+							playedAt: 1_800_000_000_000,
+						},
+					}),
+					{ status: 200 },
+				),
+			),
+		);
+
+		const result = await fetchMusicActivity('/api/hobby/netease');
+		expect(result).toMatchObject({
+			state: 'weekly',
+			track: { title: 'アイドル', playedAt: null },
+		});
+	});
+
 	it('rejects untrusted image and song URLs in a public response', async () => {
 		vi.stubGlobal(
 			'fetch',
