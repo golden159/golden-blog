@@ -357,7 +357,7 @@ Expected: all tests, Biome checks, TypeScript, and the production Turbopack buil
 
 Run the local site with the public API base and user ID, inspect `/hobby` at mobile and desktop widths, open Music, switch 周/月/年, and confirm loading/partial/ready states remain legible with no horizontal overflow.
 
-- [ ] **Step 3: Review the complete branch**
+- [x] **Step 3: Review the complete branch**
 
 Review against this plan, with special attention to Cookie isolation, period-boundary math, null-versus-zero honesty, client validation, accessibility, and layout behavior.
 
