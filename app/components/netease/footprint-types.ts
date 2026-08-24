@@ -30,7 +30,7 @@ export type NeteaseListeningFootprint = {
 		recentAvailable: boolean;
 		recordCount: number | null;
 		oldestPlayedAt: number | null;
-		limit: 100;
+		limit: number;
 		truncated: boolean;
 	};
 	today: ListeningSlice;

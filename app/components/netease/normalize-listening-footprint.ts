@@ -74,6 +74,9 @@ export type NormalizeListeningFootprintOptions = {
 const asRecord = (value: unknown): UnknownRecord | null =>
 	typeof value === 'object' && value !== null ? (value as UnknownRecord) : null;
 
+const hasSuccessfulCode = (value: UnknownRecord | null): boolean =>
+	value !== null && (!Object.hasOwn(value, 'code') || value.code === 200);
+
 const text = (value: unknown): string | null =>
 	typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
 
@@ -316,20 +319,28 @@ export function normalizeListeningFootprint({
 	now = Date.now(),
 	recentLimit = 100,
 }: NormalizeListeningFootprintOptions): NeteaseListeningFootprint {
-	const recentList = asRecord(asRecord(recentPayload)?.data)?.list;
-	const recentAvailable = Array.isArray(recentList);
+	const effectiveRecentLimit = Number.isFinite(recentLimit)
+		? Math.min(100, Math.max(1, Math.floor(recentLimit)))
+		: 100;
+	const recentRoot = asRecord(recentPayload);
+	const rawRecentList = asRecord(recentRoot?.data)?.list;
+	const recentAvailable =
+		hasSuccessfulCode(recentRoot) && Array.isArray(rawRecentList);
+	const recentList = recentAvailable
+		? rawRecentList.slice(0, effectiveRecentLimit)
+		: [];
 	const safeNow = Number.isFinite(now) ? now : Date.now();
 	const records = recentAvailable
 		? recentList
 				.map((record, index) => normalizeRecentRecord(record, index, safeNow))
 				.filter((record): record is ListeningRecord => record !== null)
 		: [];
-	const recentTotal = finiteNumber(
-		asRecord(asRecord(recentPayload)?.data)?.total,
-	);
+	const recentTotal = finiteNumber(asRecord(recentRoot?.data)?.total);
 
-	const weeklyData = asRecord(weeklyPayload)?.weekData;
-	const weeklyAvailable = Array.isArray(weeklyData);
+	const weeklyRoot = asRecord(weeklyPayload);
+	const weeklyData = weeklyRoot?.weekData;
+	const weeklyAvailable =
+		hasSuccessfulCode(weeklyRoot) && Array.isArray(weeklyData);
 	const weeklyTracks = weeklyAvailable
 		? weeklyData
 				.map((entry) => normalizeFootprintTrack(asRecord(entry)?.song))
@@ -343,7 +354,10 @@ export function normalizeListeningFootprint({
 				)
 		: [];
 
-	const listenCount = finiteNumber(asRecord(detailPayload)?.listenSongs);
+	const detailRoot = asRecord(detailPayload);
+	const listenCount = hasSuccessfulCode(detailRoot)
+		? finiteNumber(detailRoot?.listenSongs)
+		: null;
 	const validListenCount =
 		listenCount !== null && listenCount >= 0 && Number.isInteger(listenCount)
 			? listenCount
@@ -436,11 +450,11 @@ export function normalizeListeningFootprint({
 				records.length > 0
 					? Math.min(...records.map((record) => record.playedAt))
 					: null,
-			limit: 100,
+			limit: effectiveRecentLimit,
 			truncated:
 				recentAvailable &&
 				((recentTotal !== null && recentTotal > recentList.length) ||
-					recentList.length >= Math.min(Math.max(recentLimit, 1), 100)),
+					rawRecentList.length > effectiveRecentLimit),
 		},
 		today,
 		week: {

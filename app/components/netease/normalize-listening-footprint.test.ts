@@ -220,6 +220,125 @@ describe('normalizeListeningFootprint', () => {
 		]);
 	});
 
+	it('caps recent source records before aggregates and lifetime sampling', () => {
+		const recordsWithinTheLimit = Array.from({ length: 100 }, (_, index) => ({
+			playTime: now,
+			data: {
+				id: index + 100,
+				name: `Within limit ${index}`,
+				ar: [{ name: 'Limit Artist' }],
+				al: { name: 'Limit Album' },
+				dt: index < 50 ? 1_000 : 3_000,
+			},
+		}));
+		const result = normalizeListeningFootprint({
+			recentPayload: {
+				data: {
+					list: [
+						...recordsWithinTheLimit,
+						{
+							playTime: now,
+							data: {
+								id: 999,
+								name: 'Overflow record',
+								ar: [{ name: 'Overflow Artist' }],
+								al: { name: 'Overflow Album' },
+								dt: 1_000_000,
+							},
+						},
+					],
+				},
+			},
+			weeklyPayload: null,
+			detailPayload: { code: 200, listenSongs: 10 },
+			now,
+			recentLimit: 250,
+		});
+
+		expect(result.coverage).toMatchObject({
+			limit: 100,
+			recordCount: 100,
+			truncated: true,
+		});
+		expect(result.today).toMatchObject({
+			durationMs: 200_000,
+			recordCount: 100,
+		});
+		expect(result.lifetime).toMatchObject({
+			sampleDurationMs: 2_000,
+			estimatedDurationMs: 20_000,
+		});
+	});
+
+	it('uses the requested capped recent limit consistently in coverage and aggregation', () => {
+		const result = normalizeListeningFootprint({
+			recentPayload: {
+				data: {
+					list: Array.from({ length: 51 }, (_, index) => ({
+						playTime: now,
+						data: {
+							id: index + 1_000,
+							name: `Limited ${index}`,
+							ar: [{ name: 'Limit Artist' }],
+							al: { name: 'Limit Album' },
+							dt: index < 50 ? 1_000 : 1_000_000,
+						},
+					})),
+				},
+			},
+			weeklyPayload: null,
+			detailPayload: { code: 200, listenSongs: 10 },
+			now,
+			recentLimit: 50,
+		});
+
+		expect(result.coverage).toMatchObject({
+			limit: 50,
+			recordCount: 50,
+			truncated: true,
+		});
+		expect(result.today.durationMs).toBe(50_000);
+		expect(result.lifetime.sampleDurationMs).toBe(1_000);
+	});
+
+	it('treats explicit failed response codes as unavailable for each source', () => {
+		const recentFailed = normalizeListeningFootprint({
+			recentPayload: { code: 500, data: { list: [] } },
+			weeklyPayload: weeklyFixture,
+			detailPayload: { code: 200, listenSongs: 17_620 },
+			now,
+			recentLimit: 100,
+		});
+		const weeklyFailed = normalizeListeningFootprint({
+			recentPayload: recentFixture,
+			weeklyPayload: { code: 500, weekData: weeklyFixture.weekData },
+			detailPayload: { code: 200, listenSongs: 17_620 },
+			now,
+			recentLimit: 100,
+		});
+		const detailFailed = normalizeListeningFootprint({
+			recentPayload: recentFixture,
+			weeklyPayload: weeklyFixture,
+			detailPayload: { code: 500, listenSongs: 17_620 },
+			now,
+			recentLimit: 100,
+		});
+
+		expect(recentFailed).toMatchObject({
+			state: 'partial',
+			coverage: { recentAvailable: false, recordCount: null },
+			today: { durationMs: null },
+		});
+		expect(weeklyFailed).toMatchObject({
+			state: 'partial',
+			weeklyHighlight: null,
+		});
+		expect(detailFailed).toMatchObject({
+			state: 'partial',
+			lifetime: { listenCount: null, estimatedDurationMs: null },
+		});
+	});
+
 	it('returns an unavailable result when every payload is malformed or absent', () => {
 		const result = normalizeListeningFootprint({
 			recentPayload: { data: { list: 'nope' } },
