@@ -44,6 +44,13 @@ describe('normalizeRecentTrack', () => {
 		);
 	});
 
+	it('returns unavailable for an out-of-range playback timestamp', () => {
+		expect(normalizeRecentTrack(payload(1e20), NOW)).toEqual({
+			state: 'unavailable',
+			track: null,
+		});
+	});
+
 	it('keeps the song duration for a richer Music card', () => {
 		const result = normalizeRecentTrack(
 			{

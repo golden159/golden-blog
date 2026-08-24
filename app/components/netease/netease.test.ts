@@ -5,7 +5,7 @@ import { fetchNeteaseActivity } from './netease';
 
 const env = {
 	NETEASE_API_BASE_URL: 'https://netease.internal.example/',
-	NETEASE_MUSIC_COOKIE: 'MUSIC_U=super-secret',
+	NETEASE_MUSIC_COOKIE: 'MUSIC_U=abc=def==',
 	NETEASE_USER_ID: '3719820729',
 	NODE_ENV: 'production',
 };
@@ -135,7 +135,7 @@ describe('fetchNeteaseActivity', () => {
 		expect(requestOptions?.signal).toBe(timeoutSignal);
 		expect(timeoutSpy).toHaveBeenCalledTimes(1);
 		expect(timeoutSpy).toHaveBeenCalledWith(5000);
-		expect(JSON.stringify(result)).not.toContain('super-secret');
+		expect(JSON.stringify(result)).not.toContain('abc=def');
 		expect(JSON.stringify(result)).not.toContain('netease.internal.example');
 		expect(result.state).toBe('recent');
 	});

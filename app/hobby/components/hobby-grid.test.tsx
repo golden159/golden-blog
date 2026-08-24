@@ -178,10 +178,75 @@ describe('HobbyGrid', () => {
 				'https://p1.music.126.net/cover.jpg',
 			),
 		);
+		expect(preview).toHaveAttribute('alt', '夜に駆ける 的专辑封面');
 		await waitFor(() =>
 			expect(screen.getByTestId('music-preview-status')).toHaveTextContent(
 				'最近活跃',
 			),
 		);
+	});
+
+	it('uses an honest fallback label when the recent list is empty', async () => {
+		renderGrid();
+
+		await waitFor(() =>
+			expect(screen.getByTestId('music-preview-status')).toHaveTextContent(
+				'暂无记录',
+			),
+		);
+		expect(screen.getByText('暂无最近歌曲')).toBeInTheDocument();
+	});
+
+	it('falls back to the local preview art when the remote image fails', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue(
+				new Response(
+					JSON.stringify({
+						state: 'recent',
+						track: {
+							title: '夜に駆ける',
+							artists: ['YOASOBI'],
+							album: 'THE BOOK',
+							albumArtUrl: 'https://p1.music.126.net/cover.jpg',
+							songUrl: 'https://music.163.com/song?id=12345',
+							playedAt: 1_800_000_000_000,
+						},
+					}),
+					{ status: 200 },
+				),
+			),
+		);
+
+		renderGrid();
+		const preview = await screen.findByTestId('music-preview-art');
+		await waitFor(() =>
+			expect(preview).toHaveAttribute('data-track-title', '夜に駆ける'),
+		);
+		fireEvent.error(preview);
+		await waitFor(() =>
+			expect(decodeURIComponent(preview.getAttribute('src') ?? '')).toContain(
+				'/static/hobby/music-placeholder.svg',
+			),
+		);
+	});
+
+	it('shares the parent activity request when Music opens', async () => {
+		const fetchMock = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify({ state: 'empty', track: null }), {
+				status: 200,
+			}),
+		);
+		vi.stubGlobal('fetch', fetchMock);
+
+		renderGrid();
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+		fireEvent.click(trigger('Music'));
+		await waitFor(() =>
+			expect(screen.getByTestId('music-state')).toHaveTextContent(
+				'暂无最近记录',
+			),
+		);
+		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 });

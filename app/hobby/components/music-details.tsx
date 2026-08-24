@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { musicGenres, musicProfile } from '../content';
 import {
 	musicStateLabels,
+	normalizeMusicActivity,
 	unavailableMusicActivity,
 	useMusicActivity,
 } from './music-activity';
@@ -26,15 +27,23 @@ const stateDescriptions: Record<NeteaseActivityResponse['state'], string> = {
 	unavailable: '暂时无法读取网易云记录，请检查 Cookie 或稍后再试。',
 };
 
-const formatPlayedAt = (playedAt: number | null): string | null =>
-	playedAt === null
-		? null
-		: new Intl.DateTimeFormat('zh-CN', {
-				month: 'short',
-				day: 'numeric',
-				hour: '2-digit',
-				minute: '2-digit',
-			}).format(new Date(playedAt));
+const formatPlayedAt = (playedAt: number | null): string | null => {
+	if (playedAt === null) {
+		return null;
+	}
+
+	const date = new Date(playedAt);
+	if (Number.isNaN(date.getTime())) {
+		return null;
+	}
+
+	return new Intl.DateTimeFormat('zh-CN', {
+		month: 'short',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	}).format(date);
+};
 
 const formatDuration = (durationMs: number | null): string | null => {
 	if (durationMs === null || !Number.isFinite(durationMs) || durationMs < 0) {
@@ -75,8 +84,10 @@ type MusicDetailsProps = {
 };
 
 export default function MusicDetails({ activity }: MusicDetailsProps) {
-	const { data: fetchedActivity } = useMusicActivity();
-	const data = activity ?? fetchedActivity ?? unavailableMusicActivity;
+	const { data: fetchedActivity } = useMusicActivity(activity === undefined);
+	const data = normalizeMusicActivity(
+		activity ?? fetchedActivity ?? unavailableMusicActivity,
+	);
 	const { track } = data;
 	const playedAt = formatPlayedAt(track?.playedAt ?? null);
 	const duration = formatDuration(track?.durationMs ?? null);
@@ -189,8 +200,8 @@ export default function MusicDetails({ activity }: MusicDetailsProps) {
 						</a>
 					</div>
 					<p className='mt-3 text-xs text-gray-500 dark:text-gray-400'>
-						状态：{musicStateLabels[data.state]} · 每 60
-						秒更新；数据来自最近播放记录
+						状态：{musicStateLabels[data.state]} · 数据来自最近播放记录，
+						不代表当前正在播放 · 每 60 秒更新
 					</p>
 				</div>
 			</div>

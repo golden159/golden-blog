@@ -51,6 +51,8 @@ const finiteNumber = (value: unknown): number | null => {
 	return null;
 };
 
+const MAX_DATE_MS = 8.64e15;
+
 export function normalizeRecentTrack(
 	payload: unknown,
 	now = Date.now(),
@@ -80,7 +82,15 @@ export function normalizeRecentTrack(
 		.map((artist) => text(asRecord(artist)?.name))
 		.filter((artist): artist is string => artist !== null);
 	const album = asRecord(song?.al);
-	const playedAt = finiteNumber(record?.playTime);
+	const rawPlayedAt = record?.playTime;
+	const playedAt = finiteNumber(rawPlayedAt);
+	if (
+		rawPlayedAt !== undefined &&
+		rawPlayedAt !== null &&
+		(playedAt === null || Math.abs(playedAt) > MAX_DATE_MS)
+	) {
+		return unavailableActivity();
+	}
 	const durationMs = finiteNumber(song?.dt);
 	const elapsed = playedAt === null ? null : now - playedAt;
 	const state =
