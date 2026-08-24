@@ -28,7 +28,7 @@ const labels: Record<NeteaseActivityResponse['state'], string> = {
 const stateDescriptions: Record<NeteaseActivityResponse['state'], string> = {
 	recent: '15 分钟内有播放记录；这是最近听过，不代表当前正在播放。',
 	older: '有最近播放记录，但时间已经超过 15 分钟。',
-	weekly: '本周听歌汇总，不表示当前或最近播放。',
+	weekly: '本周听歌汇总。',
 	empty: '播放一首歌后，最近记录会在同步后自动更新。',
 	unavailable: '暂时无法读取网易云记录，请检查 Cookie 或稍后再试。',
 };
@@ -148,11 +148,6 @@ export default function MusicDetails({
 							<p className='mt-1 truncate text-sm text-gray-600 dark:text-gray-300'>
 								{track.artists.join(', ')} · {track.album}
 							</p>
-							{isWeekly && (
-								<p className='mt-2 text-sm text-gray-600 dark:text-gray-300'>
-									本周听歌汇总，不表示当前或最近播放。
-								</p>
-							)}
 						</>
 					) : (
 						<p className='mt-3 text-sm text-gray-600 dark:text-gray-300'>
@@ -228,23 +223,22 @@ export default function MusicDetails({
 							记录时间：{playedAt}
 						</p>
 					)}
-
-					<div className='mt-5 flex flex-wrap items-center gap-x-4 gap-y-2'>
-						<p className='text-sm text-gray-600 dark:text-gray-300'>
-							网易云 User ID：{musicProfile.userId}
-						</p>
-						<a
-							href={musicProfile.url}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='text-sm text-primary-600 underline decoration-primary-500 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-primary-400'
-						>
-							打开网易云主页 ↗
-						</a>
-					</div>
 				</div>
 			</div>
 			<ListeningWeeklyRanking ranking={weeklyRanking ?? fetchedWeeklyRanking} />
+			<div className='relative mt-4 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 border-t border-gray-200/80 pt-4 text-right dark:border-gray-700'>
+				<p className='text-sm text-gray-600 dark:text-gray-300'>
+					网易云 User ID：{musicProfile.userId}
+				</p>
+				<a
+					href={musicProfile.url}
+					target='_blank'
+					rel='noopener noreferrer'
+					className='text-sm text-primary-600 underline decoration-primary-500 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-primary-400'
+				>
+					打开网易云主页 ↗
+				</a>
+			</div>
 		</div>
 	);
 }

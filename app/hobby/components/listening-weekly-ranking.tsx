@@ -44,7 +44,7 @@ function RankingShell({
 	stateLabel,
 }: {
 	children: ReactNode;
-	stateLabel: string;
+	stateLabel?: string;
 }) {
 	return (
 		<section
@@ -71,9 +71,11 @@ function RankingShell({
 							如果要把这一周装进一个时间胶囊，我想会把这些歌一起放进去。等以后再次听见它们，也许还能想起当时的天气、心情，以及那个阶段的自己。
 						</p>
 					</div>
-					<span className='w-fit rounded-full border border-primary-300/70 bg-primary-50/90 px-3 py-1.5 text-xs font-bold text-primary-700 dark:border-primary-300/25 dark:bg-primary-400/10 dark:text-primary-200'>
-						{stateLabel}
-					</span>
+					{stateLabel && (
+						<span className='w-fit rounded-full border border-primary-300/70 bg-primary-50/90 px-3 py-1.5 text-xs font-bold text-primary-700 dark:border-primary-300/25 dark:bg-primary-400/10 dark:text-primary-200'>
+							{stateLabel}
+						</span>
+					)}
 				</header>
 				{children}
 			</div>
@@ -168,7 +170,7 @@ export default function ListeningWeeklyRanking({
 	}
 
 	return (
-		<RankingShell stateLabel={`已同步 · ${ranking.tracks.length} 首`}>
+		<RankingShell>
 			<ol
 				aria-label='网易云听歌周榜'
 				className='mt-6 min-w-0 list-none overflow-hidden rounded-2xl border border-gray-200/90 bg-white/60 dark:border-white/10 dark:bg-black/20'

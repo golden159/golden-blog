@@ -90,6 +90,12 @@ describe('MusicDetails', () => {
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 		expect(weeklyHeading.closest('section')).toHaveClass('mt-6');
+		const profileLink = screen.getByRole('link', { name: /网易云主页/ });
+		expect(
+			weeklyHeading.compareDocumentPosition(profileLink) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(profileLink.parentElement).toHaveClass('justify-end', 'text-right');
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
@@ -193,8 +199,8 @@ describe('MusicDetails', () => {
 		expect(screen.getByText('Weekly favorite · 本周常听')).toBeInTheDocument();
 		expect(screen.getByText('本周听歌汇总')).toBeInTheDocument();
 		expect(
-			screen.getByText('本周听歌汇总，不表示当前或最近播放。'),
-		).toBeInTheDocument();
+			screen.queryByText('本周听歌汇总，不表示当前或最近播放。'),
+		).not.toBeInTheDocument();
 		expect(
 			screen.queryByText(
 				'状态：本周常听 · 数据来自本周听歌汇总，不表示当前或最近播放 · 每 60 秒更新',
