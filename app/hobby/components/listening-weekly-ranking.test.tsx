@@ -40,6 +40,16 @@ describe('ListeningWeeklyRanking', () => {
 			screen.getByRole('heading', { name: '听歌周榜', level: 3 }),
 		).toBeInTheDocument();
 		expect(screen.getByText('WEEKLY TOP 10')).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'如果要把这一周装进一个时间胶囊，我想会把这些歌一起放进去。等以后再次听见它们，也许还能想起当时的天气、心情，以及那个阶段的自己。',
+			),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByText(
+				'数据来自网易云用户周榜；不推算总听歌时长。页面每 5 分钟同步一次。',
+			),
+		).not.toBeInTheDocument();
 		const list = screen.getByRole('list', { name: '网易云听歌周榜' });
 		const rows = within(list).getAllByRole('listitem');
 		expect(rows).toHaveLength(2);

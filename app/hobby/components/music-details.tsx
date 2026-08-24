@@ -160,20 +160,44 @@ export default function MusicDetails({
 						</p>
 					)}
 
-					<ul
-						aria-label='音乐标签'
-						data-testid='music-tags'
-						className='mt-4 flex flex-wrap gap-2'
-					>
-						{[...musicGenres, ...dynamicTags].map((tag) => (
-							<li
-								key={tag}
-								className='rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-gray-950/70 dark:text-gray-300 dark:ring-gray-700'
-							>
-								{tag}
-							</li>
-						))}
-					</ul>
+					<div className='mt-4 grid gap-3 sm:grid-cols-2'>
+						<div className='rounded-xl border border-gray-200/90 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-950/55'>
+							<p className='text-[11px] font-semibold tracking-[0.16em] text-gray-500 uppercase dark:text-gray-400'>
+								常听风格
+							</p>
+							<ul aria-label='常听风格' className='mt-2 flex flex-wrap gap-2'>
+								{musicGenres.map((genre) => (
+									<li
+										key={genre}
+										className='rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/[0.07] dark:text-gray-300'
+									>
+										{genre}
+									</li>
+								))}
+							</ul>
+						</div>
+
+						{track && (
+							<div className='rounded-xl border border-primary-200/80 bg-primary-50/70 p-3 dark:border-primary-300/20 dark:bg-primary-400/[0.08]'>
+								<p className='text-[11px] font-semibold tracking-[0.16em] text-primary-600 uppercase dark:text-primary-300'>
+									这首歌
+								</p>
+								<ul
+									aria-label='这首歌的标签'
+									className='mt-2 flex flex-wrap gap-2'
+								>
+									{dynamicTags.map((tag) => (
+										<li
+											key={tag}
+											className='rounded-full bg-white/85 px-3 py-1 text-xs font-semibold text-primary-700 ring-1 ring-primary-200/80 dark:bg-gray-950/60 dark:text-primary-200 dark:ring-primary-300/20'
+										>
+											{tag}
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
+					</div>
 
 					{track && (
 						<dl className='mt-5 grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400 sm:grid-cols-3'>

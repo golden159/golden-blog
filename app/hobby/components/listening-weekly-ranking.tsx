@@ -68,7 +68,7 @@ function RankingShell({
 							听歌周榜
 						</h3>
 						<p className='mt-2 max-w-2xl text-sm leading-6 text-gray-600 dark:text-neutral-300'>
-							这一周常听的歌，按网易云周榜顺序排列。
+							如果要把这一周装进一个时间胶囊，我想会把这些歌一起放进去。等以后再次听见它们，也许还能想起当时的天气、心情，以及那个阶段的自己。
 						</p>
 					</div>
 					<span className='w-fit rounded-full border border-primary-300/70 bg-primary-50/90 px-3 py-1.5 text-xs font-bold text-primary-700 dark:border-primary-300/25 dark:bg-primary-400/10 dark:text-primary-200'>
@@ -76,9 +76,6 @@ function RankingShell({
 					</span>
 				</header>
 				{children}
-				<p className='mt-5 border-t border-gray-200/80 pt-4 text-xs leading-5 text-gray-500 dark:border-white/10 dark:text-neutral-400'>
-					数据来自网易云用户周榜；不推算总听歌时长。页面每 5 分钟同步一次。
-				</p>
 			</div>
 		</section>
 	);

@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from '@testing-library/react';
 import type { NeteaseWeeklyRanking } from 'app/components/netease/types';
 import { SWRConfig, useSWRConfig } from 'swr';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -195,6 +201,35 @@ describe('MusicDetails', () => {
 			),
 		).not.toBeInTheDocument();
 		expect(screen.queryByText(/记录时间：/)).not.toBeInTheDocument();
+	});
+
+	it('keeps fixed genre tags separate from the displayed track tags', () => {
+		render(
+			<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+				<MusicDetails
+					activity={{
+						state: 'weekly',
+						track: {
+							title: 'アイドル',
+							artists: ['YOASOBI'],
+							album: 'アイドル',
+							albumArtUrl: null,
+							songUrl: 'https://music.163.com/song?id=54321',
+							playedAt: null,
+						},
+					}}
+				/>
+			</SWRConfig>,
+		);
+
+		const genres = screen.getByRole('list', { name: '常听风格' });
+		const trackTags = screen.getByRole('list', { name: '这首歌的标签' });
+		for (const genre of ['日语', 'ACG', '流行', '说唱', '粤语', '民谣']) {
+			expect(within(genres).getByText(genre)).toBeInTheDocument();
+			expect(within(trackTags).queryByText(genre)).not.toBeInTheDocument();
+		}
+		expect(within(trackTags).getByText('YOASOBI')).toBeInTheDocument();
+		expect(within(trackTags).getByText('アイドル')).toBeInTheDocument();
 	});
 
 	it('hides an inconsistent weekly playback timestamp', () => {
