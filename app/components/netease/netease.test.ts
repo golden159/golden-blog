@@ -122,6 +122,8 @@ describe('fetchNeteaseActivity', () => {
 		expect(requestOptions?.method).toBe('POST');
 		expect(requestOptions?.headers).toEqual({
 			'Content-Type': 'application/x-www-form-urlencoded',
+			Cookie: env.NETEASE_MUSIC_COOKIE,
+			'x-apicache-bypass': '1',
 		});
 		expect([...body.entries()]).toEqual([
 			['cookie', env.NETEASE_MUSIC_COOKIE],

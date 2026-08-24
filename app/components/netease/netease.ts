@@ -62,6 +62,8 @@ export async function fetchNeteaseActivity({
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
+				Cookie: cookie,
+				'x-apicache-bypass': '1',
 			},
 			body: new URLSearchParams({
 				cookie,
