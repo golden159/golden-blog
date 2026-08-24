@@ -291,38 +291,47 @@ function WeekComparison({
 					{formatCount(footprint.week.recordCount, '条记录')}
 				</p>
 			</div>
-			<fieldset className='mt-8 space-y-6'>
+			<fieldset className='mt-8'>
 				<legend className='sr-only'>本周与周一聆听时长对比</legend>
-				{rows.map((row) => (
-					<div key={row.label}>
-						<div className='mb-2 flex items-baseline justify-between gap-4'>
-							<span className='text-sm font-semibold text-neutral-200'>
-								{row.label}
-							</span>
-							<span className='text-lg font-black tabular-nums'>
-								{formatDuration(row.value)}
-							</span>
-						</div>
-						<div className='h-3 overflow-hidden rounded-full border border-white/10 bg-neutral-900'>
-							{row.value === null ? (
-								<div
-									aria-hidden='true'
-									title={`${row.label}：时长不可用`}
-									data-geometry='unavailable-marker'
-									className='h-full w-full bg-[repeating-linear-gradient(135deg,rgba(163,163,163,0.45)_0_3px,transparent_3px_7px)]'
-								/>
-							) : (
-								<div
-									aria-hidden='true'
-									title={`${row.label}：${formatDuration(row.value)}`}
-									data-geometry='quantitative-bar'
-									className={`h-full rounded-full ${row.color} motion-safe:transition-[width] motion-safe:duration-500`}
-									style={{ width: getBarSize(row.value, maximum) }}
-								/>
-							)}
-						</div>
-					</div>
-				))}
+				<ul className='list-none space-y-6'>
+					{rows.map((row) => (
+						<li key={row.label}>
+							<div className='mb-2 flex items-baseline justify-between gap-4'>
+								<span className='text-sm font-semibold text-neutral-200'>
+									{row.label}
+								</span>
+								<span className='text-lg font-black tabular-nums'>
+									{row.value === null ? (
+										<>
+											<span aria-hidden='true'>—</span>
+											<span className='sr-only'>时长不可用</span>
+										</>
+									) : (
+										formatDuration(row.value)
+									)}
+								</span>
+							</div>
+							<div className='h-3 overflow-hidden rounded-full border border-white/10 bg-neutral-900'>
+								{row.value === null ? (
+									<div
+										aria-hidden='true'
+										title={`${row.label}：时长不可用`}
+										data-geometry='unavailable-marker'
+										className='h-full w-full bg-[repeating-linear-gradient(135deg,rgba(163,163,163,0.45)_0_3px,transparent_3px_7px)]'
+									/>
+								) : (
+									<div
+										aria-hidden='true'
+										title={`${row.label}：${formatDuration(row.value)}`}
+										data-geometry='quantitative-bar'
+										className={`h-full rounded-full ${row.color} motion-safe:transition-[width] motion-safe:duration-500`}
+										style={{ width: getBarSize(row.value, maximum) }}
+									/>
+								)}
+							</div>
+						</li>
+					))}
+				</ul>
 			</fieldset>
 			<div className='mt-7 border-t border-white/10 pt-4'>
 				{footprint.weeklyHighlight ? (

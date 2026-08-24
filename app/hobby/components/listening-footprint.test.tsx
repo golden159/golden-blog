@@ -168,6 +168,36 @@ describe('ListeningFootprint', () => {
 		expect(within(comparison).getByText('—')).toBeInTheDocument();
 	});
 
+	it('gives each unavailable week comparison row explicit assistive context', () => {
+		render(
+			<ListeningFootprint
+				footprint={{
+					...validFootprint,
+					week: {
+						...validFootprint.week,
+						durationMs: null,
+						mondayDurationMs: null,
+					},
+				}}
+			/>,
+		);
+
+		const comparison = screen.getByRole('group', {
+			name: '本周与周一聆听时长对比',
+		});
+		const rows = within(comparison).getAllByRole('listitem');
+		expect(rows).toHaveLength(2);
+
+		for (const [row, label] of [
+			[rows[0], '本周'],
+			[rows[1], '周一'],
+		] as const) {
+			expect(within(row).getByText(label)).toBeInTheDocument();
+			expect(within(row).getByText('时长不可用')).toHaveClass('sr-only');
+			expect(within(row).getByText('—')).toHaveAttribute('aria-hidden', 'true');
+		}
+	});
+
 	it('uses truthful geometry for zero, unavailable, and positive chart buckets', () => {
 		const geometryFootprint: NeteaseListeningFootprint = {
 			...validFootprint,
