@@ -361,7 +361,7 @@ Run the local site with the public API base and user ID, inspect `/hobby` at mob
 
 Review against this plan, with special attention to Cookie isolation, period-boundary math, null-versus-zero honesty, client validation, accessibility, and layout behavior.
 
-- [ ] **Step 4: Integrate and deploy**
+- [x] **Step 4: Integrate and deploy**
 
 Fast-forward merge the reviewed branch into `main`, run the merged test suite, push `main`, wait for the matching Vercel deployment to reach `READY`, then verify:
 
