@@ -269,7 +269,7 @@ describe('HobbyGrid', () => {
 		);
 	});
 
-	it('shares the parent activity request while loading the footprint separately', async () => {
+	it('shares the parent activity request while loading the weekly ranking separately', async () => {
 		const fetchMock = vi.fn().mockResolvedValue(
 			new Response(JSON.stringify({ state: 'empty', track: null }), {
 				status: 200,
@@ -290,7 +290,7 @@ describe('HobbyGrid', () => {
 		).toHaveLength(1);
 		expect(
 			fetchMock.mock.calls.filter(
-				([url]) => url === '/api/hobby/netease/footprint',
+				([url]) => url === '/api/hobby/netease/weekly',
 			),
 		).toHaveLength(1);
 	});

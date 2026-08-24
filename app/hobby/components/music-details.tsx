@@ -1,18 +1,20 @@
 'use client';
 
-import type { NeteaseListeningFootprint } from 'app/components/netease/footprint-types';
-import type { NeteaseActivityResponse } from 'app/components/netease/types';
+import type {
+	NeteaseActivityResponse,
+	NeteaseWeeklyRanking,
+} from 'app/components/netease/types';
 import Image from 'next/image';
 import { useState } from 'react';
 import { musicGenres, musicProfile } from '../content';
-import ListeningFootprint from './listening-footprint';
+import ListeningWeeklyRanking from './listening-weekly-ranking';
 import {
 	musicStateLabels,
 	normalizeMusicActivity,
 	unavailableMusicActivity,
 	useMusicActivity,
 } from './music-activity';
-import { useMusicFootprint } from './music-footprint-data';
+import { useMusicWeeklyRanking } from './music-weekly-data';
 
 const albumArtPlaceholder = '/static/hobby/music-placeholder.svg';
 
@@ -86,15 +88,17 @@ function AlbumArt({ track }: { track: Track | null }) {
 
 type MusicDetailsProps = {
 	activity?: NeteaseActivityResponse;
-	footprint?: NeteaseListeningFootprint;
+	weeklyRanking?: NeteaseWeeklyRanking;
 };
 
 export default function MusicDetails({
 	activity,
-	footprint,
+	weeklyRanking,
 }: MusicDetailsProps) {
 	const { data: fetchedActivity } = useMusicActivity(activity === undefined);
-	const { data: fetchedFootprint } = useMusicFootprint(footprint === undefined);
+	const { data: fetchedWeeklyRanking } = useMusicWeeklyRanking(
+		weeklyRanking === undefined,
+	);
 	const data = normalizeMusicActivity(
 		activity ?? fetchedActivity ?? unavailableMusicActivity,
 	);
@@ -224,7 +228,7 @@ export default function MusicDetails({
 					</p>
 				</div>
 			</div>
-			<ListeningFootprint footprint={footprint ?? fetchedFootprint} />
+			<ListeningWeeklyRanking ranking={weeklyRanking ?? fetchedWeeklyRanking} />
 		</div>
 	);
 }

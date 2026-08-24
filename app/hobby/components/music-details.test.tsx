@@ -1,78 +1,25 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { NeteaseListeningFootprint } from 'app/components/netease/footprint-types';
+import type { NeteaseWeeklyRanking } from 'app/components/netease/types';
 import { SWRConfig, useSWRConfig } from 'swr';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import MusicDetails from './music-details';
 
-const injectedFootprint: NeteaseListeningFootprint = {
+const injectedWeeklyRanking: NeteaseWeeklyRanking = {
 	state: 'ready',
 	generatedAt: 1_800_000_000_000,
-	timezone: 'Asia/Shanghai',
-	coverage: {
-		recentAvailable: true,
-		recordCount: 1,
-		oldestPlayedAt: 1_800_000_000_000,
-		limit: 100,
-		truncated: false,
-	},
-	today: {
-		durationMs: 60_000,
-		recordCount: 1,
-		uniqueTrackCount: 1,
-		topArtist: 'Artist',
-		topTrack: 'Track',
-		buckets: Array.from({ length: 12 }, (_, index) => ({
-			label: `${index * 2}:00`,
-			durationMs: index === 0 ? 60_000 : 0,
-			recordCount: index === 0 ? 1 : 0,
-		})),
-	},
-	week: { durationMs: 60_000, mondayDurationMs: 60_000, recordCount: 1 },
-	reports: {
-		week: {
-			durationMs: 60_000,
-			recordCount: 1,
-			uniqueTrackCount: 1,
-			topArtist: 'Artist',
-			topTrack: 'Track',
-			buckets: Array.from({ length: 7 }, (_, index) => ({
-				label: `Day ${index + 1}`,
-				durationMs: index === 0 ? 60_000 : 0,
-				recordCount: index === 0 ? 1 : 0,
-			})),
+	tracks: [
+		{
+			rank: 1,
+			title: 'Weekly Track',
+			artists: ['Artist'],
+			album: 'Album',
+			albumArtUrl: null,
+			songUrl: 'https://music.163.com/song?id=42',
+			durationMs: 180_000,
+			playCount: 4,
+			score: 100,
 		},
-		month: {
-			durationMs: 60_000,
-			recordCount: 1,
-			uniqueTrackCount: 1,
-			topArtist: 'Artist',
-			topTrack: 'Track',
-			buckets: Array.from({ length: 5 }, (_, index) => ({
-				label: `Range ${index + 1}`,
-				durationMs: index === 0 ? 60_000 : 0,
-				recordCount: index === 0 ? 1 : 0,
-			})),
-		},
-		year: {
-			durationMs: 60_000,
-			recordCount: 1,
-			uniqueTrackCount: 1,
-			topArtist: 'Artist',
-			topTrack: 'Track',
-			buckets: Array.from({ length: 12 }, (_, index) => ({
-				label: `Month ${index + 1}`,
-				durationMs: index === 0 ? 60_000 : 0,
-				recordCount: index === 0 ? 1 : 0,
-			})),
-		},
-	},
-	lifetime: {
-		listenCount: 1,
-		estimatedDurationMs: 60_000,
-		sampleDurationMs: 60_000,
-		basis: 'recent-median',
-	},
-	weeklyHighlight: null,
+	],
 };
 
 const ChangedTrackButton = () => {
@@ -117,7 +64,7 @@ afterEach(() => {
 });
 
 describe('MusicDetails', () => {
-	it('renders an injected footprint below the current-track hero without fetching', () => {
+	it('renders an injected weekly ranking below the current-track hero without fetching', () => {
 		const fetchMock = vi.fn();
 		vi.stubGlobal('fetch', fetchMock);
 
@@ -125,28 +72,28 @@ describe('MusicDetails', () => {
 			<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
 				<MusicDetails
 					activity={{ state: 'empty', track: null }}
-					footprint={injectedFootprint}
+					weeklyRanking={injectedWeeklyRanking}
 				/>
 			</SWRConfig>,
 		);
 
 		const heroState = screen.getByTestId('music-state');
-		const footprintHeading = screen.getByRole('heading', { name: '听歌足迹' });
+		const weeklyHeading = screen.getByRole('heading', { name: '听歌周榜' });
 		expect(
-			heroState.compareDocumentPosition(footprintHeading) &
+			heroState.compareDocumentPosition(weeklyHeading) &
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
-		expect(footprintHeading.closest('section')).toHaveClass('mt-6');
+		expect(weeklyHeading.closest('section')).toHaveClass('mt-6');
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
-	it('loads the footprint separately without duplicating the recent-activity request', async () => {
+	it('loads the weekly ranking separately without duplicating the recent-activity request', async () => {
 		const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
 			const url = String(input);
 			return new Response(
 				JSON.stringify(
-					url === '/api/hobby/netease/footprint'
-						? injectedFootprint
+					url === '/api/hobby/netease/weekly'
+						? injectedWeeklyRanking
 						: { state: 'empty', track: null },
 				),
 				{ status: 200 },
@@ -156,14 +103,14 @@ describe('MusicDetails', () => {
 
 		renderMusic();
 
-		await screen.findByRole('heading', { name: '听歌足迹' });
+		await screen.findByRole('heading', { name: '听歌周榜' });
 		await waitFor(() => {
 			expect(
 				fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
 			).toHaveLength(1);
 			expect(
 				fetchMock.mock.calls.filter(
-					([url]) => url === '/api/hobby/netease/footprint',
+					([url]) => url === '/api/hobby/netease/weekly',
 				),
 			).toHaveLength(1);
 		});
