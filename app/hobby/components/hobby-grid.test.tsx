@@ -135,6 +135,33 @@ describe('HobbyGrid', () => {
 		expect(screen.getByText('Game Accounts')).toBeInTheDocument();
 	});
 
+	it('places the Music profile at the bottom-right of the top summary', () => {
+		renderGrid();
+
+		const profileLink = screen.getByRole('link', { name: /网易云主页/ });
+		const musicTrigger = trigger('Music');
+		expect(profileLink).toHaveAttribute(
+			'href',
+			'https://y.music.163.com/m/user?id=3719820729',
+		);
+		expect(profileLink.parentElement).toHaveClass('justify-end', 'text-right');
+		expect(
+			musicTrigger.compareDocumentPosition(profileLink) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(
+			screen.queryByRole('region', { name: 'Music' }),
+		).not.toBeInTheDocument();
+
+		fireEvent.click(musicTrigger);
+		const musicPanel = screen.getByRole('region', { name: 'Music' });
+		expect(
+			profileLink.compareDocumentPosition(musicPanel) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(screen.getAllByRole('link', { name: /网易云主页/ })).toHaveLength(1);
+	});
+
 	it('matches trigger and panel identifiers', () => {
 		renderGrid();
 		const gamesTrigger = trigger('Games');

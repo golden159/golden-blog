@@ -17,6 +17,7 @@ type HobbyCardProps = {
 	isOpen: boolean;
 	onToggle: () => void;
 	musicActivity?: NeteaseActivityResponse;
+	topFooter?: ReactNode;
 	children: ReactNode;
 };
 
@@ -60,6 +61,7 @@ export default function HobbyCard({
 	isOpen,
 	onToggle,
 	musicActivity,
+	topFooter,
 	children,
 }: HobbyCardProps) {
 	const prefersReducedMotion = useReducedMotion() === true;
@@ -110,6 +112,7 @@ export default function HobbyCard({
 					{category.summary}
 				</p>
 				<CategoryVisual id={category.id} musicActivity={musicActivity} />
+				{topFooter}
 			</div>
 
 			<AnimatePresence initial={false}>

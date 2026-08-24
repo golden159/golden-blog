@@ -10,6 +10,7 @@ import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
 import { useMusicActivity } from './music-activity';
 import MusicDetails from './music-details';
+import MusicProfileFooter from './music-profile-footer';
 import TravelDetails from './travel-details';
 
 function renderDetails(
@@ -55,6 +56,9 @@ export default function HobbyGrid() {
 						category={category}
 						isOpen={isOpen}
 						musicActivity={category.id === 'music' ? musicActivity : undefined}
+						topFooter={
+							category.id === 'music' ? <MusicProfileFooter /> : undefined
+						}
 						onToggle={() =>
 							setActiveCategory((current) =>
 								current === category.id ? null : category.id,

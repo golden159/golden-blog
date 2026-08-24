@@ -90,12 +90,6 @@ describe('MusicDetails', () => {
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 		expect(weeklyHeading.closest('section')).toHaveClass('mt-6');
-		const profileLink = screen.getByRole('link', { name: /网易云主页/ });
-		expect(
-			weeklyHeading.compareDocumentPosition(profileLink) &
-				Node.DOCUMENT_POSITION_FOLLOWING,
-		).toBeTruthy();
-		expect(profileLink.parentElement).toHaveClass('justify-end', 'text-right');
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
@@ -128,7 +122,7 @@ describe('MusicDetails', () => {
 		});
 	});
 
-	it('renders normalized recent activity and the profile link', async () => {
+	it('renders normalized recent activity', async () => {
 		vi.stubGlobal(
 			'fetch',
 			vi.fn().mockResolvedValue(
@@ -165,16 +159,6 @@ describe('MusicDetails', () => {
 				name: '在网易云音乐打开《夜に駆ける》（新窗口）',
 			}),
 		).toHaveAttribute('href', 'https://music.163.com/song?id=12345');
-		expect(screen.getByText('网易云 User ID：3719820729')).toBeInTheDocument();
-		const profileLink = screen.getByRole('link', { name: /网易云主页/ });
-		expect(profileLink).toHaveAttribute(
-			'href',
-			'https://y.music.163.com/m/user?id=3719820729',
-		);
-		expect(profileLink).toHaveClass(
-			'text-primary-600',
-			'dark:text-primary-400',
-		);
 	});
 
 	it('renders a weekly favorite as an aggregate without a record time', () => {
@@ -263,7 +247,7 @@ describe('MusicDetails', () => {
 	it.each([
 		['empty', 'No recent track · 暂无最近记录'],
 		['unavailable', 'Unavailable · 暂时无法获取'],
-	] as const)('keeps genres, account ID, and the profile link when activity is %s', async (state, label) => {
+	] as const)('keeps genres when activity is %s', async (state, label) => {
 		vi.stubGlobal(
 			'fetch',
 			vi.fn().mockResolvedValue(
@@ -279,10 +263,6 @@ describe('MusicDetails', () => {
 		for (const genre of ['日语', 'ACG', '流行', '说唱', '粤语', '民谣']) {
 			expect(screen.getByText(genre)).toBeInTheDocument();
 		}
-		expect(screen.getByText('网易云 User ID：3719820729')).toBeInTheDocument();
-		expect(
-			screen.getByRole('link', { name: /网易云主页/ }),
-		).toBeInTheDocument();
 	});
 
 	it('falls back to local album art after a remote image error', async () => {

@@ -6,7 +6,7 @@ import type {
 } from 'app/components/netease/types';
 import Image from 'next/image';
 import { useState } from 'react';
-import { musicGenres, musicProfile } from '../content';
+import { musicGenres } from '../content';
 import ListeningWeeklyRanking from './listening-weekly-ranking';
 import {
 	normalizeMusicActivity,
@@ -226,19 +226,6 @@ export default function MusicDetails({
 				</div>
 			</div>
 			<ListeningWeeklyRanking ranking={weeklyRanking ?? fetchedWeeklyRanking} />
-			<div className='relative mt-4 flex flex-wrap items-center justify-end gap-x-4 gap-y-2 border-t border-gray-200/80 pt-4 text-right dark:border-gray-700'>
-				<p className='text-sm text-gray-600 dark:text-gray-300'>
-					网易云 User ID：{musicProfile.userId}
-				</p>
-				<a
-					href={musicProfile.url}
-					target='_blank'
-					rel='noopener noreferrer'
-					className='text-sm text-primary-600 underline decoration-primary-500 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-primary-400'
-				>
-					打开网易云主页 ↗
-				</a>
-			</div>
 		</div>
 	);
 }
