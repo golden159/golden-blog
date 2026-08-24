@@ -9,7 +9,7 @@ export type RecentTrack = {
 };
 
 export type NeteaseActivityResponse = {
-	state: 'recent' | 'older' | 'empty' | 'unavailable';
+	state: 'recent' | 'older' | 'weekly' | 'empty' | 'unavailable';
 	track: RecentTrack | null;
 };
 
