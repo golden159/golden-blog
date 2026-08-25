@@ -1,13 +1,21 @@
+import type { SteamActivityResponse } from 'app/components/steam/types';
 import { gameAccounts, gameGroups } from '../content';
 import AccountCopyButton from './account-copy-button';
+import SteamDetails from './steam-details';
 
-export default function GameDetails() {
+type GameDetailsProps = {
+	steamActivity?: SteamActivityResponse;
+};
+
+export default function GameDetails({ steamActivity }: GameDetailsProps) {
 	const expandedAccounts = gameAccounts.filter(
 		(account) => account.platform !== 'Steam',
 	);
 
 	return (
 		<div className='space-y-7'>
+			<SteamDetails activity={steamActivity} fetchWhenMissing={false} />
+
 			<div className='grid gap-x-8 gap-y-5 md:grid-cols-3'>
 				{gameGroups.map((group) => (
 					<section key={group.label}>
