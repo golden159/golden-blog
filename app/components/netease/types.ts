@@ -33,6 +33,11 @@ export type NeteaseWeeklyRanking = {
 	tracks: WeeklyRankingTrack[];
 };
 
+export type NeteaseOverview = {
+	activity: NeteaseActivityResponse;
+	weeklyRanking: NeteaseWeeklyRanking;
+};
+
 export const unavailableActivity = (): NeteaseActivityResponse => ({
 	state: 'unavailable',
 	track: null,

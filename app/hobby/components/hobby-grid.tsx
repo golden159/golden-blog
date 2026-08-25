@@ -14,10 +14,10 @@ import AnimeProfileFooter from './anime-profile-footer';
 import FoodDetails from './food-details';
 import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
-import { useMusicActivity } from './music-activity';
 import MusicDetails from './music-details';
+import { useMusicOverview } from './music-overview-data';
 import MusicProfileFooter from './music-profile-footer';
-import { useMusicWeeklyRanking } from './music-weekly-data';
+import SteamProfileFooter from './steam-profile-footer';
 import TravelDetails from './travel-details';
 
 function renderDetails(
@@ -38,6 +38,7 @@ function renderDetails(
 			<MusicDetails
 				activity={musicActivity}
 				weeklyRanking={musicWeeklyRanking}
+				fetchWhenMissing={false}
 			/>
 		);
 	}
@@ -79,9 +80,10 @@ function activityForMusicPreview(
 
 export default function HobbyGrid() {
 	const [activeCategory, setActiveCategory] = useState<HobbyId | null>(null);
-	const { data: musicActivity } = useMusicActivity();
-	const { data: musicWeeklyRanking } = useMusicWeeklyRanking();
+	const { data: musicOverview } = useMusicOverview();
 	const { data: animeActivity } = useAnimeActivity();
+	const musicActivity = musicOverview?.activity;
+	const musicWeeklyRanking = musicOverview?.weeklyRanking;
 	const musicPreviewActivity = activityForMusicPreview(
 		musicActivity,
 		musicWeeklyRanking,
@@ -105,7 +107,9 @@ export default function HobbyGrid() {
 						}
 						animeActivity={category.id === 'anime' ? animeActivity : undefined}
 						topFooter={
-							category.id === 'anime' ? (
+							category.id === 'games' ? (
+								<SteamProfileFooter />
+							) : category.id === 'anime' ? (
 								<AnimeProfileFooter />
 							) : category.id === 'music' ? (
 								<MusicProfileFooter />

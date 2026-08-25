@@ -21,6 +21,9 @@ type FetchNeteaseOptions = {
 	now?: number;
 };
 
+const RECENT_REQUEST_TIMEOUT_MS = 5000;
+const WEEKLY_REQUEST_TIMEOUT_MS = 8000;
+
 export async function fetchNeteaseActivity({
 	env = process.env as NeteaseEnv,
 	fetchImpl = fetch,
@@ -59,7 +62,7 @@ export async function fetchNeteaseActivity({
 				}),
 				cache: 'no-store',
 				redirect: 'error',
-				signal: AbortSignal.timeout(5000),
+				signal: AbortSignal.timeout(RECENT_REQUEST_TIMEOUT_MS),
 			});
 
 			recentActivity = response.ok
@@ -82,7 +85,7 @@ export async function fetchNeteaseActivity({
 			method: 'GET',
 			cache: 'no-store',
 			redirect: 'error',
-			signal: AbortSignal.timeout(5000),
+			signal: AbortSignal.timeout(WEEKLY_REQUEST_TIMEOUT_MS),
 		});
 
 		if (!response.ok) {

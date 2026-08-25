@@ -4,7 +4,7 @@ export default function MusicProfileFooter() {
 	return (
 		<div
 			data-testid='music-profile-footer'
-			className='mt-5 flex flex-wrap items-center justify-end gap-x-4 gap-y-1 border-t border-gray-200/80 pt-3 text-right dark:border-gray-700'
+			className='mt-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-1 pt-3 text-right'
 		>
 			<p className='text-xs text-gray-500 dark:text-gray-400'>
 				网易云 User ID：{musicProfile.userId}

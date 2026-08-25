@@ -51,7 +51,7 @@ function HobbyPanel({
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -8 }}
 			transition={{ duration }}
-			className='border-t border-gray-200 px-6 py-6 dark:border-gray-700 md:px-8 md:py-8'
+			className='border-t border-gray-200 px-5 py-5 dark:border-gray-700 md:px-8 md:py-8'
 		>
 			{children}
 		</motion.div>
@@ -82,7 +82,13 @@ export default function HobbyCard({
 				isOpen ? 'md:col-span-12' : category.compactSpan,
 			)}
 		>
-			<div className='p-6 md:p-8'>
+			<div
+				data-testid={`hobby-${category.id}-summary`}
+				className={classNames(
+					'flex flex-col p-5 sm:p-6 md:p-8',
+					!isOpen && 'h-full',
+				)}
+			>
 				<span className='text-xs font-semibold tracking-[0.2em] text-primary-600 dark:text-primary-400'>
 					{category.index}
 				</span>

@@ -10,6 +10,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import HobbyGrid from './hobby-grid';
 
 const trigger = (name: string) => screen.getByRole('button', { name });
+const emptyOverview = {
+	activity: { state: 'empty', track: null },
+	weeklyRanking: {
+		state: 'empty',
+		generatedAt: 1_800_000_000_000,
+		tracks: [],
+	},
+};
+const emptyBangumi = {
+	state: 'empty',
+	profile: null,
+	total: 0,
+	entries: [],
+};
 const renderGrid = () =>
 	render(
 		<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
@@ -21,10 +35,16 @@ describe('HobbyGrid', () => {
 	beforeEach(() => {
 		vi.stubGlobal(
 			'fetch',
-			vi.fn().mockResolvedValue(
-				new Response(JSON.stringify({ state: 'empty', track: null }), {
-					status: 200,
-				}),
+			vi.fn(
+				async (input: RequestInfo | URL) =>
+					new Response(
+						JSON.stringify(
+							String(input) === '/api/hobby/netease/overview'
+								? emptyOverview
+								: emptyBangumi,
+						),
+						{ status: 200 },
+					),
 			),
 		);
 	});
@@ -135,6 +155,39 @@ describe('HobbyGrid', () => {
 		expect(screen.getByText('Game Accounts')).toBeInTheDocument();
 	});
 
+	it('places the Steam ID and profile link in the Games summary', () => {
+		renderGrid();
+
+		const profileLink = screen.getByRole('link', { name: /打开 Steam 主页/ });
+		const gamesTrigger = trigger('Games');
+		expect(profileLink).toHaveAttribute(
+			'href',
+			'https://steamcommunity.com/profiles/76561198985102331/',
+		);
+		expect(profileLink.parentElement).toHaveTextContent(
+			'Steam ID：76561198985102331',
+		);
+		expect(profileLink.parentElement).toHaveClass('justify-end', 'text-right');
+		expect(
+			gamesTrigger.compareDocumentPosition(profileLink) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(
+			screen.queryByRole('region', { name: 'Games' }),
+		).not.toBeInTheDocument();
+
+		fireEvent.click(gamesTrigger);
+		expect(
+			screen
+				.getAllByRole('link')
+				.filter(
+					(link) =>
+						link.getAttribute('href') ===
+						'https://steamcommunity.com/profiles/76561198985102331/',
+				),
+		).toHaveLength(1);
+	});
+
 	it('places the Music profile at the bottom-right of the top summary', () => {
 		renderGrid();
 
@@ -160,6 +213,62 @@ describe('HobbyGrid', () => {
 				Node.DOCUMENT_POSITION_FOLLOWING,
 		).toBeTruthy();
 		expect(screen.getAllByRole('link', { name: /网易云主页/ })).toHaveLength(1);
+	});
+
+	it('shares a baseline for profile footers across the first row', () => {
+		renderGrid();
+
+		for (const [id, footer] of [
+			['games', 'steam'],
+			['anime', 'anime'],
+			['music', 'music'],
+		] as const) {
+			expect(screen.getByTestId(`hobby-${id}-summary`)).toHaveClass(
+				'flex',
+				'h-full',
+				'flex-col',
+			);
+			expect(screen.getByTestId(`${footer}-profile-footer`)).toHaveClass(
+				'mt-auto',
+			);
+		}
+	});
+
+	it('shows profile footers without gray top dividers', () => {
+		renderGrid();
+
+		for (const footerName of ['steam', 'anime', 'music']) {
+			const footer = screen.getByTestId(`${footerName}-profile-footer`);
+			expect(footer).toHaveClass('mt-auto', 'justify-end', 'text-right');
+			expect(footer).not.toHaveClass('border-t');
+			expect(footer).not.toHaveClass('border-gray-200/80');
+			expect(footer).not.toHaveClass('dark:border-gray-700');
+		}
+	});
+
+	it('keeps decorative compact visuals out of narrow summaries', () => {
+		renderGrid();
+
+		expect(screen.getByTestId('games-preview')).toHaveClass(
+			'hidden',
+			'sm:flex',
+		);
+		expect(screen.getByTestId('food-preview')).toHaveClass(
+			'hidden',
+			'sm:block',
+		);
+		expect(screen.getByTestId('travel-preview')).toHaveClass(
+			'hidden',
+			'sm:block',
+		);
+	});
+
+	it('does not stretch an expanded summary to the full panel height', () => {
+		renderGrid();
+
+		fireEvent.click(trigger('Music'));
+
+		expect(screen.getByTestId('hobby-music-summary')).not.toHaveClass('h-full');
 	});
 
 	it('shows the Bangumi avatar and profile link while Anime is closed', async () => {
@@ -240,21 +349,29 @@ describe('HobbyGrid', () => {
 	it('shows the latest album art and freshness in the closed Music card', async () => {
 		vi.stubGlobal(
 			'fetch',
-			vi.fn().mockResolvedValue(
-				new Response(
-					JSON.stringify({
-						state: 'recent',
-						track: {
-							title: '夜に駆ける',
-							artists: ['YOASOBI'],
-							album: 'THE BOOK',
-							albumArtUrl: 'https://p1.music.126.net/cover.jpg',
-							songUrl: 'https://music.163.com/song?id=12345',
-							playedAt: 1_800_000_000_000,
-						},
-					}),
-					{ status: 200 },
-				),
+			vi.fn(
+				async (input: RequestInfo | URL) =>
+					new Response(
+						JSON.stringify(
+							String(input) === '/api/hobby/netease/overview'
+								? {
+										...emptyOverview,
+										activity: {
+											state: 'recent',
+											track: {
+												title: '夜に駆ける',
+												artists: ['YOASOBI'],
+												album: 'THE BOOK',
+												albumArtUrl: 'https://p1.music.126.net/cover.jpg',
+												songUrl: 'https://music.163.com/song?id=12345',
+												playedAt: 1_800_000_000_000,
+											},
+										},
+									}
+								: emptyBangumi,
+						),
+						{ status: 200 },
+					),
 			),
 		);
 
@@ -299,9 +416,12 @@ describe('HobbyGrid', () => {
 			const url = String(input);
 			return new Response(
 				JSON.stringify(
-					url === '/api/hobby/netease/weekly'
-						? weeklyRanking
-						: { state: 'unavailable', track: null },
+					url === '/api/hobby/netease/overview'
+						? {
+								activity: { state: 'unavailable', track: null },
+								weeklyRanking,
+							}
+						: emptyBangumi,
 				),
 				{ status: 200 },
 			);
@@ -321,7 +441,7 @@ describe('HobbyGrid', () => {
 		);
 		expect(
 			fetchMock.mock.calls.filter(
-				([url]) => url === '/api/hobby/netease/weekly',
+				([url]) => url === '/api/hobby/netease/overview',
 			),
 		).toHaveLength(1);
 		expect(
@@ -332,7 +452,7 @@ describe('HobbyGrid', () => {
 		await screen.findByRole('list', { name: '网易云听歌周榜' });
 		expect(
 			fetchMock.mock.calls.filter(
-				([url]) => url === '/api/hobby/netease/weekly',
+				([url]) => url === '/api/hobby/netease/overview',
 			),
 		).toHaveLength(1);
 	});
@@ -340,21 +460,30 @@ describe('HobbyGrid', () => {
 	it('shows the weekly favorite cover and title in the closed Music card', async () => {
 		vi.stubGlobal(
 			'fetch',
-			vi.fn().mockResolvedValue(
-				new Response(
-					JSON.stringify({
-						state: 'weekly',
-						track: {
-							title: 'アイドル',
-							artists: ['YOASOBI'],
-							album: 'アイドル',
-							albumArtUrl: 'https://p1.music.126.net/weekly-cover.jpg',
-							songUrl: 'https://music.163.com/song?id=54321',
-							playedAt: null,
-						},
-					}),
-					{ status: 200 },
-				),
+			vi.fn(
+				async (input: RequestInfo | URL) =>
+					new Response(
+						JSON.stringify(
+							String(input) === '/api/hobby/netease/overview'
+								? {
+										...emptyOverview,
+										activity: {
+											state: 'weekly',
+											track: {
+												title: 'アイドル',
+												artists: ['YOASOBI'],
+												album: 'アイドル',
+												albumArtUrl:
+													'https://p1.music.126.net/weekly-cover.jpg',
+												songUrl: 'https://music.163.com/song?id=54321',
+												playedAt: null,
+											},
+										},
+									}
+								: emptyBangumi,
+						),
+						{ status: 200 },
+					),
 			),
 		);
 
@@ -389,21 +518,29 @@ describe('HobbyGrid', () => {
 	it('falls back to the local preview art when the remote image fails', async () => {
 		vi.stubGlobal(
 			'fetch',
-			vi.fn().mockResolvedValue(
-				new Response(
-					JSON.stringify({
-						state: 'recent',
-						track: {
-							title: '夜に駆ける',
-							artists: ['YOASOBI'],
-							album: 'THE BOOK',
-							albumArtUrl: 'https://p1.music.126.net/cover.jpg',
-							songUrl: 'https://music.163.com/song?id=12345',
-							playedAt: 1_800_000_000_000,
-						},
-					}),
-					{ status: 200 },
-				),
+			vi.fn(
+				async (input: RequestInfo | URL) =>
+					new Response(
+						JSON.stringify(
+							String(input) === '/api/hobby/netease/overview'
+								? {
+										...emptyOverview,
+										activity: {
+											state: 'recent',
+											track: {
+												title: '夜に駆ける',
+												artists: ['YOASOBI'],
+												album: 'THE BOOK',
+												albumArtUrl: 'https://p1.music.126.net/cover.jpg',
+												songUrl: 'https://music.163.com/song?id=12345',
+												playedAt: 1_800_000_000_000,
+											},
+										},
+									}
+								: emptyBangumi,
+						),
+						{ status: 200 },
+					),
 			),
 		);
 
@@ -421,51 +558,63 @@ describe('HobbyGrid', () => {
 	});
 
 	it('loads activity and weekly ranking before Music opens', async () => {
-		const fetchMock = vi.fn().mockResolvedValue(
-			new Response(JSON.stringify({ state: 'empty', track: null }), {
-				status: 200,
-			}),
+		const fetchMock = vi.fn(
+			async (input: RequestInfo | URL) =>
+				new Response(
+					JSON.stringify(
+						String(input) === '/api/hobby/netease/overview'
+							? emptyOverview
+							: emptyBangumi,
+					),
+					{ status: 200 },
+				),
 		);
 		vi.stubGlobal('fetch', fetchMock);
 
 		renderGrid();
-		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+		expect(
+			fetchMock.mock.calls.filter(
+				([url]) => url === '/api/hobby/netease/overview',
+			),
+		).toHaveLength(1);
 		expect(
 			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
-		).toHaveLength(1);
+		).toHaveLength(0);
 		expect(
 			fetchMock.mock.calls.filter(
 				([url]) => url === '/api/hobby/netease/weekly',
 			),
-		).toHaveLength(1);
+		).toHaveLength(0);
 		fireEvent.click(trigger('Music'));
 		await waitFor(() =>
 			expect(screen.getByTestId('music-state')).toHaveTextContent(
 				'暂无最近记录',
 			),
 		);
-		expect(fetchMock).toHaveBeenCalledTimes(3);
+		expect(fetchMock).toHaveBeenCalledTimes(2);
 	});
 
-	it('deduplicates the parent activity request when Music opens in flight', async () => {
-		let resolveActivity: ((response: Response) => void) | undefined;
-		const pendingActivity = new Promise<Response>((resolve) => {
-			resolveActivity = resolve;
+	it('uses one overview request when Music opens before music data resolves', async () => {
+		let resolveOverview: ((response: Response) => void) | undefined;
+		const pendingOverview = new Promise<Response>((resolve) => {
+			resolveOverview = resolve;
 		});
-		const fetchMock = vi.fn((input: RequestInfo | URL) =>
-			String(input) === '/api/hobby/netease'
-				? pendingActivity
-				: Promise.resolve(
-						new Response(
-							JSON.stringify({
-								state: 'unavailable',
-								generatedAt: 1_800_000_000_000,
-								tracks: [],
-							}),
-							{ status: 200 },
-						),
-					),
-		);
+		const fetchMock = vi.fn((input: RequestInfo | URL) => {
+			const url = String(input);
+			if (url === '/api/hobby/netease/overview') return pendingOverview;
+			return Promise.resolve(
+				new Response(
+					JSON.stringify({
+						state: 'empty',
+						profile: null,
+						total: 0,
+						entries: [],
+					}),
+					{ status: 200 },
+				),
+			);
+		});
 		vi.stubGlobal('fetch', fetchMock);
 
 		renderGrid();
@@ -473,13 +622,32 @@ describe('HobbyGrid', () => {
 
 		await waitFor(() => {
 			expect(
-				fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
+				fetchMock.mock.calls.filter(
+					([url]) => url === '/api/hobby/netease/overview',
+				),
 			).toHaveLength(1);
 		});
-		resolveActivity?.(
-			new Response(JSON.stringify({ state: 'empty', track: null }), {
-				status: 200,
-			}),
+		expect(
+			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
+		).toHaveLength(0);
+		expect(
+			fetchMock.mock.calls.filter(
+				([url]) => url === '/api/hobby/netease/weekly',
+			),
+		).toHaveLength(0);
+
+		resolveOverview?.(
+			new Response(
+				JSON.stringify({
+					activity: { state: 'empty', track: null },
+					weeklyRanking: {
+						state: 'empty',
+						generatedAt: 1_800_000_000_000,
+						tracks: [],
+					},
+				}),
+				{ status: 200 },
+			),
 		);
 		await waitFor(() =>
 			expect(screen.getByTestId('music-state')).toHaveTextContent(

@@ -47,12 +47,17 @@ export const gameGroups: GameGroup[] = [
 	},
 ];
 
+export const steamProfile = {
+	userId: '76561198985102331',
+	url: 'https://steamcommunity.com/profiles/76561198985102331/',
+} as const;
+
 export const gameAccounts: GameAccount[] = [
 	{
 		kind: 'link',
 		platform: 'Steam',
-		value: '76561198985102331',
-		url: 'https://steamcommunity.com/profiles/76561198985102331/',
+		value: steamProfile.userId,
+		url: steamProfile.url,
 	},
 	{ kind: 'copy', platform: '小黑盒', value: '29362113' },
 	{ kind: 'copy', platform: 'Battle.net', value: '小朱诺诺的#5394' },

@@ -91,6 +91,19 @@ describe('ListeningWeeklyRanking', () => {
 		).toBeInTheDocument();
 	});
 
+	it('uses one flat section with divider-separated ranking rows', () => {
+		render(<ListeningWeeklyRanking ranking={ranking} />);
+
+		const section = screen
+			.getByRole('heading', { name: '听歌周榜' })
+			.closest('section');
+		const list = screen.getByRole('list', { name: '网易云听歌周榜' });
+
+		expect(section).not.toHaveClass('rounded-3xl', 'border');
+		expect(list).not.toHaveClass('rounded-2xl', 'border');
+		expect(list).toHaveClass('divide-y');
+	});
+
 	it('updates a cover when SWR returns a new artwork URL for the same song', () => {
 		const { rerender } = render(<ListeningWeeklyRanking ranking={ranking} />);
 		const originalCover = screen.getByRole('img', {
@@ -144,9 +157,11 @@ describe('ListeningWeeklyRanking', () => {
 			/>,
 		);
 
-		expect(
-			screen.getByText('本周暂时没有可展示的听歌记录。'),
-		).toBeInTheDocument();
+		const emptyState = screen
+			.getByText('本周暂时没有可展示的听歌记录。')
+			.closest('output');
+		expect(emptyState).toBeInTheDocument();
+		expect(emptyState).not.toHaveClass('rounded-2xl', 'border');
 		expect(
 			screen.queryByRole('list', { name: '网易云听歌周榜' }),
 		).not.toBeInTheDocument();
@@ -169,5 +184,6 @@ describe('ListeningWeeklyRanking', () => {
 
 		const loading = screen.getByRole('status', { name: '正在加载听歌周榜' });
 		expect(loading).toHaveAttribute('aria-busy', 'true');
+		expect(loading).not.toHaveClass('rounded-3xl', 'border');
 	});
 });

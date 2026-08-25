@@ -113,7 +113,11 @@ export default function CategoryVisual({
 }: CategoryVisualProps) {
 	if (id === 'games') {
 		return (
-			<span aria-hidden='true' className='mt-5 flex gap-2'>
+			<span
+				data-testid='games-preview'
+				aria-hidden='true'
+				className='mt-5 hidden gap-2 sm:flex'
+			>
 				<span className='rounded-lg bg-gray-100 px-3 py-2 text-xs font-semibold dark:bg-gray-800'>
 					CO-OP
 				</span>
@@ -134,7 +138,11 @@ export default function CategoryVisual({
 
 	if (id === 'food') {
 		return (
-			<span aria-hidden='true' className='mt-5 block text-3xl'>
+			<span
+				data-testid='food-preview'
+				aria-hidden='true'
+				className='mt-5 hidden text-3xl sm:block'
+			>
 				◯
 			</span>
 		);
@@ -142,8 +150,9 @@ export default function CategoryVisual({
 
 	return (
 		<span
+			data-testid='travel-preview'
 			aria-hidden='true'
-			className='mt-5 text-xs tracking-[0.2em] text-gray-500 dark:text-gray-400'
+			className='mt-5 hidden text-xs tracking-[0.2em] text-gray-500 sm:block dark:text-gray-400'
 		>
 			HGH · FS · SZX · ZSN
 		</span>

@@ -31,6 +31,15 @@ describe('AccountCopyButton', () => {
 		);
 	});
 
+	it('renders the account as a flat row instead of a nested card', () => {
+		render(<AccountCopyButton label='Battle.net' value='小朱诺诺的#5394' />);
+
+		const row = screen.getByRole('button', {
+			name: '复制 Battle.net',
+		}).parentElement;
+		expect(row).not.toHaveClass('rounded-xl', 'border');
+	});
+
 	it('keeps the value visible and announces copy failure', async () => {
 		setClipboard(vi.fn().mockRejectedValue(new Error('denied')));
 		render(<AccountCopyButton label='小黑盒' value='29362113' />);
