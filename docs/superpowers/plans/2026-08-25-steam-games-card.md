@@ -543,4 +543,3 @@ git status --short
 - Spec coverage: Games 名称、当前游戏、最近游戏、时长、稳定图片、无黑名单、服务端 Key、多端布局、动态刷新和降级均有对应任务。
 - Placeholder scan: 所有步骤都有明确文件、接口、测试命令和实现规则，没有待定工作。
 - Type consistency: SteamActivityResponse 在 server normalizer、Route Handler、client normalizer、SteamDetails、CategoryVisual、HobbyCard 和 HobbyGrid 中字段一致。
-
