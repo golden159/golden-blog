@@ -5,6 +5,7 @@ import type {
 	NeteaseActivityResponse,
 	NeteaseWeeklyRanking,
 } from 'app/components/netease/types';
+import type { SteamActivityResponse } from 'app/components/steam/types';
 import { useState } from 'react';
 import { hobbyCategories } from '../content';
 import type { HobbyId } from '../types';
@@ -17,18 +18,20 @@ import HobbyCard from './hobby-card';
 import MusicDetails from './music-details';
 import { useMusicOverview } from './music-overview-data';
 import MusicProfileFooter from './music-profile-footer';
+import { useSteamActivity } from './steam-activity';
 import SteamProfileFooter from './steam-profile-footer';
 import TravelDetails from './travel-details';
 
 function renderDetails(
 	id: HobbyId,
 	summary: string,
+	steamActivity?: SteamActivityResponse,
 	animeActivity?: BangumiAnimeResponse,
 	musicActivity?: NeteaseActivityResponse,
 	musicWeeklyRanking?: NeteaseWeeklyRanking,
 ) {
 	if (id === 'games') {
-		return <GameDetails />;
+		return <GameDetails steamActivity={steamActivity} />;
 	}
 	if (id === 'anime') {
 		return <AnimeDetails activity={animeActivity} />;
@@ -82,6 +85,7 @@ export default function HobbyGrid() {
 	const [activeCategory, setActiveCategory] = useState<HobbyId | null>(null);
 	const { data: musicOverview } = useMusicOverview();
 	const { data: animeActivity } = useAnimeActivity();
+	const { data: steamActivity } = useSteamActivity();
 	const musicActivity = musicOverview?.activity;
 	const musicWeeklyRanking = musicOverview?.weeklyRanking;
 	const musicPreviewActivity = activityForMusicPreview(
@@ -106,6 +110,7 @@ export default function HobbyGrid() {
 							category.id === 'music' ? musicPreviewActivity : undefined
 						}
 						animeActivity={category.id === 'anime' ? animeActivity : undefined}
+						steamActivity={category.id === 'games' ? steamActivity : undefined}
 						topFooter={
 							category.id === 'games' ? (
 								<SteamProfileFooter />
@@ -124,6 +129,7 @@ export default function HobbyGrid() {
 						{renderDetails(
 							category.id,
 							category.summary,
+							steamActivity,
 							animeActivity,
 							musicActivity,
 							musicWeeklyRanking,

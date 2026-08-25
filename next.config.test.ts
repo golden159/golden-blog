@@ -35,4 +35,26 @@ describe('Next image host policy', () => {
 			]),
 		);
 	});
+
+	it('allows only the Steam image hosts accepted by the client normalizer', () => {
+		expect(nextConfig.images?.remotePatterns).toEqual(
+			expect.arrayContaining([
+				{
+					protocol: 'https',
+					hostname: 'steamstatic.com',
+					pathname: '/**',
+				},
+				{
+					protocol: 'https',
+					hostname: '**.steamstatic.com',
+					pathname: '/**',
+				},
+				{
+					protocol: 'https',
+					hostname: 'media.steampowered.com',
+					pathname: '/**',
+				},
+			]),
+		);
+	});
 });

@@ -2,6 +2,7 @@
 
 import type { BangumiAnimeResponse } from 'app/components/bangumi/types';
 import type { NeteaseActivityResponse } from 'app/components/netease/types';
+import type { SteamActivityResponse } from 'app/components/steam/types';
 import classNames from 'classnames';
 import {
 	AnimatePresence,
@@ -19,6 +20,7 @@ type HobbyCardProps = {
 	onToggle: () => void;
 	animeActivity?: BangumiAnimeResponse;
 	musicActivity?: NeteaseActivityResponse;
+	steamActivity?: SteamActivityResponse;
 	topFooter?: ReactNode;
 	children: ReactNode;
 };
@@ -64,6 +66,7 @@ export default function HobbyCard({
 	onToggle,
 	animeActivity,
 	musicActivity,
+	steamActivity,
 	topFooter,
 	children,
 }: HobbyCardProps) {
@@ -124,6 +127,7 @@ export default function HobbyCard({
 					id={category.id}
 					animeActivity={animeActivity}
 					musicActivity={musicActivity}
+					steamActivity={steamActivity}
 				/>
 				{topFooter}
 			</div>

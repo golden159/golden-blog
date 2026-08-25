@@ -7,6 +7,7 @@ import {
 } from '@testing-library/react';
 import { SWRConfig } from 'swr';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { steamProfile } from '../content';
 import HobbyGrid from './hobby-grid';
 
 const trigger = (name: string) => screen.getByRole('button', { name });
@@ -23,6 +24,18 @@ const emptyBangumi = {
 	profile: null,
 	total: 0,
 	entries: [],
+};
+const emptySteam = {
+	state: 'empty',
+	generatedAt: 1_800_000_000_000,
+	profile: {
+		steamId: steamProfile.userId,
+		personaName: 'Golden',
+		profileUrl: steamProfile.url,
+		avatarUrl: null,
+	},
+	currentGame: null,
+	recentGames: [],
 };
 const renderGrid = () =>
 	render(
@@ -41,7 +54,9 @@ describe('HobbyGrid', () => {
 						JSON.stringify(
 							String(input) === '/api/hobby/netease/overview'
 								? emptyOverview
-								: emptyBangumi,
+								: String(input) === '/api/hobby/steam'
+									? emptySteam
+									: emptyBangumi,
 						),
 						{ status: 200 },
 					),
@@ -246,13 +261,11 @@ describe('HobbyGrid', () => {
 		}
 	});
 
-	it('keeps decorative compact visuals out of narrow summaries', () => {
+	it('keeps the informative Steam preview visible on narrow summaries', () => {
 		renderGrid();
 
-		expect(screen.getByTestId('games-preview')).toHaveClass(
-			'hidden',
-			'sm:flex',
-		);
+		expect(screen.getByTestId('games-preview')).toHaveClass('flex', 'min-w-0');
+		expect(screen.getByTestId('games-preview')).not.toHaveClass('hidden');
 		expect(screen.getByTestId('food-preview')).toHaveClass(
 			'hidden',
 			'sm:block',
@@ -261,6 +274,53 @@ describe('HobbyGrid', () => {
 			'hidden',
 			'sm:block',
 		);
+	});
+
+	it('shares one Steam response between the closed preview and expanded panel', async () => {
+		const avatarUrl = 'https://avatars.fastly.steamstatic.com/golden_full.jpg';
+		const steamActivity = {
+			...emptySteam,
+			state: 'ready',
+			profile: { ...emptySteam.profile, avatarUrl },
+			currentGame: {
+				appId: 1446780,
+				name: 'MONSTER HUNTER RISE',
+				iconUrl: null,
+			},
+		};
+		const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+			const url = String(input);
+			return new Response(
+				JSON.stringify(
+					url === '/api/hobby/steam'
+						? steamActivity
+						: url === '/api/hobby/netease/overview'
+							? emptyOverview
+							: emptyBangumi,
+				),
+				{ status: 200 },
+			);
+		});
+		vi.stubGlobal('fetch', fetchMock);
+
+		renderGrid();
+
+		const avatar = await screen.findByTestId('steam-preview-avatar');
+		expect(avatar).toHaveAttribute('alt', 'Golden 的 Steam 头像');
+		expect(screen.getByTestId('steam-preview-status')).toHaveTextContent(
+			'正在玩',
+		);
+		expect(screen.getByTestId('steam-preview-game')).toHaveTextContent(
+			'MONSTER HUNTER RISE',
+		);
+
+		fireEvent.click(trigger('Games'));
+		expect(
+			screen.getByRole('heading', { name: '最近玩过' }),
+		).toBeInTheDocument();
+		expect(
+			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/steam'),
+		).toHaveLength(1);
 	});
 
 	it('does not stretch an expanded summary to the full panel height', () => {
@@ -572,7 +632,7 @@ describe('HobbyGrid', () => {
 		vi.stubGlobal('fetch', fetchMock);
 
 		renderGrid();
-		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
 		expect(
 			fetchMock.mock.calls.filter(
 				([url]) => url === '/api/hobby/netease/overview',
@@ -586,13 +646,16 @@ describe('HobbyGrid', () => {
 				([url]) => url === '/api/hobby/netease/weekly',
 			),
 		).toHaveLength(0);
+		expect(
+			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/steam'),
+		).toHaveLength(1);
 		fireEvent.click(trigger('Music'));
 		await waitFor(() =>
 			expect(screen.getByTestId('music-state')).toHaveTextContent(
 				'暂无最近记录',
 			),
 		);
-		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(fetchMock).toHaveBeenCalledTimes(3);
 	});
 
 	it('uses one overview request when Music opens before music data resolves', async () => {
