@@ -9,6 +9,7 @@ describe('TravelDetails', () => {
 		for (const city of ['杭州', '佛山', '深圳', '中山']) {
 			expect(screen.getByRole('heading', { name: city })).toBeInTheDocument();
 		}
+		expect(screen.queryAllByRole('article')).toHaveLength(0);
 		expect(screen.getByText('01')).toHaveClass(
 			'text-primary-600',
 			'dark:text-primary-400',

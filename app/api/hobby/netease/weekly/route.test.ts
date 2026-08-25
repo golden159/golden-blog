@@ -20,7 +20,7 @@ describe('GET /api/hobby/netease/weekly', () => {
 		});
 	});
 
-	it('returns the ranking with five-minute public cache headers', async () => {
+	it('does not cache an unavailable ranking', async () => {
 		const response = await GET();
 
 		expect(mockedFetch).toHaveBeenCalledOnce();
@@ -29,6 +29,30 @@ describe('GET /api/hobby/netease/weekly', () => {
 			generatedAt: 1_800_000_000_000,
 			tracks: [],
 		});
+		expect(response.headers.get('cache-control')).toBe('no-store, max-age=0');
+	});
+
+	it('keeps the five-minute public cache for a ready ranking', async () => {
+		mockedFetch.mockResolvedValue({
+			state: 'ready',
+			generatedAt: 1_800_000_000_000,
+			tracks: [
+				{
+					rank: 1,
+					title: 'Weekly Track',
+					artists: ['Artist'],
+					album: 'Album',
+					albumArtUrl: null,
+					songUrl: 'https://music.163.com/song?id=42',
+					durationMs: 180_000,
+					playCount: 4,
+					score: 100,
+				},
+			],
+		});
+
+		const response = await GET();
+
 		expect(response.headers.get('cache-control')).toBe(
 			'public, s-maxage=300, stale-while-revalidate=600',
 		);

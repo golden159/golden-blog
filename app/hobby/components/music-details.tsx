@@ -80,7 +80,7 @@ function AlbumArt({ track }: { track: Track | null }) {
 			height={180}
 			alt={alt}
 			onError={() => setSource(albumArtPlaceholder)}
-			className='aspect-square w-36 rounded-2xl object-cover shadow-lg md:w-44'
+			className='aspect-square w-28 rounded-xl object-cover shadow-sm sm:w-36 sm:rounded-2xl md:w-40'
 		/>
 	);
 }
@@ -88,15 +88,19 @@ function AlbumArt({ track }: { track: Track | null }) {
 type MusicDetailsProps = {
 	activity?: NeteaseActivityResponse;
 	weeklyRanking?: NeteaseWeeklyRanking;
+	fetchWhenMissing?: boolean;
 };
 
 export default function MusicDetails({
 	activity,
 	weeklyRanking,
+	fetchWhenMissing = true,
 }: MusicDetailsProps) {
-	const { data: fetchedActivity } = useMusicActivity(activity === undefined);
+	const { data: fetchedActivity } = useMusicActivity(
+		fetchWhenMissing && activity === undefined,
+	);
 	const { data: fetchedWeeklyRanking } = useMusicWeeklyRanking(
-		weeklyRanking === undefined,
+		fetchWhenMissing && weeklyRanking === undefined,
 	);
 	const data = normalizeMusicActivity(
 		activity ?? fetchedActivity ?? unavailableMusicActivity,
@@ -114,12 +118,8 @@ export default function MusicDetails({
 		: [];
 
 	return (
-		<div className='relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/70 md:p-6'>
-			<div
-				aria-hidden='true'
-				className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(139,92,246,0.16),transparent_45%)]'
-			/>
-			<div className='relative grid gap-6 md:grid-cols-[auto_minmax(0,1fr)] md:items-center'>
+		<div className='min-w-0'>
+			<div className='grid gap-5 md:grid-cols-[auto_minmax(0,1fr)] md:items-center md:gap-6'>
 				<AlbumArt key={albumArtKey} track={track} />
 				<div className='min-w-0'>
 					<div className='flex flex-wrap items-center gap-2'>
@@ -155,8 +155,8 @@ export default function MusicDetails({
 						</p>
 					)}
 
-					<div className='mt-4 grid gap-3 sm:grid-cols-2'>
-						<div className='rounded-xl border border-gray-200/90 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-950/55'>
+					<div className='mt-4 grid gap-4 sm:grid-cols-2'>
+						<div>
 							<p className='text-[11px] font-semibold tracking-[0.16em] text-gray-500 uppercase dark:text-gray-400'>
 								常听风格
 							</p>
@@ -173,7 +173,7 @@ export default function MusicDetails({
 						</div>
 
 						{track && (
-							<div className='rounded-xl border border-primary-200/80 bg-primary-50/70 p-3 dark:border-primary-300/20 dark:bg-primary-400/[0.08]'>
+							<div className='border-l-2 border-primary-200 pl-3 dark:border-primary-400/30'>
 								<p className='text-[11px] font-semibold tracking-[0.16em] text-primary-600 uppercase dark:text-primary-300'>
 									这首歌
 								</p>

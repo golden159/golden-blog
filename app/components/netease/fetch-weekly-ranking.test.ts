@@ -63,7 +63,7 @@ describe('fetchNeteaseWeeklyRanking', () => {
 			},
 		);
 		expect(timeoutSpy).toHaveBeenCalledOnce();
-		expect(timeoutSpy).toHaveBeenCalledWith(5000);
+		expect(timeoutSpy).toHaveBeenCalledWith(8000);
 		expect(result).toMatchObject({
 			state: 'ready',
 			generatedAt: NOW,
@@ -87,11 +87,13 @@ describe('fetchNeteaseWeeklyRanking', () => {
 		],
 	] as const)('makes no request for %s', async (_label, rejectedEnv) => {
 		const fetchImpl = vi.fn();
+		const onFailure = vi.fn();
 
 		const result = await fetchNeteaseWeeklyRanking({
 			env: rejectedEnv,
 			fetchImpl: fetchImpl as typeof fetch,
 			now: NOW,
+			onFailure,
 		});
 
 		expect(fetchImpl).not.toHaveBeenCalled();
@@ -100,28 +102,121 @@ describe('fetchNeteaseWeeklyRanking', () => {
 			generatedAt: NOW,
 			tracks: [],
 		});
+		expect(onFailure).toHaveBeenCalledOnce();
+		expect(onFailure).toHaveBeenCalledWith({
+			reason: 'invalid-configuration',
+		});
 	});
 
 	it.each([
 		[
 			'an upstream failure',
 			() => Promise.resolve(new Response(null, { status: 500 })),
+			{ reason: 'upstream-status', status: 500 },
 		],
 		[
 			'a rejected redirect or request',
 			() => Promise.reject(new TypeError('fetch failed')),
+			{ reason: 'request-failed' },
 		],
 		[
 			'an invalid JSON response',
 			() => Promise.resolve(new Response('not json', { status: 200 })),
+			{ reason: 'invalid-json' },
 		],
-	] as const)('fails closed for %s', async (_label, responseFactory) => {
+		[
+			'a response body timeout',
+			() =>
+				Promise.resolve(
+					new Response(
+						new ReadableStream({
+							start(controller) {
+								controller.error(new DOMException('timed out', 'TimeoutError'));
+							},
+						}),
+						{ status: 200 },
+					),
+				),
+			{ reason: 'timeout' },
+		],
+		[
+			'a response body read failure',
+			() =>
+				Promise.resolve(
+					new Response(
+						new ReadableStream({
+							start(controller) {
+								controller.error(new TypeError('stream interrupted'));
+							},
+						}),
+						{ status: 200 },
+					),
+				),
+			{ reason: 'request-failed' },
+		],
+	] as const)('fails closed and reports %s', async (_label, responseFactory, expectedFailure) => {
 		const fetchImpl = vi.fn().mockImplementation(responseFactory);
+		const onFailure = vi.fn();
 
 		const result = await fetchNeteaseWeeklyRanking({
 			env,
 			fetchImpl: fetchImpl as typeof fetch,
 			now: NOW,
+			onFailure,
+		});
+
+		expect(result).toEqual({
+			state: 'unavailable',
+			generatedAt: NOW,
+			tracks: [],
+		});
+		expect(onFailure).toHaveBeenCalledOnce();
+		expect(onFailure).toHaveBeenCalledWith(expectedFailure);
+	});
+
+	it('reports a structurally invalid upstream payload', async () => {
+		const onFailure = vi.fn();
+
+		const result = await fetchNeteaseWeeklyRanking({
+			env,
+			fetchImpl: vi
+				.fn()
+				.mockResolvedValue(jsonResponse({ code: 200, weekData: [{}] })),
+			now: NOW,
+			onFailure,
+		});
+
+		expect(result.state).toBe('unavailable');
+		expect(onFailure).toHaveBeenCalledWith({ reason: 'invalid-payload' });
+	});
+
+	it('logs a categorized timeout without exposing configuration', async () => {
+		const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		await fetchNeteaseWeeklyRanking({
+			env,
+			fetchImpl: vi
+				.fn()
+				.mockRejectedValue(new DOMException('timed out', 'TimeoutError')),
+			now: NOW,
+		});
+
+		expect(warnSpy).toHaveBeenCalledWith('[netease-weekly]', {
+			reason: 'timeout',
+		});
+		const logged = JSON.stringify(warnSpy.mock.calls);
+		expect(logged).not.toContain(env.NETEASE_MUSIC_COOKIE);
+		expect(logged).not.toContain(env.NETEASE_API_BASE_URL);
+	});
+
+	it('still fails closed when the diagnostic reporter throws', async () => {
+		const result = await fetchNeteaseWeeklyRanking({
+			env,
+			fetchImpl: vi.fn().mockResolvedValue(new Response(null, { status: 503 })),
+			now: NOW,
+			onFailure: () => {
+				throw new Error('telemetry unavailable');
+			},
 		});
 
 		expect(result).toEqual({

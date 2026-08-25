@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import GameDetails from './game-details';
 
 describe('GameDetails', () => {
-	it('renders the approved games and account destinations', () => {
+	it('renders the approved games and copyable account identifiers', () => {
 		render(<GameDetails />);
 
 		for (const game of [
@@ -22,9 +22,10 @@ describe('GameDetails', () => {
 			'text-primary-600',
 			'dark:text-primary-400',
 		);
-		expect(screen.getByRole('link', { name: /Steam/ })).toHaveAttribute(
-			'href',
-			'https://steamcommunity.com/profiles/76561198985102331/',
-		);
+		expect(
+			screen.queryByRole('link', { name: /Steam/ }),
+		).not.toBeInTheDocument();
+		expect(screen.getByText('小黑盒')).toBeInTheDocument();
+		expect(screen.getByText('Battle.net')).toBeInTheDocument();
 	});
 });

@@ -69,6 +69,23 @@ describe('AnimeDetails', () => {
 		).toHaveAttribute('href', 'https://bgm.tv/subject/400602');
 	});
 
+	it('keeps the expanded anime layout flat instead of nesting card surfaces', () => {
+		const { container } = renderAnime(readyActivity);
+
+		expect(container.firstElementChild).not.toHaveClass(
+			'rounded-2xl',
+			'border',
+		);
+
+		const collectionLink = screen.getByRole('link', {
+			name: /打开《葬送的芙莉莲》/,
+		});
+		expect(collectionLink).not.toHaveClass('rounded-2xl', 'border');
+
+		const total = screen.getByText('动画收藏').parentElement?.parentElement;
+		expect(total).not.toHaveClass('rounded-2xl', 'border');
+	});
+
 	it('renders an unavailable state without hiding the explanation', () => {
 		renderAnime({
 			state: 'unavailable',

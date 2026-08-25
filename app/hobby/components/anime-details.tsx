@@ -20,7 +20,7 @@ function ProfileAvatar({ profile }: { profile: BangumiProfile }) {
 		return (
 			<div
 				aria-hidden='true'
-				className='grid size-16 shrink-0 place-items-center rounded-2xl bg-primary-100 text-xl font-semibold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200'
+				className='grid size-14 shrink-0 place-items-center rounded-xl bg-primary-100 text-lg font-semibold text-primary-700 sm:size-16 sm:rounded-2xl sm:text-xl dark:bg-primary-400/15 dark:text-primary-200'
 			>
 				{profile.nickname.slice(0, 1).toUpperCase()}
 			</div>
@@ -34,7 +34,7 @@ function ProfileAvatar({ profile }: { profile: BangumiProfile }) {
 			height={64}
 			alt={`${profile.nickname} 的 Bangumi 头像`}
 			onError={() => setFailed(true)}
-			className='size-16 shrink-0 rounded-2xl object-cover'
+			className='size-14 shrink-0 rounded-xl object-cover sm:size-16 sm:rounded-2xl'
 		/>
 	);
 }
@@ -76,7 +76,7 @@ function ProfileSummary({
 	total: number;
 }) {
 	return (
-		<div className='flex flex-col gap-4 sm:flex-row sm:items-center'>
+		<div className='grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-x-4'>
 			<ProfileAvatar key={profile.avatarUrl} profile={profile} />
 			<div className='min-w-0 flex-1'>
 				<h3 className='truncate text-xl font-semibold'>{profile.nickname}</h3>
@@ -89,7 +89,7 @@ function ProfileSummary({
 					</p>
 				)}
 			</div>
-			<dl className='min-w-28 rounded-2xl border border-primary-200/80 bg-primary-50/80 px-5 py-3 dark:border-primary-300/20 dark:bg-primary-400/[0.08]'>
+			<dl className='col-span-2 border-l-2 border-primary-300 pl-3 sm:col-span-1 sm:min-w-28 sm:pl-4 dark:border-primary-400/50'>
 				<div>
 					<dd className='text-2xl font-semibold text-primary-700 dark:text-primary-200'>
 						{total}
@@ -118,7 +118,7 @@ function AnimeCollection({ entries }: { entries: BangumiAnimeEntry[] }) {
 				<p className='text-xs text-gray-500 dark:text-gray-400'>最近整理</p>
 			</div>
 
-			<ul className='mt-3 grid gap-3 lg:grid-cols-2'>
+			<ul className='mt-2 divide-y divide-gray-200 dark:divide-gray-700'>
 				{entries.map((entry) => (
 					<li key={entry.id}>
 						<a
@@ -126,7 +126,7 @@ function AnimeCollection({ entries }: { entries: BangumiAnimeEntry[] }) {
 							target='_blank'
 							rel='noopener noreferrer'
 							aria-label={`在 Bangumi 打开《${entry.title}》（新窗口）`}
-							className='group flex min-h-28 gap-3 rounded-2xl border border-gray-200 bg-white/80 p-3 outline-none transition-colors hover:border-primary-300 hover:bg-primary-50/40 focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-gray-700 dark:bg-gray-950/45 dark:hover:border-primary-400/40 dark:hover:bg-primary-400/[0.06]'
+							className='group flex min-h-28 gap-3 py-4 outline-none transition-colors hover:bg-primary-50/40 focus-visible:ring-2 focus-visible:ring-primary-500 dark:hover:bg-primary-400/[0.06]'
 						>
 							<AnimePoster key={entry.imageUrl} entry={entry} />
 							<div className='min-w-0 flex-1 py-0.5'>
@@ -173,12 +173,8 @@ export default function AnimeDetails({ activity }: AnimeDetailsProps) {
 		: normalizeAnimeActivity(activity ?? fetchedActivity);
 
 	return (
-		<div className='relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/70 md:p-6'>
-			<div
-				aria-hidden='true'
-				className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(236,72,153,0.12),transparent_42%)]'
-			/>
-			<div className='relative'>
+		<div className='min-w-0'>
+			<div>
 				{isLoading && (
 					<p className='py-8 text-center text-sm text-gray-500 dark:text-gray-400'>
 						正在连接 Bangumi…
@@ -192,7 +188,7 @@ export default function AnimeDetails({ activity }: AnimeDetailsProps) {
 				{data?.state === 'ready' && <AnimeCollection entries={data.entries} />}
 
 				{data?.state === 'empty' && (
-					<p className='mt-6 rounded-xl border border-dashed border-gray-300 px-4 py-5 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400'>
+					<p className='mt-6 border-l-2 border-gray-300 py-2 pl-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400'>
 						还没有公开的动画收藏。
 					</p>
 				)}

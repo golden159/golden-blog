@@ -70,6 +70,38 @@ afterEach(() => {
 });
 
 describe('MusicDetails', () => {
+	it('keeps the current-track and tag sections flat inside the hobby card', () => {
+		const { container } = render(
+			<SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+				<MusicDetails
+					activity={{
+						state: 'weekly',
+						track: {
+							title: 'アイドル',
+							artists: ['YOASOBI'],
+							album: 'アイドル',
+							albumArtUrl: null,
+							songUrl: 'https://music.163.com/song?id=54321',
+							playedAt: null,
+						},
+					}}
+					weeklyRanking={injectedWeeklyRanking}
+				/>
+			</SWRConfig>,
+		);
+
+		expect(container.firstElementChild).not.toHaveClass(
+			'rounded-2xl',
+			'border',
+		);
+		expect(
+			screen.getByRole('list', { name: '常听风格' }).parentElement,
+		).not.toHaveClass('rounded-xl', 'border');
+		expect(
+			screen.getByRole('list', { name: '这首歌的标签' }).parentElement,
+		).not.toHaveClass('rounded-xl', 'border');
+	});
+
 	it('renders an injected weekly ranking below the current-track hero without fetching', () => {
 		const fetchMock = vi.fn();
 		vi.stubGlobal('fetch', fetchMock);

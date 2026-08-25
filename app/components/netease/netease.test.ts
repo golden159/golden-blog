@@ -249,7 +249,8 @@ describe('fetchNeteaseActivity', () => {
 		expect(fallbackOptions?.redirect).toBe('error');
 		expect(fallbackOptions?.signal).toBe(timeoutSignal);
 		expect(timeoutSpy).toHaveBeenCalledTimes(2);
-		expect(timeoutSpy).toHaveBeenNthCalledWith(2, 5000);
+		expect(timeoutSpy).toHaveBeenNthCalledWith(1, 5000);
+		expect(timeoutSpy).toHaveBeenNthCalledWith(2, 8000);
 	});
 
 	it('returns empty when recent and weekly activity lists are both valid and empty', async () => {
