@@ -162,6 +162,70 @@ describe('HobbyGrid', () => {
 		expect(screen.getAllByRole('link', { name: /网易云主页/ })).toHaveLength(1);
 	});
 
+	it('shows the Bangumi avatar and profile link while Anime is closed', async () => {
+		const avatarUrl = 'https://lain.bgm.tv/pic/user/l/golden.jpg';
+		const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+			if (String(input) === '/api/hobby/bangumi') {
+				return new Response(
+					JSON.stringify({
+						state: 'empty',
+						profile: {
+							username: 'golden_xzs',
+							nickname: 'Golden',
+							sign: null,
+							avatarUrl,
+						},
+						total: 0,
+						entries: [],
+					}),
+					{ status: 200 },
+				);
+			}
+
+			return new Response(JSON.stringify({ state: 'empty', track: null }), {
+				status: 200,
+			});
+		});
+		vi.stubGlobal('fetch', fetchMock);
+
+		renderGrid();
+
+		const avatar = await screen.findByTestId('anime-preview-avatar');
+		expect(avatar).toHaveAttribute('alt', 'Golden 的 Bangumi 头像');
+		expect(decodeURIComponent(avatar.getAttribute('src') ?? '')).toContain(
+			avatarUrl,
+		);
+		expect(
+			screen.getByRole('link', { name: /打开 Bangumi 主页/ }),
+		).toHaveAttribute('href', 'https://bangumi.tv/user/1022640');
+		expect(
+			screen.queryByRole('region', { name: 'Anime' }),
+		).not.toBeInTheDocument();
+	});
+
+	it('keeps a single Bangumi profile link when Anime opens', () => {
+		renderGrid();
+
+		const profileLink = screen.getByRole('link', {
+			name: /打开 Bangumi 主页/,
+		});
+		fireEvent.click(trigger('Anime'));
+		const animePanel = screen.getByRole('region', { name: 'Anime' });
+
+		expect(
+			profileLink.compareDocumentPosition(animePanel) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+		expect(
+			screen
+				.getAllByRole('link')
+				.filter(
+					(link) =>
+						link.getAttribute('href') === 'https://bangumi.tv/user/1022640',
+				),
+		).toHaveLength(1);
+	});
+
 	it('matches trigger and panel identifiers', () => {
 		renderGrid();
 		const gamesTrigger = trigger('Games');
@@ -365,7 +429,7 @@ describe('HobbyGrid', () => {
 		vi.stubGlobal('fetch', fetchMock);
 
 		renderGrid();
-		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
 		expect(
 			fetchMock.mock.calls.filter(([url]) => url === '/api/hobby/netease'),
 		).toHaveLength(1);
@@ -380,7 +444,7 @@ describe('HobbyGrid', () => {
 				'暂无最近记录',
 			),
 		);
-		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(fetchMock).toHaveBeenCalledTimes(3);
 	});
 
 	it('deduplicates the parent activity request when Music opens in flight', async () => {

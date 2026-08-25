@@ -33,6 +33,14 @@ cp .env.example .env.local
 - `NETEASE_MUSIC_COOKIE` — 仅服务端保存的网易云 Cookie，禁止提交到仓库
 - `NETEASE_USER_ID` — 网易云用户 ID，当前为 `3719820729`
 
+`/hobby` 的 Anime 卡片使用 Bangumi 官方公开 v0 API 读取用户资料和公开动画收藏，不需要 Bangumi access token。接口不可用时会保留 Bangumi 主页入口并显示降级提示。实现时参考了这些公开仓库：
+
+- [`bangumi/api`](https://github.com/bangumi/api) — 官方 API 文档与 OpenAPI 入口
+- [`bangumi/server`](https://github.com/bangumi/server) — 官方 API 服务端与 v0 响应模型
+- [`bangumi/frontend`](https://github.com/bangumi/frontend) — 官方前端（BSD-3-Clause）的条目展示与界面组织思路
+
+当前主页只复用公开数据契约与容错思路，没有复制第三方项目代码；服务端会清洗 Bangumi 图片地址、限制展示条目数量，并通过 `/api/hobby/bangumi` 统一转发。
+
 ### 启动开发服务器
 
 ```bash

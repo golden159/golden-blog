@@ -18,4 +18,21 @@ describe('Next image host policy', () => {
 			]),
 		);
 	});
+
+	it('allows the Bangumi image hosts accepted by the normalizer', () => {
+		expect(nextConfig.images?.remotePatterns).toEqual(
+			expect.arrayContaining([
+				{
+					protocol: 'https',
+					hostname: '**.bgm.tv',
+					pathname: '/**',
+				},
+				{
+					protocol: 'https',
+					hostname: '**.bangumi.tv',
+					pathname: '/**',
+				},
+			]),
+		);
+	});
 });

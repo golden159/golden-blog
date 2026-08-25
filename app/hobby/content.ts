@@ -60,6 +60,7 @@ export const gameAccounts: GameAccount[] = [
 
 export const animeProfile = {
 	userId: '1022640',
+	apiUsername: 'golden_xzs',
 	url: 'https://bangumi.tv/user/1022640',
 } as const;
 

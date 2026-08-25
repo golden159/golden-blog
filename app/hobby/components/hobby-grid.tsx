@@ -1,5 +1,6 @@
 'use client';
 
+import type { BangumiAnimeResponse } from 'app/components/bangumi/types';
 import type {
 	NeteaseActivityResponse,
 	NeteaseWeeklyRanking,
@@ -7,7 +8,9 @@ import type {
 import { useState } from 'react';
 import { hobbyCategories } from '../content';
 import type { HobbyId } from '../types';
+import { useAnimeActivity } from './anime-activity';
 import AnimeDetails from './anime-details';
+import AnimeProfileFooter from './anime-profile-footer';
 import FoodDetails from './food-details';
 import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
@@ -20,6 +23,7 @@ import TravelDetails from './travel-details';
 function renderDetails(
 	id: HobbyId,
 	summary: string,
+	animeActivity?: BangumiAnimeResponse,
 	musicActivity?: NeteaseActivityResponse,
 	musicWeeklyRanking?: NeteaseWeeklyRanking,
 ) {
@@ -27,7 +31,7 @@ function renderDetails(
 		return <GameDetails />;
 	}
 	if (id === 'anime') {
-		return <AnimeDetails />;
+		return <AnimeDetails activity={animeActivity} />;
 	}
 	if (id === 'music') {
 		return (
@@ -77,6 +81,7 @@ export default function HobbyGrid() {
 	const [activeCategory, setActiveCategory] = useState<HobbyId | null>(null);
 	const { data: musicActivity } = useMusicActivity();
 	const { data: musicWeeklyRanking } = useMusicWeeklyRanking();
+	const { data: animeActivity } = useAnimeActivity();
 	const musicPreviewActivity = activityForMusicPreview(
 		musicActivity,
 		musicWeeklyRanking,
@@ -98,8 +103,13 @@ export default function HobbyGrid() {
 						musicActivity={
 							category.id === 'music' ? musicPreviewActivity : undefined
 						}
+						animeActivity={category.id === 'anime' ? animeActivity : undefined}
 						topFooter={
-							category.id === 'music' ? <MusicProfileFooter /> : undefined
+							category.id === 'anime' ? (
+								<AnimeProfileFooter />
+							) : category.id === 'music' ? (
+								<MusicProfileFooter />
+							) : undefined
 						}
 						onToggle={() =>
 							setActiveCategory((current) =>
@@ -110,6 +120,7 @@ export default function HobbyGrid() {
 						{renderDetails(
 							category.id,
 							category.summary,
+							animeActivity,
 							musicActivity,
 							musicWeeklyRanking,
 						)}

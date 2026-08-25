@@ -1,7 +1,13 @@
+import type { BangumiAnimeResponse } from 'app/components/bangumi/types';
 import type { NeteaseActivityResponse } from 'app/components/netease/types';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { animeProfile } from '../content';
 import type { HobbyId } from '../types';
+import {
+	normalizeAnimeActivity,
+	unavailableAnimeActivity,
+} from './anime-activity';
 import {
 	musicPreviewLabels,
 	musicStateLabels,
@@ -13,8 +19,49 @@ const albumArtPlaceholder = '/static/hobby/music-placeholder.svg';
 
 type CategoryVisualProps = {
 	id: HobbyId;
+	animeActivity?: BangumiAnimeResponse;
 	musicActivity?: NeteaseActivityResponse;
 };
+
+function AnimePreview({
+	animeActivity,
+}: {
+	animeActivity: BangumiAnimeResponse;
+}) {
+	const safeActivity = normalizeAnimeActivity(animeActivity);
+	const profile = safeActivity.profile;
+	const requestedSource = profile?.avatarUrl ?? null;
+	const [source, setSource] = useState(requestedSource);
+
+	useEffect(() => {
+		setSource(requestedSource);
+	}, [requestedSource]);
+
+	return (
+		<span className='mt-5 flex items-center gap-3'>
+			<span className='relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary-500 font-semibold text-white'>
+				{source ? (
+					<Image
+						data-testid='anime-preview-avatar'
+						src={source}
+						width={40}
+						height={40}
+						alt={`${profile?.nickname ?? 'Bangumi'} 的 Bangumi 头像`}
+						onError={() => setSource(null)}
+						className='size-10 object-cover'
+					/>
+				) : (
+					<span data-testid='anime-preview-avatar-fallback' aria-hidden='true'>
+						BG
+					</span>
+				)}
+			</span>
+			<span className='text-xs text-gray-500 dark:text-gray-400'>
+				{animeProfile.userId}
+			</span>
+		</span>
+	);
+}
 
 function MusicPreview({
 	musicActivity,
@@ -61,6 +108,7 @@ function MusicPreview({
 
 export default function CategoryVisual({
 	id,
+	animeActivity = unavailableAnimeActivity,
 	musicActivity = unavailableMusicActivity,
 }: CategoryVisualProps) {
 	if (id === 'games') {
@@ -77,16 +125,7 @@ export default function CategoryVisual({
 	}
 
 	if (id === 'anime') {
-		return (
-			<span aria-hidden='true' className='mt-5 flex items-center gap-3'>
-				<span className='grid h-10 w-10 place-items-center rounded-full bg-primary-500 font-semibold text-white'>
-					BG
-				</span>
-				<span className='text-xs text-gray-500 dark:text-gray-400'>
-					1022640
-				</span>
-			</span>
-		);
+		return <AnimePreview animeActivity={animeActivity} />;
 	}
 
 	if (id === 'music') {

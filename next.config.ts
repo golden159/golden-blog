@@ -11,6 +11,26 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: 'https',
+				hostname: 'bgm.tv',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '**.bgm.tv',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: 'bangumi.tv',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
+				hostname: '**.bangumi.tv',
+				pathname: '/**',
+			},
+			{
+				protocol: 'https',
 				hostname: 'music.126.net',
 				pathname: '/**',
 			},

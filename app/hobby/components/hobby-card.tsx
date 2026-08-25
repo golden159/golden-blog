@@ -1,5 +1,6 @@
 'use client';
 
+import type { BangumiAnimeResponse } from 'app/components/bangumi/types';
 import type { NeteaseActivityResponse } from 'app/components/netease/types';
 import classNames from 'classnames';
 import {
@@ -16,6 +17,7 @@ type HobbyCardProps = {
 	category: HobbyCategory;
 	isOpen: boolean;
 	onToggle: () => void;
+	animeActivity?: BangumiAnimeResponse;
 	musicActivity?: NeteaseActivityResponse;
 	topFooter?: ReactNode;
 	children: ReactNode;
@@ -60,6 +62,7 @@ export default function HobbyCard({
 	category,
 	isOpen,
 	onToggle,
+	animeActivity,
 	musicActivity,
 	topFooter,
 	children,
@@ -111,7 +114,11 @@ export default function HobbyCard({
 				<p className='mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300 md:text-base'>
 					{category.summary}
 				</p>
-				<CategoryVisual id={category.id} musicActivity={musicActivity} />
+				<CategoryVisual
+					id={category.id}
+					animeActivity={animeActivity}
+					musicActivity={musicActivity}
+				/>
 				{topFooter}
 			</div>
 
