@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import nextConfig from './next.config';
 
 describe('Next image host policy', () => {
+	it('does not proxy retired Umami analytics endpoints', async () => {
+		expect(nextConfig.rewrites).toBeUndefined();
+	});
+
 	it('allows both NetEase image hosts accepted by the normalizer', () => {
 		expect(nextConfig.images?.remotePatterns).toEqual(
 			expect.arrayContaining([

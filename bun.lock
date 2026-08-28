@@ -19,7 +19,6 @@
         "husky": "9.1.7",
         "lenis": "^1.2.3",
         "lint-staged": "16.4.0",
-        "logrocket": "12.1.0",
         "motion": "12.23.24",
         "next": "16.2.6",
         "next-mdx-remote": "6.0.0",
@@ -604,8 +603,6 @@
     "listr2": ["listr2@9.0.5", "", { "dependencies": { "cli-truncate": "^5.0.0", "colorette": "^2.0.20", "eventemitter3": "^5.0.1", "log-update": "^6.1.0", "rfdc": "^1.4.1", "wrap-ansi": "^9.0.0" } }, "sha512-ME4Fb83LgEgwNw96RKNvKV4VTLuXfoKudAmm2lP8Kk87KaMK0/Xrx/aAkMWmT8mDb+3MlFDspfbCs7adjRxA2g=="],
 
     "log-update": ["log-update@6.1.0", "", { "dependencies": { "ansi-escapes": "^7.0.0", "cli-cursor": "^5.0.0", "slice-ansi": "^7.1.0", "strip-ansi": "^7.1.0", "wrap-ansi": "^9.0.0" } }, "sha512-9ie8ItPR6tjY5uYJh8K/Zrv/RMZ5VOlOWvtZdEHYSTFKZfIBPQa9tOAEeAWhd+AnIneLJ22w5fjOYtoutpWq5w=="],
-
-    "logrocket": ["logrocket@12.1.0", "", {}, "sha512-WZXCwtPam15ktseKzP2SAd2PgHXmr41++8Lgg30VyW/mpAbHaJAZm5//C+l9Yt5x6HLfwH76PuY47RXpKUvTuA=="],
 
     "longest-streak": ["longest-streak@3.1.0", "", {}, "sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g=="],
 
