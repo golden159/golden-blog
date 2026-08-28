@@ -2,17 +2,18 @@ import { format } from 'date-fns';
 import AnimatedNumber from '../animated-number';
 import StatItem from '../stat-item';
 import {
-	type ContributionCalendar,
 	getBestDay,
 	getContributionStreak,
 	getDaysFromContribution,
-} from './github';
+} from './metrics';
+import type { ContributionCalendar } from './types';
 
 interface Props {
 	contributions: ContributionCalendar;
+	year: number;
 }
 
-export default function GithubStats({ contributions }: Props) {
+export default function GithubStats({ contributions, year }: Props) {
 	const { weeks, totalContributions } = contributions;
 
 	const bestDay = getBestDay(weeks);
@@ -24,7 +25,7 @@ export default function GithubStats({ contributions }: Props) {
 
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-			<StatItem title='This year'>
+			<StatItem title={`${year} contributions`}>
 				<AnimatedNumber number={totalContributions} />
 				<span> contributions</span>
 			</StatItem>

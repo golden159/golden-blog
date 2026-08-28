@@ -21,11 +21,9 @@ bun install
 cp .env.example .env.local
 ```
 
-`/stats` 页面依赖以下第三方接口，未配置时页面会优雅降级（不显示对应板块）：
+`/stats` 页面通过服务端 GitHub GraphQL API 展示 `golden159` 的贡献日历。Token 只配置在本地或 Vercel 的服务端环境，禁止提交到仓库：
 
-- `NEXT_PUBLIC_GITHUB_TOKEN` — GitHub 贡献日历
-- `WAKATIME_SECRET_KEY` — WakaTime 编程时长
-- `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` / `SPOTIFY_REFRESH_TOKEN` — Spotify 最近播放
+- `GITHUB_TOKEN` — GitHub 贡献日历；未配置或接口不可用时页面显示明确的降级提示
 
 `/hobby` 的“最近在听”功能使用单独部署的 NeteaseCloudMusicApi 服务。未配置时 Music 卡片仍会展示音乐偏好和网易云主页入口：
 

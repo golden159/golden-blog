@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import ActivityTooltip from './activity-tooltip';
-import type { ContributionCalendar } from './github';
+import type { ContributionCalendar } from './types';
 
 interface Props {
 	contributions: ContributionCalendar;
