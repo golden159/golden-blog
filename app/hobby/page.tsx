@@ -4,7 +4,7 @@ import HobbyGrid from './components/hobby-grid';
 
 export const metadata: Metadata = {
 	title: 'Hobby',
-	description: 'Golden 的游戏、动漫、音乐、美食与旅行兴趣。',
+	description: 'Golden 的游戏、动漫与音乐兴趣。',
 };
 
 export default function HobbyPage() {

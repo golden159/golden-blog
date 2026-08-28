@@ -182,37 +182,7 @@ export default function CategoryVisual({
 	musicActivity = unavailableMusicActivity,
 	steamActivity = unavailableSteamActivity,
 }: CategoryVisualProps) {
-	if (id === 'games') {
-		return <SteamPreview steamActivity={steamActivity} />;
-	}
-
-	if (id === 'anime') {
-		return <AnimePreview animeActivity={animeActivity} />;
-	}
-
-	if (id === 'music') {
-		return <MusicPreview musicActivity={musicActivity} />;
-	}
-
-	if (id === 'food') {
-		return (
-			<span
-				data-testid='food-preview'
-				aria-hidden='true'
-				className='mt-5 hidden text-3xl sm:block'
-			>
-				◯
-			</span>
-		);
-	}
-
-	return (
-		<span
-			data-testid='travel-preview'
-			aria-hidden='true'
-			className='mt-5 hidden text-xs tracking-[0.2em] text-gray-500 sm:block dark:text-gray-400'
-		>
-			HGH · FS · SZX · ZSN
-		</span>
-	);
+	if (id === 'games') return <SteamPreview steamActivity={steamActivity} />;
+	if (id === 'anime') return <AnimePreview animeActivity={animeActivity} />;
+	return <MusicPreview musicActivity={musicActivity} />;
 }

@@ -2,7 +2,7 @@
 
 import { steamProfile } from 'app/hobby/content';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchSteamActivity } from './steam';
+import { fetchSteamActivity, fetchSteamLibrary } from './steam';
 
 const env = { STEAM_WEB_API_KEY: 'server-secret' };
 
@@ -125,6 +125,70 @@ describe('fetchSteamActivity', () => {
 			profile: null,
 			currentGame: null,
 			recentGames: [],
+		});
+	});
+});
+
+describe('fetchSteamLibrary', () => {
+	it('requests owned games with app names and played free games enabled', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					response: {
+						game_count: 1,
+						games: [
+							{
+								appid: 2379780,
+								name: 'Balatro',
+								playtime_forever: 1611,
+							},
+						],
+					},
+				}),
+			),
+		);
+
+		const result = await fetchSteamLibrary({
+			env,
+			fetchImpl,
+			now: () => 1_800_000_000_000,
+		});
+
+		expect(fetchImpl).toHaveBeenCalledTimes(1);
+		const [input, init] = fetchImpl.mock.calls[0];
+		const url = new URL(String(input));
+		expect(url.pathname).toContain('GetOwnedGames');
+		expect(url.searchParams.get('key')).toBe('server-secret');
+		expect(url.searchParams.get('steamid')).toBe(steamProfile.userId);
+		expect(url.searchParams.get('include_appinfo')).toBe('true');
+		expect(url.searchParams.get('include_played_free_games')).toBe('true');
+		expect(url.searchParams.get('format')).toBe('json');
+		expect(init).toMatchObject({ cache: 'no-store', redirect: 'error' });
+		expect(result).toEqual({
+			state: 'ready',
+			generatedAt: 1_800_000_000_000,
+			totalCount: 1,
+			games: [
+				{
+					appId: 2379780,
+					name: 'Balatro',
+					playtimeForeverMinutes: 1611,
+				},
+			],
+		});
+		expect(JSON.stringify(result)).not.toContain('server-secret');
+	});
+
+	it('does not request owned games without the server-only key', async () => {
+		const fetchImpl = vi.fn();
+
+		const result = await fetchSteamLibrary({ env: {}, fetchImpl });
+
+		expect(fetchImpl).not.toHaveBeenCalled();
+		expect(result).toMatchObject({
+			state: 'unavailable',
+			totalCount: 0,
+			games: [],
 		});
 	});
 });

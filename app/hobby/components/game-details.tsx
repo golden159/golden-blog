@@ -1,13 +1,21 @@
-import type { SteamActivityResponse } from 'app/components/steam/types';
-import { gameAccounts, gameGroups } from '../content';
+import type {
+	SteamActivityResponse,
+	SteamLibraryResponse,
+} from 'app/components/steam/types';
+import { gameAccounts } from '../content';
 import AccountCopyButton from './account-copy-button';
 import SteamDetails from './steam-details';
+import SteamLibraryBubbles from './steam-library-bubbles';
 
 type GameDetailsProps = {
 	steamActivity?: SteamActivityResponse;
+	steamLibrary?: SteamLibraryResponse;
 };
 
-export default function GameDetails({ steamActivity }: GameDetailsProps) {
+export default function GameDetails({
+	steamActivity,
+	steamLibrary,
+}: GameDetailsProps) {
 	const expandedAccounts = gameAccounts.filter(
 		(account) => account.platform !== 'Steam',
 	);
@@ -15,26 +23,7 @@ export default function GameDetails({ steamActivity }: GameDetailsProps) {
 	return (
 		<div className='space-y-7'>
 			<SteamDetails activity={steamActivity} fetchWhenMissing={false} />
-
-			<div className='grid gap-x-8 gap-y-5 md:grid-cols-3'>
-				{gameGroups.map((group) => (
-					<section key={group.label}>
-						<h3 className='text-sm font-semibold text-primary-600 dark:text-primary-400'>
-							{group.label}
-						</h3>
-						<ul className='mt-2 flex flex-wrap gap-x-4 gap-y-1'>
-							{group.games.map((game) => (
-								<li
-									key={game}
-									className='text-sm text-gray-600 dark:text-gray-300'
-								>
-									{game}
-								</li>
-							))}
-						</ul>
-					</section>
-				))}
-			</div>
+			<SteamLibraryBubbles library={steamLibrary} />
 
 			<section>
 				<h3 className='text-lg font-semibold'>Game Accounts</h3>

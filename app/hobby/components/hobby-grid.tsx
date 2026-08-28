@@ -12,7 +12,6 @@ import type { HobbyId } from '../types';
 import { useAnimeActivity } from './anime-activity';
 import AnimeDetails from './anime-details';
 import AnimeProfileFooter from './anime-profile-footer';
-import FoodDetails from './food-details';
 import GameDetails from './game-details';
 import HobbyCard from './hobby-card';
 import MusicDetails from './music-details';
@@ -20,11 +19,9 @@ import { useMusicOverview } from './music-overview-data';
 import MusicProfileFooter from './music-profile-footer';
 import { useSteamActivity } from './steam-activity';
 import SteamProfileFooter from './steam-profile-footer';
-import TravelDetails from './travel-details';
 
 function renderDetails(
 	id: HobbyId,
-	summary: string,
 	steamActivity?: SteamActivityResponse,
 	animeActivity?: BangumiAnimeResponse,
 	musicActivity?: NeteaseActivityResponse,
@@ -36,23 +33,12 @@ function renderDetails(
 	if (id === 'anime') {
 		return <AnimeDetails activity={animeActivity} />;
 	}
-	if (id === 'music') {
-		return (
-			<MusicDetails
-				activity={musicActivity}
-				weeklyRanking={musicWeeklyRanking}
-				fetchWhenMissing={false}
-			/>
-		);
-	}
-	if (id === 'food') {
-		return <FoodDetails />;
-	}
-	if (id === 'travel') {
-		return <TravelDetails />;
-	}
 	return (
-		<p className='leading-7 text-gray-600 dark:text-gray-300'>{summary}</p>
+		<MusicDetails
+			activity={musicActivity}
+			weeklyRanking={musicWeeklyRanking}
+			fetchWhenMissing={false}
+		/>
 	);
 }
 
@@ -128,7 +114,6 @@ export default function HobbyGrid() {
 					>
 						{renderDetails(
 							category.id,
-							category.summary,
 							steamActivity,
 							animeActivity,
 							musicActivity,

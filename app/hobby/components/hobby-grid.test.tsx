@@ -68,14 +68,21 @@ describe('HobbyGrid', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('renders five closed categories initially', () => {
+	it('renders only the three retained closed categories initially', () => {
 		renderGrid();
 
-		for (const title of ['Games', 'Anime', 'Music', 'Food', 'Travel']) {
+		for (const title of ['Games', 'Anime', 'Music']) {
 			const heading = screen.getByRole('heading', { name: title, level: 2 });
 			expect(heading.tagName).toBe('H2');
 			expect(trigger(title)).toHaveAttribute('aria-expanded', 'false');
 		}
+		expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(3);
+		expect(
+			screen.queryByRole('heading', { name: 'Food' }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole('heading', { name: 'Travel' }),
+		).not.toBeInTheDocument();
 		expect(screen.getByTestId('hobby-games-indicator')).toHaveStyle({
 			transitionDuration: '300ms',
 		});
@@ -266,14 +273,6 @@ describe('HobbyGrid', () => {
 
 		expect(screen.getByTestId('games-preview')).toHaveClass('flex', 'min-w-0');
 		expect(screen.getByTestId('games-preview')).not.toHaveClass('hidden');
-		expect(screen.getByTestId('food-preview')).toHaveClass(
-			'hidden',
-			'sm:block',
-		);
-		expect(screen.getByTestId('travel-preview')).toHaveClass(
-			'hidden',
-			'sm:block',
-		);
 	});
 
 	it('shares one Steam response between the closed preview and expanded panel', async () => {

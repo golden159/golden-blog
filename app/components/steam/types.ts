@@ -18,6 +18,19 @@ export type SteamGame = SteamCurrentGame & {
 	playtimeForeverMinutes: number | null;
 };
 
+export type SteamLibraryGame = {
+	appId: number;
+	name: string;
+	playtimeForeverMinutes: number;
+};
+
+export type SteamLibraryResponse = {
+	state: 'ready' | 'empty' | 'unavailable';
+	generatedAt: number;
+	totalCount: number;
+	games: SteamLibraryGame[];
+};
+
 export type SteamActivityResponse = {
 	state: 'ready' | 'empty' | 'unavailable';
 	generatedAt: number;
@@ -40,4 +53,13 @@ export const unavailableSteamActivity = (
 	profile: options.profile ?? null,
 	currentGame: options.currentGame ?? null,
 	recentGames: [],
+});
+
+export const unavailableSteamLibrary = (
+	generatedAt = Date.now(),
+): SteamLibraryResponse => ({
+	state: 'unavailable',
+	generatedAt,
+	totalCount: 0,
+	games: [],
 });
