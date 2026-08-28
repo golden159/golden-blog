@@ -4,24 +4,22 @@ import {
 	gameAccounts,
 	hobbyCategories,
 	musicProfile,
-	travelCities,
 } from './content';
 
 describe('hobby content', () => {
-	it('keeps the approved category order and desktop proportions', () => {
+	it('keeps only the three approved categories in display order', () => {
 		expect(hobbyCategories.map(({ id }) => id)).toEqual([
 			'games',
 			'anime',
 			'music',
-			'food',
-			'travel',
 		]);
+	});
+
+	it('uses readable tablet spans and an equal desktop row', () => {
 		expect(hobbyCategories.map(({ compactSpan }) => compactSpan)).toEqual([
-			'md:col-span-7',
-			'md:col-span-5',
-			'md:col-span-4',
-			'md:col-span-4',
-			'md:col-span-4',
+			'md:col-span-12 lg:col-span-4',
+			'md:col-span-6 lg:col-span-4',
+			'md:col-span-6 lg:col-span-4',
 		]);
 	});
 
@@ -39,6 +37,5 @@ describe('hobby content', () => {
 				}),
 			]),
 		);
-		expect(travelCities).toEqual(['杭州', '佛山', '深圳', '中山']);
 	});
 });

@@ -53,4 +53,17 @@ describe('AccountCopyButton', () => {
 		);
 		expect(screen.getByText('29362113')).toBeInTheDocument();
 	});
+
+	it('does not draw a divider beneath the 小黑盒 account', () => {
+		render(<AccountCopyButton label='小黑盒' value='29362113' />);
+
+		const row = screen.getByRole('button', {
+			name: '复制 小黑盒',
+		}).parentElement;
+		expect(row).not.toHaveClass(
+			'border-b',
+			'border-gray-200',
+			'dark:border-gray-700',
+		);
+	});
 });

@@ -37,7 +37,7 @@ export default function AccountCopyButton({
 	};
 
 	return (
-		<div className='grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-gray-200 py-3 last:border-b-0 dark:border-gray-700'>
+		<div className='grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3'>
 			<div className='min-w-0'>
 				<p className='text-sm font-semibold'>{label}</p>
 				<p className='mt-1 break-all text-sm text-gray-600 dark:text-gray-300'>

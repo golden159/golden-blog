@@ -41,6 +41,18 @@ cp .env.example .env.local
 
 当前主页只复用公开数据契约与容错思路，没有复制第三方项目代码；服务端会清洗 Bangumi 图片地址、限制展示条目数量，并通过 `/api/hobby/bangumi` 统一转发。
 
+`/hobby` 的 Games 卡片使用 Steam Web API 读取当前游戏、最近公开游戏和游玩时长。Steam ID 固定来自 `app/hobby/content.ts`，API Key 只配置在本地或 Vercel 的服务端环境：
+
+- `STEAM_WEB_API_KEY` — 仅服务端使用的 Steam Web API Key，禁止提交到仓库
+
+页面不会展示最后在线时间；接口不可用或游戏详情未公开时，仍会保留静态 Games 内容和 Steam 主页入口。实现以 [Valve Steam Web API](https://partner.steamgames.com/doc/webapi) 为权威契约，并参考这些开源仓库：
+
+- [`xPaw/SteamWebAPIDocumentation`](https://github.com/xPaw/SteamWebAPIDocumentation)（MIT）— 接口、参数和响应字段索引
+- [`yuyinws/steam-card`](https://github.com/yuyinws/steam-card)（MIT）— 资料、当前状态、最近游戏和缓存的信息层级
+- [`FN-FAL113/github-readme-steam-card`](https://github.com/FN-FAL113/github-readme-steam-card)（GPL-3.0）— 当前游戏优先级和 Serverless 容错经验
+
+本站只借鉴公开契约、容错和信息组织方式，不复制第三方代码；GPL 项目仅作为视觉和缓存经验参考。服务端会限制返回数量、清洗图片和链接，并通过 `/api/hobby/steam` 返回不含 API Key 的公共响应。
+
 ### 启动开发服务器
 
 ```bash

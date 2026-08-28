@@ -72,6 +72,120 @@
 			transform: translateY(-50%);
 		}
 	}
+
+	@keyframes steam-bubble-float {
+		0%,
+		100% {
+			transform: translate3d(0, 0, 0);
+		}
+		50% {
+			transform: translate3d(0, -5px, 0);
+		}
+	}
+
+	@keyframes steam-bubble-center-float {
+		0%,
+		100% {
+			transform: translate3d(0, 0, 0);
+		}
+		50% {
+			transform: translate3d(0, -3px, 0);
+		}
+	}
+}
+
+.steam-bubble-motion {
+	animation: steam-bubble-float 7s ease-in-out infinite;
+}
+
+.steam-bubble-center-motion {
+	animation-name: steam-bubble-center-float;
+	animation-duration: 10s;
+}
+
+.steam-bubble-cloud {
+	position: relative;
+	display: flex;
+	min-height: 0;
+	align-content: center;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	overflow: visible;
+	padding: 1.75rem 0 1.5rem;
+}
+
+.steam-bubble-center-slot {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+	order: -1;
+	margin-bottom: 0.75rem;
+	z-index: 3;
+}
+
+.steam-bubble-center {
+	max-width: min(90%, 15rem);
+	padding: clamp(0.75rem, 1.4vw, 1rem) clamp(1rem, 2.2vw, 1.5rem);
+	font-size: clamp(0.95rem, 2vw, 1.25rem);
+	line-height: 1.5rem;
+}
+
+.steam-bubble-orbit {
+	min-width: 0;
+	max-width: min(100%, 13rem);
+}
+
+.steam-bubble-orbit > a,
+.steam-bubble-overflow a {
+	max-width: 100%;
+}
+
+.steam-bubble-overflow {
+	display: flex;
+	min-width: 0;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+}
+
+@media (min-width: 64rem) {
+	.steam-bubble-cloud {
+		display: block;
+		min-height: clamp(34rem, 48vw, 38rem);
+		padding: 3rem 0;
+	}
+
+	.steam-bubble-center-slot {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: auto;
+		margin: 0;
+		transform: translate(-50%, -50%);
+	}
+
+	.steam-bubble-orbit {
+		position: absolute;
+		top: var(--steam-bubble-y);
+		left: var(--steam-bubble-x);
+		transform: translate(-50%, -50%);
+		max-width: 8rem;
+	}
+
+	.steam-bubble-orbit-inner {
+		z-index: 2;
+		max-width: 10rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.steam-bubble-motion,
+	.steam-bubble-center-motion {
+		animation: none;
+	}
 }
 
 html::-webkit-scrollbar {

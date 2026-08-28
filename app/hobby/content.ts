@@ -1,4 +1,4 @@
-import type { GameAccount, GameGroup, HobbyCategory } from './types';
+import type { GameAccount, HobbyCategory } from './types';
 
 export const hobbyCategories: HobbyCategory[] = [
 	{
@@ -6,44 +6,21 @@ export const hobbyCategories: HobbyCategory[] = [
 		index: '01',
 		title: 'Games',
 		summary: '竞技、狩猎，以及和朋友一起制造混乱的联机夜晚。',
-		compactSpan: 'md:col-span-7',
+		compactSpan: 'md:col-span-12 lg:col-span-4',
 	},
 	{
 		id: 'anime',
 		index: '02',
 		title: 'Anime',
 		summary: '我的动画收藏、观看记录与评分都整理在 Bangumi。',
-		compactSpan: 'md:col-span-5',
+		compactSpan: 'md:col-span-6 lg:col-span-4',
 	},
 	{
 		id: 'music',
 		index: '03',
 		title: 'Music',
 		summary: '从日语与 ACG，到流行、说唱、粤语和民谣。',
-		compactSpan: 'md:col-span-4',
-	},
-	{
-		id: 'food',
-		index: '04',
-		title: 'Food',
-		summary: '用照片和文字保留值得再吃一次的味道。',
-		compactSpan: 'md:col-span-4',
-	},
-	{
-		id: 'travel',
-		index: '05',
-		title: 'Travel',
-		summary: '走过杭州、佛山、深圳和中山，也继续寻找下一站。',
-		compactSpan: 'md:col-span-4',
-	},
-];
-
-export const gameGroups: GameGroup[] = [
-	{ label: 'Competitive', games: ['守望先锋'] },
-	{ label: 'Hunting', games: ['怪物猎人'] },
-	{
-		label: 'Co-op Nights',
-		games: ['R.E.P.O.', 'PEAK', '胡闹厨房', '链在一起', '机械狂欢'],
+		compactSpan: 'md:col-span-6 lg:col-span-4',
 	},
 ];
 
@@ -75,10 +52,3 @@ export const musicProfile = {
 } as const;
 
 export const musicGenres = ['日语', 'ACG', '流行', '说唱', '粤语', '民谣'];
-
-export const foodContent = {
-	label: 'Coming soon',
-	description: '这里会慢慢收集喜欢的食物、照片，以及它们背后的片段。',
-} as const;
-
-export const travelCities = ['杭州', '佛山', '深圳', '中山'];

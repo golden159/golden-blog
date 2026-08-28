@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title">
+	<title id="title">Steam 图片占位图</title>
+	<rect width="96" height="96" rx="20" fill="#172033"/>
+	<circle cx="59" cy="35" r="15" fill="none" stroke="#dbeafe" stroke-width="7"/>
+	<circle cx="31" cy="66" r="10" fill="none" stroke="#dbeafe" stroke-width="7"/>
+	<path d="M39 62 49 48l13 7" fill="none" stroke="#dbeafe" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"/>
+</svg>

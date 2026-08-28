@@ -1,5 +1,6 @@
 import type { BangumiAnimeResponse } from 'app/components/bangumi/types';
 import type { NeteaseActivityResponse } from 'app/components/netease/types';
+import type { SteamActivityResponse } from 'app/components/steam/types';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { animeProfile } from '../content';
@@ -14,6 +15,10 @@ import {
 	normalizeMusicActivity,
 	unavailableMusicActivity,
 } from './music-activity';
+import {
+	normalizeSteamActivity,
+	unavailableSteamActivity,
+} from './steam-activity';
 
 const albumArtPlaceholder = '/static/hobby/music-placeholder.svg';
 
@@ -21,7 +26,72 @@ type CategoryVisualProps = {
 	id: HobbyId;
 	animeActivity?: BangumiAnimeResponse;
 	musicActivity?: NeteaseActivityResponse;
+	steamActivity?: SteamActivityResponse;
 };
+
+function SteamPreview({
+	steamActivity,
+}: {
+	steamActivity: SteamActivityResponse;
+}) {
+	const safeActivity = normalizeSteamActivity(steamActivity);
+	const profile = safeActivity.profile;
+	const game = safeActivity.currentGame ?? safeActivity.recentGames[0] ?? null;
+	const requestedSource = profile?.avatarUrl ?? null;
+	const [source, setSource] = useState(requestedSource);
+
+	useEffect(() => {
+		setSource(requestedSource);
+	}, [requestedSource]);
+
+	const status = safeActivity.currentGame
+		? '正在玩'
+		: safeActivity.recentGames.length > 0
+			? '最近玩过'
+			: safeActivity.state === 'empty'
+				? '暂无公开记录'
+				: 'Steam 暂时不可用';
+
+	return (
+		<span
+			data-testid='games-preview'
+			className='mt-5 flex min-w-0 items-center gap-3'
+		>
+			<span className='relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[#172033] text-xs font-semibold text-white'>
+				{source ? (
+					<Image
+						data-testid='steam-preview-avatar'
+						src={source}
+						width={40}
+						height={40}
+						sizes='40px'
+						alt={`${profile?.personaName ?? 'Steam'} 的 Steam 头像`}
+						onError={() => setSource(null)}
+						className='size-10 object-cover'
+					/>
+				) : (
+					<span data-testid='steam-preview-avatar-fallback' aria-hidden='true'>
+						ST
+					</span>
+				)}
+			</span>
+			<span className='min-w-0'>
+				<span
+					data-testid='steam-preview-status'
+					className='block text-xs font-semibold text-primary-600 dark:text-primary-400'
+				>
+					{status}
+				</span>
+				<span
+					data-testid='steam-preview-game'
+					className='mt-0.5 block max-w-[min(16rem,60vw)] truncate text-xs text-gray-500 dark:text-gray-400'
+				>
+					{game?.name ?? profile?.personaName ?? 'Steam'}
+				</span>
+			</span>
+		</span>
+	);
+}
 
 function AnimePreview({
 	animeActivity,
@@ -110,51 +180,9 @@ export default function CategoryVisual({
 	id,
 	animeActivity = unavailableAnimeActivity,
 	musicActivity = unavailableMusicActivity,
+	steamActivity = unavailableSteamActivity,
 }: CategoryVisualProps) {
-	if (id === 'games') {
-		return (
-			<span
-				data-testid='games-preview'
-				aria-hidden='true'
-				className='mt-5 hidden gap-2 sm:flex'
-			>
-				<span className='rounded-lg bg-gray-100 px-3 py-2 text-xs font-semibold dark:bg-gray-800'>
-					CO-OP
-				</span>
-				<span className='rounded-lg bg-primary-500 px-3 py-2 text-xs font-semibold text-white'>
-					GG
-				</span>
-			</span>
-		);
-	}
-
-	if (id === 'anime') {
-		return <AnimePreview animeActivity={animeActivity} />;
-	}
-
-	if (id === 'music') {
-		return <MusicPreview musicActivity={musicActivity} />;
-	}
-
-	if (id === 'food') {
-		return (
-			<span
-				data-testid='food-preview'
-				aria-hidden='true'
-				className='mt-5 hidden text-3xl sm:block'
-			>
-				◯
-			</span>
-		);
-	}
-
-	return (
-		<span
-			data-testid='travel-preview'
-			aria-hidden='true'
-			className='mt-5 hidden text-xs tracking-[0.2em] text-gray-500 sm:block dark:text-gray-400'
-		>
-			HGH · FS · SZX · ZSN
-		</span>
-	);
+	if (id === 'games') return <SteamPreview steamActivity={steamActivity} />;
+	if (id === 'anime') return <AnimePreview animeActivity={animeActivity} />;
+	return <MusicPreview musicActivity={musicActivity} />;
 }

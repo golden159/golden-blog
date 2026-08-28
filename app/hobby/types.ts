@@ -1,4 +1,4 @@
-export type HobbyId = 'games' | 'anime' | 'music' | 'food' | 'travel';
+export type HobbyId = 'games' | 'anime' | 'music';
 
 export type HobbyCategory = {
 	id: HobbyId;
@@ -6,11 +6,6 @@ export type HobbyCategory = {
 	title: string;
 	summary: string;
 	compactSpan: string;
-};
-
-export type GameGroup = {
-	label: 'Competitive' | 'Hunting' | 'Co-op Nights';
-	games: string[];
 };
 
 export type GameAccount =
