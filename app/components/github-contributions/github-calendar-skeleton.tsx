@@ -2,7 +2,7 @@ import Skeleton from '../skeleton';
 
 export default function GithubCalendarSkeleton() {
 	return (
-		<div className='h-[152px] flex flex-col justify-between w-[calc(100%-53px)] md:w-[640px] lg:w-[800px]'>
+		<div className='flex h-[152px] w-full flex-col justify-between'>
 			<Skeleton className='h-4 w-full' />
 			<Skeleton className='h-[102px] w-full' />
 			<Skeleton className='h-4 w-36' />
