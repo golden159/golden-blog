@@ -22,6 +22,9 @@ async function fetchContributions(url: string): Promise<ContributionCalendar> {
 
 export default function Contributions() {
 	const [year, setYear] = useState(new Date().getFullYear());
+	const layoutClassName = 'flex min-w-0 flex-col gap-3 md:flex-row md:gap-2';
+	const calendarColumnClassName = 'order-2 min-w-0 flex-1 md:order-none';
+	const yearColumnClassName = 'order-1 md:order-none';
 
 	const {
 		data: contributions,
@@ -43,10 +46,14 @@ export default function Contributions() {
 	if (!contributions || isLoading) {
 		return (
 			<div className='flex flex-col space-y-4'>
-				<div className='flex space-x-2'>
+				<div className={layoutClassName}>
 					<Days />
-					<GithubCalendarSkeleton />
-					<YearSelect selectedYear={year} onYearChange={setYear} />
+					<div className={calendarColumnClassName}>
+						<GithubCalendarSkeleton />
+					</div>
+					<div className={yearColumnClassName}>
+						<YearSelect selectedYear={year} onYearChange={setYear} />
+					</div>
 				</div>
 				<GithubStatsSkeleton />
 			</div>
@@ -55,10 +62,14 @@ export default function Contributions() {
 
 	return (
 		<Fragment>
-			<div className='flex space-x-2'>
+			<div className={layoutClassName}>
 				<Days />
-				<Calendar contributions={contributions} />
-				<YearSelect selectedYear={year} onYearChange={setYear} />
+				<div className={calendarColumnClassName}>
+					<Calendar contributions={contributions} />
+				</div>
+				<div className={yearColumnClassName}>
+					<YearSelect selectedYear={year} onYearChange={setYear} />
+				</div>
 			</div>
 			<GithubStats contributions={contributions} year={year} />
 		</Fragment>
