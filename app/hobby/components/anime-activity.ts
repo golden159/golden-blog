@@ -192,8 +192,8 @@ export const normalizeAnimeActivity = (
 		return unavailableAnimeActivity;
 	}
 
-	const normalized = {
-		state: root.state,
+	const normalized: BangumiAnimeResponse = {
+		state: root.state as BangumiAnimeResponse['state'],
 		profile,
 		total,
 		entries: validEntries,
