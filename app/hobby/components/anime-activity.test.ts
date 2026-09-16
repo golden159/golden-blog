@@ -85,6 +85,16 @@ describe('normalizeAnimeActivity', () => {
 		);
 	});
 
+	it('preserves a valid collection response when activity history is unavailable', () => {
+		const degraded = {
+			...readyActivity,
+			activity: [],
+			activityState: 'unavailable' as const,
+		};
+
+		expect(normalizeAnimeActivity(degraded)).toEqual(degraded);
+	});
+
 	it('keeps a trusted profile in an unavailable response', () => {
 		expect(
 			normalizeAnimeActivity({

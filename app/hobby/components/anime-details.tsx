@@ -186,9 +186,16 @@ export default function AnimeDetails({ activity }: AnimeDetailsProps) {
 					<ProfileSummary profile={data.profile} total={data.total} />
 				)}
 
-				{data && data.activity.length > 0 && (
-					<AnimeHeatmap activity={data.activity} />
-				)}
+				{data?.activityState !== 'unavailable' &&
+					data &&
+					data.activity.length > 0 && <AnimeHeatmap activity={data.activity} />}
+
+				{data?.state !== 'unavailable' &&
+					data?.activityState === 'unavailable' && (
+						<p className='mt-6 border-l-2 border-primary-300 py-2 pl-4 text-sm text-gray-600 dark:border-primary-400/50 dark:text-gray-300'>
+							Bangumi 活跃日历暂时不可用，本次未缓存不完整数据。
+						</p>
+					)}
 
 				{data?.state === 'ready' && <AnimeCollection entries={data.entries} />}
 

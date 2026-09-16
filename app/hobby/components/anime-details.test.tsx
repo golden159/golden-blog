@@ -134,6 +134,17 @@ describe('AnimeDetails', () => {
 		expect(screen.getByText(/Bangumi 数据暂时不可用/)).toBeInTheDocument();
 	});
 
+	it('explains an activity-only failure while keeping the collection visible', () => {
+		renderAnime({
+			...readyActivity,
+			activity: [],
+			activityState: 'unavailable',
+		});
+
+		expect(screen.getByText(/Bangumi 活跃日历暂时不可用/)).toBeInTheDocument();
+		expect(screen.getByText('葬送的芙莉莲')).toBeInTheDocument();
+	});
+
 	it('renders a profile-aware empty state', () => {
 		renderAnime({
 			state: 'empty',

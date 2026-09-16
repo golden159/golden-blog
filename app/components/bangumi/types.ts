@@ -29,12 +29,15 @@ export type BangumiActivityDay = {
 	count: number;
 };
 
+export type BangumiActivityState = 'ready' | 'unavailable';
+
 export type BangumiAnimeResponse = {
 	state: 'ready' | 'empty' | 'unavailable';
 	profile: BangumiProfile | null;
 	total: number;
 	entries: BangumiAnimeEntry[];
 	activity: BangumiActivityDay[];
+	activityState?: BangumiActivityState;
 };
 
 export type NormalizedBangumiCollections = Pick<
