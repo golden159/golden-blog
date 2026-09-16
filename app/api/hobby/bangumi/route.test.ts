@@ -23,17 +23,42 @@ describe('GET /api/hobby/bangumi', () => {
 	});
 
 	it('returns the normalized response with public cache headers', async () => {
-		const response = await GET();
-
-		expect(await response.json()).toEqual({
-			state: 'unavailable',
+		mockedFetch.mockResolvedValue({
+			state: 'empty',
 			profile: null,
 			total: 0,
 			entries: [],
 			activity: [],
+			activityState: 'ready',
+		});
+		const response = await GET();
+
+		expect(await response.json()).toMatchObject({
+			state: 'empty',
+			activityState: 'ready',
 		});
 		expect(response.headers.get('cache-control')).toBe(
 			'public, s-maxage=300, stale-while-revalidate=900',
 		);
+	});
+
+	it('does not cache a response with incomplete activity data', async () => {
+		mockedFetch.mockResolvedValue({
+			state: 'ready',
+			profile: {
+				username: 'golden_xzs',
+				nickname: 'golden',
+				sign: null,
+				avatarUrl: null,
+			},
+			total: 1,
+			entries: [],
+			activity: [],
+			activityState: 'unavailable',
+		});
+
+		const response = await GET();
+
+		expect(response.headers.get('cache-control')).toBe('no-store');
 	});
 });

@@ -159,6 +159,14 @@ export const normalizeAnimeActivity = (
 	const profile = normalizeProfile(root.profile);
 	const total = root.total;
 	const rawEntries = root.entries;
+	const activityState = root.activityState;
+	if (
+		activityState !== undefined &&
+		activityState !== 'ready' &&
+		activityState !== 'unavailable'
+	) {
+		return unavailableAnimeActivity;
+	}
 	const activity = normalizeActivity(root.activity ?? []);
 	if (
 		!profile ||
@@ -184,13 +192,17 @@ export const normalizeAnimeActivity = (
 		return unavailableAnimeActivity;
 	}
 
-	return {
+	const normalized = {
 		state: root.state,
 		profile,
 		total,
 		entries: validEntries,
 		activity,
 	};
+	if (activityState !== undefined) {
+		return { ...normalized, activityState };
+	}
+	return normalized;
 };
 
 export const fetchAnimeActivity = async (

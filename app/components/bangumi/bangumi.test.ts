@@ -207,8 +207,9 @@ describe('fetchBangumiAnime', () => {
 				<ul><li id="tml_101">看过 ep.1</li></ul>
 			`,
 			2: `
-				<h4 class="Header">2025-9-16</h4>
-				<ul><li id="tml_100">一年以前</li></ul>
+				<template id="likes_reaction_grid_item" type="text/template">
+					<a class="item {selected_class}" href="javascript:void(0);"></a>
+				</template>
 			`,
 		};
 		const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
@@ -236,6 +237,7 @@ describe('fetchBangumiAnime', () => {
 			{ date: '2026-09-11', count: 1 },
 			{ date: '2026-09-12', count: 2 },
 		]);
+		expect(result.activityState).toBe('ready');
 		expect(
 			fetchImpl.mock.calls.some(([input]) =>
 				String(input).startsWith(
@@ -243,6 +245,37 @@ describe('fetchBangumiAnime', () => {
 				),
 			),
 		).toBe(true);
+	});
+
+	it('marks the activity as unavailable when every public timeline host fails', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-09-16T12:00:00Z'));
+		const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+			const url = new URL(String(input));
+			if (url.hostname === 'bgm.tv' || url.hostname === 'bangumi.tv') {
+				return new Response('temporary outage', { status: 503 });
+			}
+			return new Response(
+				JSON.stringify(
+					url.pathname.endsWith('/collections')
+						? collectionPayload
+						: profilePayload,
+				),
+				{ status: 200 },
+			);
+		});
+
+		const result = await fetchBangumiAnime({
+			username: '1022640',
+			fetchImpl,
+		});
+
+		expect(result).toMatchObject({
+			state: 'ready',
+			profile: { username: '1022640' },
+			activity: [],
+			activityState: 'unavailable',
+		});
 	});
 
 	it('retries a transient public timeline page failure without dropping the calendar', async () => {

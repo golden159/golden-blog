@@ -33,10 +33,20 @@ type TimelineEvent = {
 const normalizeTimelinePage = (html: string): TimelineEvent[] | null => {
 	if (!html.trim()) return [];
 
+	const dateGroups = [
+		...html.matchAll(
+			/<h4 class="Header">(\d{4})-(\d{1,2})-(\d{1,2})<\/h4>\s*<ul>([\s\S]*?)<\/ul>/g,
+		),
+	];
+	if (
+		dateGroups.length === 0 &&
+		html.includes('<template id="likes_reaction_grid_item"')
+	) {
+		return [];
+	}
+
 	const events: TimelineEvent[] = [];
-	for (const group of html.matchAll(
-		/<h4 class="Header">(\d{4})-(\d{1,2})-(\d{1,2})<\/h4>\s*<ul>([\s\S]*?)<\/ul>/g,
-	)) {
+	for (const group of dateGroups) {
 		const [, year, month, day, list] = group;
 		const date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 		if (new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date) {
@@ -227,6 +237,7 @@ export async function fetchBangumiAnime(
 			profile,
 			...collections,
 			activity: activity ?? [],
+			activityState: activity === null ? 'unavailable' : 'ready',
 		};
 	} catch {
 		return unavailableBangumiAnime();
