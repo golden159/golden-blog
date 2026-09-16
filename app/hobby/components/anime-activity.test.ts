@@ -14,6 +14,7 @@ const readyActivity = {
 		avatarUrl: 'https://lain.bgm.tv/pic/user/l/avatar.jpg',
 	},
 	total: 12,
+	activity: [{ date: '2026-08-24', count: 1 }],
 	entries: [
 		{
 			id: 42,
@@ -36,6 +37,17 @@ afterEach(() => {
 describe('normalizeAnimeActivity', () => {
 	it('keeps a complete ready response from the local API', () => {
 		expect(normalizeAnimeActivity(readyActivity)).toEqual(readyActivity);
+	});
+
+	it('keeps up to 365 distinct activity dates', () => {
+		const activity = Array.from({ length: 51 }, (_, index) => ({
+			date: new Date(Date.UTC(2026, 0, index + 1)).toISOString().slice(0, 10),
+			count: 1,
+		}));
+
+		expect(
+			normalizeAnimeActivity({ ...readyActivity, activity }).activity,
+		).toHaveLength(51);
 	});
 
 	it('rejects unsafe URLs and inconsistent states', () => {
@@ -65,6 +77,7 @@ describe('normalizeAnimeActivity', () => {
 				profile: readyActivity.profile,
 				total: 0,
 				entries: [],
+				activity: [],
 			}),
 		).toMatchObject({ state: 'empty', total: 0, entries: [] });
 		expect(normalizeAnimeActivity(unavailableAnimeActivity)).toEqual(
@@ -79,12 +92,14 @@ describe('normalizeAnimeActivity', () => {
 				profile: readyActivity.profile,
 				total: 0,
 				entries: [],
+				activity: [],
 			}),
 		).toEqual({
 			state: 'unavailable',
 			profile: readyActivity.profile,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 	});
 });

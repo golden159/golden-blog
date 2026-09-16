@@ -8,6 +8,7 @@ import type {
 import Image from 'next/image';
 import { useState } from 'react';
 import { normalizeAnimeActivity, useAnimeActivity } from './anime-activity';
+import AnimeHeatmap from './anime-heatmap';
 
 type AnimeDetailsProps = {
 	activity?: BangumiAnimeResponse;
@@ -183,6 +184,10 @@ export default function AnimeDetails({ activity }: AnimeDetailsProps) {
 
 				{data?.profile && (
 					<ProfileSummary profile={data.profile} total={data.total} />
+				)}
+
+				{data && data.activity.length > 0 && (
+					<AnimeHeatmap activity={data.activity} />
 				)}
 
 				{data?.state === 'ready' && <AnimeCollection entries={data.entries} />}

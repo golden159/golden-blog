@@ -24,11 +24,17 @@ export type BangumiAnimeEntry = {
 	totalEpisodes: number;
 };
 
+export type BangumiActivityDay = {
+	date: string;
+	count: number;
+};
+
 export type BangumiAnimeResponse = {
 	state: 'ready' | 'empty' | 'unavailable';
 	profile: BangumiProfile | null;
 	total: number;
 	entries: BangumiAnimeEntry[];
+	activity: BangumiActivityDay[];
 };
 
 export type NormalizedBangumiCollections = Pick<
@@ -43,4 +49,5 @@ export const unavailableBangumiAnime = (
 	profile,
 	total: 0,
 	entries: [],
+	activity: [],
 });

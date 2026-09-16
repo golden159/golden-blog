@@ -43,6 +43,7 @@ const collectionPayload = {
 };
 
 afterEach(() => {
+	vi.useRealTimers();
 	vi.restoreAllMocks();
 });
 
@@ -83,6 +84,7 @@ describe('fetchBangumiAnime', () => {
 			profile: null,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 		expect(fetchImpl).not.toHaveBeenCalled();
 	});
@@ -91,9 +93,12 @@ describe('fetchBangumiAnime', () => {
 		const fetchImpl = vi.fn(
 			async (input: RequestInfo | URL, _init?: RequestInit) => {
 				const url = String(input);
+				if (url.startsWith('https://bgm.tv/')) {
+					return new Response('', { status: 200 });
+				}
 				return new Response(
 					JSON.stringify(
-						url.endsWith('/collections?subject_type=2&limit=6&offset=0')
+						url.endsWith('/collections?subject_type=2&limit=50&offset=0')
 							? collectionPayload
 							: profilePayload,
 					),
@@ -113,10 +118,13 @@ describe('fetchBangumiAnime', () => {
 			total: 1,
 			entries: [{ id: 42, title: '中文名', status: '在看' }],
 		});
-		expect(fetchImpl).toHaveBeenCalledTimes(2);
-		for (const [input, init] of fetchImpl.mock.calls) {
+		const apiCalls = fetchImpl.mock.calls.filter(([input]) =>
+			String(input).startsWith('https://api.bgm.tv/'),
+		);
+		expect(apiCalls).toHaveLength(2);
+		for (const [input, init] of apiCalls) {
 			expect(String(input)).toMatch(
-				/^https:\/\/api\.bgm\.tv\/v0\/users\/1022640(?:\/collections\?subject_type=2&limit=6&offset=0)?$/,
+				/^https:\/\/api\.bgm\.tv\/v0\/users\/1022640(?:\/collections\?subject_type=2&limit=50&offset=0)?$/,
 			);
 			expect(init).toMatchObject({
 				method: 'GET',
@@ -128,6 +136,207 @@ describe('fetchBangumiAnime', () => {
 				},
 			});
 		}
+		for (const [, init] of fetchImpl.mock.calls) {
+			expect(init?.headers).toMatchObject({
+				'User-Agent': expect.stringContaining('golden-xzs-blog'),
+			});
+		}
+	});
+
+	it('does not mistake collection timestamps for a history of public activity', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-09-16T12:00:00Z'));
+		const item = collectionPayload.data[0];
+		const collectionAt = (id: number, date: string) => ({
+			...item,
+			subject_id: id,
+			updated_at: `${date}T10:00:00+08:00`,
+			subject: { ...item.subject, id, name: `Anime ${id}` },
+		});
+		const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+			const url = new URL(String(input));
+			if (url.hostname === 'bgm.tv') {
+				return new Response('', { status: 200 });
+			}
+			if (!url.pathname.endsWith('/collections')) {
+				return new Response(JSON.stringify(profilePayload), { status: 200 });
+			}
+
+			const offset = url.searchParams.get('offset');
+			return new Response(
+				JSON.stringify({
+					total: 52,
+					limit: 50,
+					offset: Number(offset),
+					data:
+						offset === '0'
+							? [collectionAt(1, '2026-09-12')]
+							: [collectionAt(2, '2026-01-10'), collectionAt(3, '2025-09-16')],
+				}),
+				{ status: 200 },
+			);
+		});
+
+		const result = await fetchBangumiAnime({
+			username: '1022640',
+			fetchImpl,
+		});
+
+		expect(result).toMatchObject({
+			state: 'ready',
+			total: 52,
+			activity: [],
+			entries: [{ id: 1 }],
+		});
+		expect(fetchImpl.mock.calls.map(([input]) => String(input))).not.toContain(
+			'https://api.bgm.tv/v0/users/1022640/collections?subject_type=2&limit=50&offset=50',
+		);
+	});
+
+	it('builds the heatmap from every public timeline activity instead of one timestamp per collection', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-09-16T12:00:00Z'));
+		const timelinePages: Record<number, string> = {
+			1: `
+				<h4 class="Header">2026-9-12</h4>
+				<ul>
+					<li id="tml_103">收藏了人物</li>
+					<li id="tml_102">看过 ep.2</li>
+				</ul>
+				<h4 class="Header">2026-9-11</h4>
+				<ul><li id="tml_101">看过 ep.1</li></ul>
+			`,
+			2: `
+				<h4 class="Header">2025-9-16</h4>
+				<ul><li id="tml_100">一年以前</li></ul>
+			`,
+		};
+		const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+			const url = new URL(String(input));
+			if (url.hostname === 'bgm.tv') {
+				const page = Number(url.searchParams.get('page'));
+				return new Response(timelinePages[page] ?? '', { status: 200 });
+			}
+			return new Response(
+				JSON.stringify(
+					url.pathname.endsWith('/collections')
+						? collectionPayload
+						: profilePayload,
+				),
+				{ status: 200 },
+			);
+		});
+
+		const result = await fetchBangumiAnime({
+			username: '1022640',
+			fetchImpl,
+		});
+
+		expect(result.activity).toEqual([
+			{ date: '2026-09-11', count: 1 },
+			{ date: '2026-09-12', count: 2 },
+		]);
+		expect(
+			fetchImpl.mock.calls.some(([input]) =>
+				String(input).startsWith(
+					'https://bgm.tv/user/1022640/timeline?type=all&page=1&ajax=1',
+				),
+			),
+		).toBe(true);
+	});
+
+	it('retries a transient public timeline page failure without dropping the calendar', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-09-16T12:00:00Z'));
+		let firstPageAttempts = 0;
+		const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+			const url = new URL(String(input));
+			if (url.hostname !== 'bgm.tv') {
+				return new Response(
+					JSON.stringify(
+						url.pathname.endsWith('/collections')
+							? collectionPayload
+							: profilePayload,
+					),
+					{ status: 200 },
+				);
+			}
+
+			const page = Number(url.searchParams.get('page'));
+			if (page === 1 && firstPageAttempts++ === 0) {
+				return new Response('temporary outage', { status: 503 });
+			}
+			if (page === 1) {
+				return new Response(
+					'<h4 class="Header">2026-9-12</h4><ul><li id="tml_101">看过 ep.1</li></ul>',
+					{ status: 200 },
+				);
+			}
+			if (page === 2) {
+				return new Response(
+					'<h4 class="Header">2025-9-16</h4><ul><li id="tml_100">一年以前</li></ul>',
+					{ status: 200 },
+				);
+			}
+			return new Response('', { status: 200 });
+		});
+
+		const result = await fetchBangumiAnime({
+			username: '1022640',
+			fetchImpl,
+		});
+
+		expect(result.activity).toEqual([{ date: '2026-09-12', count: 1 }]);
+		expect(firstPageAttempts).toBe(2);
+	});
+
+	it('falls back to the alternate public timeline host after repeated 503s', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-09-16T12:00:00Z'));
+		const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+			const url = new URL(String(input));
+			if (url.hostname === 'bgm.tv') {
+				return new Response('temporary outage', { status: 503 });
+			}
+			if (url.hostname === 'bangumi.tv') {
+				const page = Number(url.searchParams.get('page'));
+				if (page === 1) {
+					return new Response(
+						'<h4 class="Header">2026-9-12</h4><ul><li id="tml_101">看过 ep.1</li></ul>',
+						{ status: 200 },
+					);
+				}
+				if (page === 2) {
+					return new Response(
+						'<h4 class="Header">2025-9-16</h4><ul><li id="tml_100">一年以前</li></ul>',
+						{ status: 200 },
+					);
+				}
+				return new Response('', { status: 200 });
+			}
+			return new Response(
+				JSON.stringify(
+					url.pathname.endsWith('/collections')
+						? collectionPayload
+						: profilePayload,
+				),
+				{ status: 200 },
+			);
+		});
+
+		const result = await fetchBangumiAnime({
+			username: '1022640',
+			fetchImpl,
+		});
+
+		expect(result.activity).toEqual([{ date: '2026-09-12', count: 1 }]);
+		expect(
+			fetchImpl.mock.calls.some(([input]) =>
+				String(input).startsWith(
+					'https://bangumi.tv/user/1022640/timeline?type=all&page=1&ajax=1',
+				),
+			),
+		).toBe(true);
 	});
 
 	it('returns unavailable for an upstream failure or malformed payload', async () => {
@@ -145,6 +354,7 @@ describe('fetchBangumiAnime', () => {
 			profile: null,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 
 		const malformedFetch = vi
@@ -167,6 +377,7 @@ describe('fetchBangumiAnime', () => {
 			},
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 
 		const throwingFetch = vi.fn().mockRejectedValue(new Error('timeout'));
@@ -180,6 +391,7 @@ describe('fetchBangumiAnime', () => {
 			profile: null,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 	});
 
@@ -207,6 +419,7 @@ describe('fetchBangumiAnime', () => {
 			},
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 	});
 
@@ -234,6 +447,7 @@ describe('fetchBangumiAnime', () => {
 			},
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 	});
 
@@ -280,7 +494,7 @@ describe('fetchBangumiAnime', () => {
 				new Response(
 					JSON.stringify(
 						String(input).endsWith(
-							'/collections?subject_type=2&limit=6&offset=0',
+							'/collections?subject_type=2&limit=50&offset=0',
 						)
 							? { total: 0, limit: 6, offset: 0, data: [] }
 							: profilePayload,

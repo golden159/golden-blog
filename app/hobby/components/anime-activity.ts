@@ -12,6 +12,7 @@ export const unavailableAnimeActivity: BangumiAnimeResponse = {
 	profile: null,
 	total: 0,
 	entries: [],
+	activity: [],
 };
 
 type UnknownRecord = Record<string, unknown>;
@@ -26,6 +27,17 @@ const nonEmptyString = (value: unknown): value is string =>
 
 const nonNegativeInteger = (value: unknown): value is number =>
 	typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
+
+const activityDate = (value: unknown): value is string => {
+	if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+		return false;
+	}
+	const parsed = new Date(`${value}T00:00:00Z`);
+	return (
+		!Number.isNaN(parsed.valueOf()) &&
+		parsed.toISOString().slice(0, 10) === value
+	);
+};
 
 const nullableScore = (value: unknown): value is number | null =>
 	value === null ||
@@ -104,6 +116,31 @@ const normalizeEntry = (value: unknown): BangumiAnimeEntry | null => {
 	};
 };
 
+const normalizeActivity = (
+	value: unknown,
+): BangumiAnimeResponse['activity'] | null => {
+	if (!Array.isArray(value) || value.length > 365) return null;
+
+	const seenDates = new Set<string>();
+	const activity: BangumiAnimeResponse['activity'] = [];
+	for (const valueForDay of value) {
+		const day = asRecord(valueForDay);
+		if (
+			!day ||
+			!activityDate(day.date) ||
+			!nonNegativeInteger(day.count) ||
+			day.count === 0 ||
+			seenDates.has(day.date)
+		) {
+			return null;
+		}
+		seenDates.add(day.date);
+		activity.push({ date: day.date, count: day.count });
+	}
+
+	return activity.sort((left, right) => left.date.localeCompare(right.date));
+};
+
 export const normalizeAnimeActivity = (
 	value: unknown,
 ): BangumiAnimeResponse => {
@@ -122,11 +159,13 @@ export const normalizeAnimeActivity = (
 	const profile = normalizeProfile(root.profile);
 	const total = root.total;
 	const rawEntries = root.entries;
+	const activity = normalizeActivity(root.activity ?? []);
 	if (
 		!profile ||
 		!nonNegativeInteger(total) ||
 		!Array.isArray(rawEntries) ||
-		rawEntries.length > 6
+		rawEntries.length > 6 ||
+		!activity
 	) {
 		return unavailableAnimeActivity;
 	}
@@ -145,7 +184,13 @@ export const normalizeAnimeActivity = (
 		return unavailableAnimeActivity;
 	}
 
-	return { state: root.state, profile, total, entries: validEntries };
+	return {
+		state: root.state,
+		profile,
+		total,
+		entries: validEntries,
+		activity,
+	};
 };
 
 export const fetchAnimeActivity = async (
