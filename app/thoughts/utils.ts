@@ -18,6 +18,7 @@ type Metadata = {
 	summary: string;
 	draft: boolean;
 	image?: string;
+	tags?: string[];
 };
 
 function normalizeDraft(value: unknown): boolean {
@@ -30,14 +31,28 @@ function normalizeDraft(value: unknown): boolean {
 	return false;
 }
 
+function normalizeTags(value: unknown): string[] | undefined {
+	if (!Array.isArray(value)) {
+		return undefined;
+	}
+
+	const tags = value.filter(
+		(tag): tag is string => typeof tag === 'string' && tag.length > 0,
+	);
+
+	return tags.length > 0 ? tags : undefined;
+}
+
 function matterDataToMetadata(data: Record<string, unknown>): Metadata {
 	const image = data.image;
+	const tags = normalizeTags(data.tags);
 	return {
 		title: String(data.title ?? ''),
-		publishedAt: String(data.publishedAt ?? ''),
-		summary: String(data.summary ?? ''),
+		publishedAt: String(data.publishedAt ?? data.date ?? ''),
+		summary: String(data.summary ?? data.description ?? ''),
 		draft: normalizeDraft(data.draft),
 		...(typeof image === 'string' && image.length > 0 ? { image } : {}),
+		...(tags ? { tags } : {}),
 	};
 }
 
