@@ -72,7 +72,7 @@ export default async function ProjectPage({
 	return (
 		<>
 			<section>
-				<BackNavigation />
+				<BackNavigation fallbackHref='/projects' />
 				<div className='flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-gray-500 dark:text-gray-400'>
 					<time dateTime={metadata.publishedAt}>
 						{formatDate(metadata.publishedAt)}
