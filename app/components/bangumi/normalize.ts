@@ -153,9 +153,10 @@ export function normalizeBangumiCollections(
 		return null;
 	}
 
-	const entries = data
+	const collections = data
 		.map(normalizeCollection)
-		.filter((value): value is EntryWithTimestamp => value !== null)
+		.filter((value): value is EntryWithTimestamp => value !== null);
+	const entries = collections
 		.sort((left, right) => right.updatedAt - left.updatedAt)
 		.slice(0, COLLECTION_LIMIT)
 		.map(({ entry }) => entry);

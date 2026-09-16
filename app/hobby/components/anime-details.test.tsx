@@ -13,6 +13,11 @@ const readyActivity: BangumiAnimeResponse = {
 		avatarUrl: null,
 	},
 	total: 27,
+	activity: [
+		{ date: '2025-09-16', count: 4 },
+		{ date: '2026-08-24', count: 2 },
+		{ date: '2026-08-25', count: 1 },
+	],
 	entries: [
 		{
 			id: 400602,
@@ -47,10 +52,41 @@ const renderAnime = (activity?: BangumiAnimeResponse) =>
 	);
 
 afterEach(() => {
+	vi.useRealTimers();
 	vi.unstubAllGlobals();
 });
 
 describe('AnimeDetails', () => {
+	it('renders a one-year Bangumi public activity heatmap', () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-09-15T12:00:00+08:00'));
+
+		const { container } = renderAnime(readyActivity);
+
+		expect(
+			screen.getByRole('img', { name: '近一年有 7 次 Bangumi 活动' }),
+		).toBeInTheDocument();
+		expect(container.querySelectorAll('[data-level]')).toHaveLength(365);
+		expect(screen.getAllByText('10月')).toHaveLength(1);
+		const animatedCell = screen.getByTitle('2025-09-16：4 次活动');
+		expect(animatedCell).toHaveAttribute('data-level', '4');
+		expect(animatedCell).toHaveStyle({
+			opacity: '0',
+			transform: 'translateY(-20px)',
+		});
+		expect(
+			screen.getByText('基于最近 365 天的公开时间胶囊活动'),
+		).toBeInTheDocument();
+		expect(screen.getByTitle('2026-08-24：2 次活动')).toHaveAttribute(
+			'data-level',
+			'2',
+		);
+		expect(screen.getByTitle('2026-08-25：1 次活动')).toHaveAttribute(
+			'data-level',
+			'1',
+		);
+	});
+
 	it('renders the public profile, exact total and collection entries', () => {
 		renderAnime(readyActivity);
 
@@ -92,6 +128,7 @@ describe('AnimeDetails', () => {
 			profile: null,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 
 		expect(screen.getByText(/Bangumi 数据暂时不可用/)).toBeInTheDocument();
@@ -103,6 +140,7 @@ describe('AnimeDetails', () => {
 			profile: readyActivity.profile,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 
 		expect(screen.getByRole('heading', { name: 'Golden' })).toBeInTheDocument();

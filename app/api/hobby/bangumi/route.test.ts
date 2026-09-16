@@ -18,6 +18,7 @@ describe('GET /api/hobby/bangumi', () => {
 			profile: null,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 	});
 
@@ -29,6 +30,7 @@ describe('GET /api/hobby/bangumi', () => {
 			profile: null,
 			total: 0,
 			entries: [],
+			activity: [],
 		});
 		expect(response.headers.get('cache-control')).toBe(
 			'public, s-maxage=300, stale-while-revalidate=900',
