@@ -5,13 +5,28 @@ import { useRouter } from 'next/navigation';
 import { mukta } from '../../fonts';
 import { SquareArrowLeftIcon } from './icons/square-arrow-left';
 
-export default function BackNavigation() {
+interface BackNavigationProps {
+	fallbackHref?: string;
+}
+
+export default function BackNavigation({
+	fallbackHref,
+}: BackNavigationProps = {}) {
 	const router = useRouter();
+
+	const handleBack = () => {
+		if (fallbackHref) {
+			router.push(fallbackHref);
+			return;
+		}
+
+		router.back();
+	};
 
 	return (
 		<button
 			type='button'
-			onClick={() => router.back()}
+			onClick={handleBack}
 			className={classNames(
 				'flex w-full cursor-pointer text-primary-500 mb-12',
 				mukta.className,

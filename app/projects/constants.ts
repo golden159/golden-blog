@@ -15,4 +15,11 @@ export const projects: Project[] = [
 		url: '#',
 		role: '核心模型与推理调度设计',
 	},
+	{
+		title: '基于语音对话系统的零售机器人项目',
+		src: 'retail-robot-project.svg',
+		color: '#fce7f3',
+		url: '/projects/retail-robot-project',
+		role: 'ASR、LLM、TTS 与机器人系统集成',
+	},
 ];
