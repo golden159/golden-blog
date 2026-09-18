@@ -2,8 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { client } from '../../../tina/__generated__/client';
 import BackNavigation from '../../components/layouts/back-navigation';
-import { CustomMDX } from '../../components/mdx';
+import { TinaPost } from '../../components/tina-post';
 import { formatDate, readMDXFile } from '../../thoughts/utils';
 
 const projectsDirectory = path.join(process.cwd(), 'app/projects/posts');
@@ -67,7 +68,9 @@ export default async function ProjectPage({
 }: {
 	params: Promise<{ slug: string }>;
 }) {
-	const { metadata, content } = getProject((await params).slug);
+	const slug = (await params).slug;
+	const { metadata } = getProject(slug);
+	const tina = await client.queries.projects({ relativePath: `${slug}.mdx` });
 
 	return (
 		<>
@@ -88,7 +91,7 @@ export default async function ProjectPage({
 				</div>
 			</section>
 			<article className='md:max-w-5xl'>
-				<CustomMDX source={content} />
+				<TinaPost dataKey='projects' {...tina} />
 			</article>
 		</>
 	);

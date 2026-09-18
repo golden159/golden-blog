@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { client } from '../../../tina/__generated__/client';
 import BackNavigation from '../../components/layouts/back-navigation';
+import { TinaPost } from '../../components/tina-post';
 import { formatDate, getPostFromSlug, getPosts } from '../utils';
 import PageTitle from './page-title';
 
@@ -52,7 +54,10 @@ export default async function Blog(props: {
 }) {
 	const params = await props.params;
 
-	const { metadata, content } = await getPostFromSlug(params.slug);
+	const { metadata } = await getPostFromSlug(params.slug);
+	const tina = await client.queries.thoughts({
+		relativePath: `${params.slug}.mdx`,
+	});
 
 	return (
 		<>
@@ -65,7 +70,9 @@ export default async function Blog(props: {
 					</p>
 				</div>
 			</section>
-			<article className='md:max-w-5xl'>{content}</article>
+			<article className='md:max-w-5xl'>
+				<TinaPost dataKey='thoughts' {...tina} />
+			</article>
 		</>
 	);
 }
