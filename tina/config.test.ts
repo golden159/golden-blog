@@ -6,7 +6,7 @@ vi.mock('tinacms', () => ({
 	defineConfig: <T>(config: T) => config,
 }));
 
-const config = (await import('./config')).default;
+import config from './config';
 
 type Field = { name: string; type: string; list?: boolean; isBody?: boolean };
 type Collection = {

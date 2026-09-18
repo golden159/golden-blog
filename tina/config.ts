@@ -52,7 +52,6 @@ export default defineConfig({
 						name: 'publishedAt',
 						label: 'Published At',
 						required: true,
-						ui: { dateFormat: 'YYYY-MM-DD' },
 					},
 					{
 						type: 'string',
@@ -105,7 +104,6 @@ export default defineConfig({
 						name: 'date',
 						label: 'Date',
 						required: true,
-						ui: { dateFormat: 'YYYY-MM-DD' },
 					},
 					{
 						type: 'string',
