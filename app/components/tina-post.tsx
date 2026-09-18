@@ -1,6 +1,11 @@
 'use client';
 
-import { type ComponentProps, useEffect, useState } from 'react';
+import {
+	type ComponentProps,
+	type ReactNode,
+	useEffect,
+	useState,
+} from 'react';
 import type { BundledLanguage, ThemedToken } from 'shiki';
 import { useTina } from 'tinacms/dist/react';
 import { TinaMarkdown, type TinaMarkdownContent } from 'tinacms/dist/rich-text';
@@ -51,6 +56,20 @@ function CodeBlock(props?: { lang?: string; value: string }) {
 	);
 }
 
+function Underline(props?: { color?: string; children?: ReactNode }) {
+	return (
+		<span
+			style={{
+				textDecorationLine: 'underline',
+				textDecorationColor: props?.color,
+				textUnderlineOffset: '0.2em',
+			}}
+		>
+			{props?.children}
+		</span>
+	);
+}
+
 export function TinaPost(props: {
 	dataKey: 'thoughts' | 'projects';
 	query: string;
@@ -69,6 +88,7 @@ export function TinaPost(props: {
 				{
 					...components,
 					code_block: CodeBlock,
+					underline: Underline,
 				} as unknown as ComponentProps<typeof TinaMarkdown>['components']
 			}
 		/>

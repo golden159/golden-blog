@@ -72,6 +72,26 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
+            "templates": [
+              {
+                "name": "underline",
+                "label": "Underline",
+                "inline": true,
+                "fields": [
+                  {
+                    "type": "string",
+                    "name": "color",
+                    "label": "Underline Color",
+                    "options": ["orange", "red", "green", "blue"],
+                    "ui": { "component": "select" },
+                    "namespace": ["thoughts", "body", "underline", "color"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["thoughts", "body", "underline"]
+              }
+            ],
             "namespace": ["thoughts", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -137,6 +157,26 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
+            "templates": [
+              {
+                "name": "underline",
+                "label": "Underline",
+                "inline": true,
+                "fields": [
+                  {
+                    "type": "string",
+                    "name": "color",
+                    "label": "Underline Color",
+                    "options": ["orange", "red", "green", "blue"],
+                    "ui": { "component": "select" },
+                    "namespace": ["projects", "body", "underline", "color"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["projects", "body", "underline"]
+              }
+            ],
             "namespace": ["projects", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -1289,30 +1329,28 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
-        "name": { "kind": "Name", "value": "RichTextFilter" },
+        "name": { "kind": "Name", "value": "ThoughtsBodyUnderlineFilter" },
         "fields": [
           {
             "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "startsWith" },
+            "name": { "kind": "Name", "value": "color" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "String" }
+              "name": { "kind": "Name", "value": "StringFilter" }
             }
-          },
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ThoughtsBodyFilter" },
+        "fields": [
           {
             "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "eq" },
+            "name": { "kind": "Name", "value": "underline" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "String" }
-            }
-          },
-          {
-            "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "exists" },
-            "type": {
-              "kind": "NamedType",
-              "name": { "kind": "Name", "value": "Boolean" }
+              "name": { "kind": "Name", "value": "ThoughtsBodyUnderlineFilter" }
             }
           }
         ]
@@ -1374,7 +1412,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "RichTextFilter" }
+              "name": { "kind": "Name", "value": "ThoughtsBodyFilter" }
             }
           }
         ]
@@ -1572,6 +1610,34 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyUnderlineFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "color" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "underline" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ProjectsBodyUnderlineFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
         "name": { "kind": "Name", "value": "ProjectsFilter" },
         "fields": [
           {
@@ -1619,7 +1685,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "RichTextFilter" }
+              "name": { "kind": "Name", "value": "ProjectsBodyFilter" }
             }
           }
         ]
