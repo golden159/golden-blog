@@ -1,24 +1,22 @@
-import path from 'node:path';
 import { Fragment } from 'react';
+import { client } from '../../tina/__generated__/client';
 import Header from '../components/header';
-import { CustomMDX } from '../components/mdx';
-import { readMDXFile } from '../thoughts/utils';
+import { TinaPost } from '../components/tina-post';
 import UsesTitle from './uses-title';
-
-const contentPath = path.join(process.cwd(), 'app', 'uses', 'content.mdx');
-const { content } = readMDXFile(contentPath);
 
 export const metadata = {
 	title: 'Uses',
 	description: 'What I use',
 };
 
-export default function Page() {
+export default async function Page() {
+	const tina = await client.queries.uses({ relativePath: 'content.mdx' });
+
 	return (
 		<Fragment>
 			<Header title='Uses' />
 			<UsesTitle />
-			<CustomMDX source={content} />
+			<TinaPost dataKey='uses' {...tina} />
 		</Fragment>
 	);
 }

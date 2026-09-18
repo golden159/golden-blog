@@ -160,6 +160,43 @@ export default defineConfig({
 					router: ({ document }) => `/projects/${document._sys.filename}`,
 				},
 			},
+			{
+				name: 'uses',
+				label: 'Uses',
+				path: 'app/uses',
+				format: 'mdx',
+				fields: [
+					{
+						type: 'string',
+						name: 'title',
+						label: 'Title',
+						isTitle: true,
+						required: true,
+					},
+					{
+						type: 'string',
+						name: 'publishedAt',
+						label: 'Published At',
+						required: true,
+					},
+					{
+						type: 'string',
+						name: 'summary',
+						label: 'Summary',
+						ui: { component: 'textarea' },
+					},
+					{
+						type: 'rich-text',
+						name: 'body',
+						label: 'Body',
+						isBody: true,
+						templates: [underlineTemplate],
+					},
+				],
+				ui: {
+					router: () => '/uses',
+				},
+			},
 		],
 	},
 });

@@ -71,7 +71,7 @@ function Underline(props?: { color?: string; children?: ReactNode }) {
 }
 
 export function TinaPost(props: {
-	dataKey: 'thoughts' | 'projects';
+	dataKey: 'thoughts' | 'projects' | 'uses';
 	query: string;
 	variables: object;
 	data: object;

@@ -63,6 +63,15 @@ describe('Tina config', () => {
 		);
 	});
 
+	it('manages the uses singleton as mdx in app/uses', () => {
+		const uses = findCollection('uses');
+		expect(uses?.path).toBe('app/uses');
+		expect(uses?.format).toBe('mdx');
+		expect(fieldNames(uses)).toEqual(
+			expect.arrayContaining(['title', 'publishedAt', 'summary', 'body']),
+		);
+	});
+
 	it('marks the rich-text body field on both collections', () => {
 		for (const name of ['thoughts', 'projects']) {
 			const body = findCollection(name)?.fields.find(
