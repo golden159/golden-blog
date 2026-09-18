@@ -29,7 +29,6 @@
             "name": "publishedAt",
             "label": "Published At",
             "required": true,
-            "ui": { "dateFormat": "YYYY-MM-DD" },
             "namespace": ["thoughts", "publishedAt"],
             "searchable": true,
             "uid": false
@@ -103,7 +102,6 @@
             "name": "date",
             "label": "Date",
             "required": true,
-            "ui": { "dateFormat": "YYYY-MM-DD" },
             "namespace": ["projects", "date"],
             "searchable": true,
             "uid": false
