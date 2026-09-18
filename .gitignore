@@ -43,3 +43,12 @@ yarn-error.log*
 # Contentlayer
 .contentlayer
 .env*.local
+
+node_modules
+tina/__generated__
+
+# generated TinaCMS admin (rebuilt by `tinacms build`)
+/public/admin
+
+# local tooling artifacts
+/.playwright-mcp/
