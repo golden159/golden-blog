@@ -72,36 +72,6 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
-            "templates": [
-              {
-                "name": "underline",
-                "label": "Underline",
-                "inline": true,
-                "fields": [
-                  {
-                    "type": "string",
-                    "name": "color",
-                    "label": "Underline Color",
-                    "options": [
-                      "orange",
-                      "red",
-                      "green",
-                      "blue",
-                      "purple",
-                      "pink",
-                      "yellow",
-                      "teal",
-                      "gray"
-                    ],
-                    "ui": { "component": "select" },
-                    "namespace": ["thoughts", "body", "underline", "color"],
-                    "searchable": true,
-                    "uid": false
-                  }
-                ],
-                "namespace": ["thoughts", "body", "underline"]
-              }
-            ],
             "namespace": ["thoughts", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -167,36 +137,6 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
-            "templates": [
-              {
-                "name": "underline",
-                "label": "Underline",
-                "inline": true,
-                "fields": [
-                  {
-                    "type": "string",
-                    "name": "color",
-                    "label": "Underline Color",
-                    "options": [
-                      "orange",
-                      "red",
-                      "green",
-                      "blue",
-                      "purple",
-                      "pink",
-                      "yellow",
-                      "teal",
-                      "gray"
-                    ],
-                    "ui": { "component": "select" },
-                    "namespace": ["projects", "body", "underline", "color"],
-                    "searchable": true,
-                    "uid": false
-                  }
-                ],
-                "namespace": ["projects", "body", "underline"]
-              }
-            ],
             "namespace": ["projects", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -245,36 +185,6 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
-            "templates": [
-              {
-                "name": "underline",
-                "label": "Underline",
-                "inline": true,
-                "fields": [
-                  {
-                    "type": "string",
-                    "name": "color",
-                    "label": "Underline Color",
-                    "options": [
-                      "orange",
-                      "red",
-                      "green",
-                      "blue",
-                      "purple",
-                      "pink",
-                      "yellow",
-                      "teal",
-                      "gray"
-                    ],
-                    "ui": { "component": "select" },
-                    "namespace": ["uses", "body", "underline", "color"],
-                    "searchable": true,
-                    "uid": false
-                  }
-                ],
-                "namespace": ["uses", "body", "underline"]
-              }
-            ],
             "namespace": ["uses", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -1530,28 +1440,30 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
-        "name": { "kind": "Name", "value": "ThoughtsBodyUnderlineFilter" },
+        "name": { "kind": "Name", "value": "RichTextFilter" },
         "fields": [
           {
             "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "color" },
+            "name": { "kind": "Name", "value": "startsWith" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "StringFilter" }
+              "name": { "kind": "Name", "value": "String" }
             }
-          }
-        ]
-      },
-      {
-        "kind": "InputObjectTypeDefinition",
-        "name": { "kind": "Name", "value": "ThoughtsBodyFilter" },
-        "fields": [
+          },
           {
             "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "underline" },
+            "name": { "kind": "Name", "value": "eq" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "ThoughtsBodyUnderlineFilter" }
+              "name": { "kind": "Name", "value": "String" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "exists" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "Boolean" }
             }
           }
         ]
@@ -1613,7 +1525,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "ThoughtsBodyFilter" }
+              "name": { "kind": "Name", "value": "RichTextFilter" }
             }
           }
         ]
@@ -1811,34 +1723,6 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
-        "name": { "kind": "Name", "value": "ProjectsBodyUnderlineFilter" },
-        "fields": [
-          {
-            "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "color" },
-            "type": {
-              "kind": "NamedType",
-              "name": { "kind": "Name", "value": "StringFilter" }
-            }
-          }
-        ]
-      },
-      {
-        "kind": "InputObjectTypeDefinition",
-        "name": { "kind": "Name", "value": "ProjectsBodyFilter" },
-        "fields": [
-          {
-            "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "underline" },
-            "type": {
-              "kind": "NamedType",
-              "name": { "kind": "Name", "value": "ProjectsBodyUnderlineFilter" }
-            }
-          }
-        ]
-      },
-      {
-        "kind": "InputObjectTypeDefinition",
         "name": { "kind": "Name", "value": "ProjectsFilter" },
         "fields": [
           {
@@ -1886,7 +1770,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "ProjectsBodyFilter" }
+              "name": { "kind": "Name", "value": "RichTextFilter" }
             }
           }
         ]
@@ -2063,34 +1947,6 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
-        "name": { "kind": "Name", "value": "UsesBodyUnderlineFilter" },
-        "fields": [
-          {
-            "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "color" },
-            "type": {
-              "kind": "NamedType",
-              "name": { "kind": "Name", "value": "StringFilter" }
-            }
-          }
-        ]
-      },
-      {
-        "kind": "InputObjectTypeDefinition",
-        "name": { "kind": "Name", "value": "UsesBodyFilter" },
-        "fields": [
-          {
-            "kind": "InputValueDefinition",
-            "name": { "kind": "Name", "value": "underline" },
-            "type": {
-              "kind": "NamedType",
-              "name": { "kind": "Name", "value": "UsesBodyUnderlineFilter" }
-            }
-          }
-        ]
-      },
-      {
-        "kind": "InputObjectTypeDefinition",
         "name": { "kind": "Name", "value": "UsesFilter" },
         "fields": [
           {
@@ -2122,7 +1978,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "UsesBodyFilter" }
+              "name": { "kind": "Name", "value": "RichTextFilter" }
             }
           }
         ]

@@ -1,30 +1,5 @@
 import { defineConfig } from 'tinacms';
 
-const underlineTemplate = {
-	name: 'underline',
-	label: 'Underline',
-	inline: true,
-	fields: [
-		{
-			type: 'string' as const,
-			name: 'color',
-			label: 'Underline Color',
-			options: [
-				'orange',
-				'red',
-				'green',
-				'blue',
-				'purple',
-				'pink',
-				'yellow',
-				'teal',
-				'gray',
-			],
-			ui: { component: 'select' as const },
-		},
-	],
-};
-
 // Your hosting provider likely exposes this as an environment variable
 const branch =
 	process.env.GITHUB_BRANCH ||
@@ -105,7 +80,6 @@ export default defineConfig({
 						name: 'body',
 						label: 'Body',
 						isBody: true,
-						templates: [underlineTemplate],
 					},
 				],
 				ui: {
@@ -153,7 +127,6 @@ export default defineConfig({
 						name: 'body',
 						label: 'Body',
 						isBody: true,
-						templates: [underlineTemplate],
 					},
 				],
 				ui: {
@@ -190,7 +163,6 @@ export default defineConfig({
 						name: 'body',
 						label: 'Body',
 						isBody: true,
-						templates: [underlineTemplate],
 					},
 				],
 				ui: {
