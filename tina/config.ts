@@ -1,4 +1,5 @@
 import { defineConfig } from 'tinacms';
+import { mdxTemplates } from './mdx-templates';
 
 // Your hosting provider likely exposes this as an environment variable
 const branch =
@@ -80,6 +81,7 @@ export default defineConfig({
 						name: 'body',
 						label: 'Body',
 						isBody: true,
+						templates: mdxTemplates,
 					},
 				],
 				ui: {
@@ -127,6 +129,7 @@ export default defineConfig({
 						name: 'body',
 						label: 'Body',
 						isBody: true,
+						templates: mdxTemplates,
 					},
 				],
 				ui: {
@@ -163,6 +166,7 @@ export default defineConfig({
 						name: 'body',
 						label: 'Body',
 						isBody: true,
+						templates: mdxTemplates,
 					},
 				],
 				ui: {

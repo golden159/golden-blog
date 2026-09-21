@@ -8,7 +8,13 @@ vi.mock('tinacms', () => ({
 
 import config from './config';
 
-type Field = { name: string; type: string; list?: boolean; isBody?: boolean };
+type Field = {
+	name: string;
+	type: string;
+	list?: boolean;
+	isBody?: boolean;
+	templates?: { name: string; fields: { name: string; type: string }[] }[];
+};
 type Collection = {
 	name: string;
 	path: string;
@@ -88,6 +94,17 @@ describe('Tina config', () => {
 				(field) => field.name === 'tags',
 			);
 			expect(tags?.list).toBe(true);
+		}
+	});
+
+	it('registers the shared MDX components for visual editing', () => {
+		const expectedTemplates = ['Callout', 'Steps', 'Step', 'LinkCard', 'Badge'];
+
+		for (const collection of collections) {
+			const body = collection.fields.find((field) => field.name === 'body');
+			expect(body?.templates?.map((template) => template.name)).toEqual(
+				expect.arrayContaining(expectedTemplates),
+			);
 		}
 	});
 });

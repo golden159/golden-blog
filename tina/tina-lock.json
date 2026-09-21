@@ -72,6 +72,151 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
+            "templates": [
+              {
+                "name": "Callout",
+                "label": "Callout",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["thoughts", "body", "Callout", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "kind",
+                    "label": "Kind",
+                    "type": "string",
+                    "options": ["info", "tip", "warning", "danger"],
+                    "namespace": ["thoughts", "body", "Callout", "kind"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "children",
+                    "label": "Content",
+                    "type": "rich-text",
+                    "namespace": ["thoughts", "body", "Callout", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["thoughts", "body", "Callout"]
+              },
+              {
+                "name": "Steps",
+                "label": "Steps",
+                "fields": [
+                  {
+                    "name": "children",
+                    "label": "Steps",
+                    "type": "rich-text",
+                    "namespace": ["thoughts", "body", "Steps", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["thoughts", "body", "Steps"]
+              },
+              {
+                "name": "Step",
+                "label": "Step",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["thoughts", "body", "Step", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "children",
+                    "label": "Content",
+                    "type": "rich-text",
+                    "namespace": ["thoughts", "body", "Step", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["thoughts", "body", "Step"]
+              },
+              {
+                "name": "LinkCard",
+                "label": "Link Card",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["thoughts", "body", "LinkCard", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "description",
+                    "label": "Description",
+                    "type": "string",
+                    "ui": { "component": "textarea" },
+                    "namespace": [
+                      "thoughts",
+                      "body",
+                      "LinkCard",
+                      "description"
+                    ],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "url",
+                    "label": "URL",
+                    "type": "string",
+                    "namespace": ["thoughts", "body", "LinkCard", "url"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "newTab",
+                    "label": "Open in new tab",
+                    "type": "boolean",
+                    "namespace": ["thoughts", "body", "LinkCard", "newTab"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["thoughts", "body", "LinkCard"]
+              },
+              {
+                "name": "Badge",
+                "label": "Badge",
+                "inline": true,
+                "fields": [
+                  {
+                    "name": "text",
+                    "label": "Text",
+                    "type": "string",
+                    "namespace": ["thoughts", "body", "Badge", "text"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "tone",
+                    "label": "Tone",
+                    "type": "string",
+                    "options": ["primary", "neutral", "success", "warning"],
+                    "namespace": ["thoughts", "body", "Badge", "tone"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["thoughts", "body", "Badge"]
+              }
+            ],
             "namespace": ["thoughts", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -137,6 +282,151 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
+            "templates": [
+              {
+                "name": "Callout",
+                "label": "Callout",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["projects", "body", "Callout", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "kind",
+                    "label": "Kind",
+                    "type": "string",
+                    "options": ["info", "tip", "warning", "danger"],
+                    "namespace": ["projects", "body", "Callout", "kind"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "children",
+                    "label": "Content",
+                    "type": "rich-text",
+                    "namespace": ["projects", "body", "Callout", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["projects", "body", "Callout"]
+              },
+              {
+                "name": "Steps",
+                "label": "Steps",
+                "fields": [
+                  {
+                    "name": "children",
+                    "label": "Steps",
+                    "type": "rich-text",
+                    "namespace": ["projects", "body", "Steps", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["projects", "body", "Steps"]
+              },
+              {
+                "name": "Step",
+                "label": "Step",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["projects", "body", "Step", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "children",
+                    "label": "Content",
+                    "type": "rich-text",
+                    "namespace": ["projects", "body", "Step", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["projects", "body", "Step"]
+              },
+              {
+                "name": "LinkCard",
+                "label": "Link Card",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["projects", "body", "LinkCard", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "description",
+                    "label": "Description",
+                    "type": "string",
+                    "ui": { "component": "textarea" },
+                    "namespace": [
+                      "projects",
+                      "body",
+                      "LinkCard",
+                      "description"
+                    ],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "url",
+                    "label": "URL",
+                    "type": "string",
+                    "namespace": ["projects", "body", "LinkCard", "url"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "newTab",
+                    "label": "Open in new tab",
+                    "type": "boolean",
+                    "namespace": ["projects", "body", "LinkCard", "newTab"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["projects", "body", "LinkCard"]
+              },
+              {
+                "name": "Badge",
+                "label": "Badge",
+                "inline": true,
+                "fields": [
+                  {
+                    "name": "text",
+                    "label": "Text",
+                    "type": "string",
+                    "namespace": ["projects", "body", "Badge", "text"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "tone",
+                    "label": "Tone",
+                    "type": "string",
+                    "options": ["primary", "neutral", "success", "warning"],
+                    "namespace": ["projects", "body", "Badge", "tone"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["projects", "body", "Badge"]
+              }
+            ],
             "namespace": ["projects", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -185,6 +475,146 @@
             "name": "body",
             "label": "Body",
             "isBody": true,
+            "templates": [
+              {
+                "name": "Callout",
+                "label": "Callout",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["uses", "body", "Callout", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "kind",
+                    "label": "Kind",
+                    "type": "string",
+                    "options": ["info", "tip", "warning", "danger"],
+                    "namespace": ["uses", "body", "Callout", "kind"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "children",
+                    "label": "Content",
+                    "type": "rich-text",
+                    "namespace": ["uses", "body", "Callout", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["uses", "body", "Callout"]
+              },
+              {
+                "name": "Steps",
+                "label": "Steps",
+                "fields": [
+                  {
+                    "name": "children",
+                    "label": "Steps",
+                    "type": "rich-text",
+                    "namespace": ["uses", "body", "Steps", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["uses", "body", "Steps"]
+              },
+              {
+                "name": "Step",
+                "label": "Step",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["uses", "body", "Step", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "children",
+                    "label": "Content",
+                    "type": "rich-text",
+                    "namespace": ["uses", "body", "Step", "children"],
+                    "searchable": true,
+                    "parser": { "type": "mdx" },
+                    "uid": false
+                  }
+                ],
+                "namespace": ["uses", "body", "Step"]
+              },
+              {
+                "name": "LinkCard",
+                "label": "Link Card",
+                "fields": [
+                  {
+                    "name": "title",
+                    "label": "Title",
+                    "type": "string",
+                    "namespace": ["uses", "body", "LinkCard", "title"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "description",
+                    "label": "Description",
+                    "type": "string",
+                    "ui": { "component": "textarea" },
+                    "namespace": ["uses", "body", "LinkCard", "description"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "url",
+                    "label": "URL",
+                    "type": "string",
+                    "namespace": ["uses", "body", "LinkCard", "url"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "newTab",
+                    "label": "Open in new tab",
+                    "type": "boolean",
+                    "namespace": ["uses", "body", "LinkCard", "newTab"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["uses", "body", "LinkCard"]
+              },
+              {
+                "name": "Badge",
+                "label": "Badge",
+                "inline": true,
+                "fields": [
+                  {
+                    "name": "text",
+                    "label": "Text",
+                    "type": "string",
+                    "namespace": ["uses", "body", "Badge", "text"],
+                    "searchable": true,
+                    "uid": false
+                  },
+                  {
+                    "name": "tone",
+                    "label": "Tone",
+                    "type": "string",
+                    "options": ["primary", "neutral", "success", "warning"],
+                    "namespace": ["uses", "body", "Badge", "tone"],
+                    "searchable": true,
+                    "uid": false
+                  }
+                ],
+                "namespace": ["uses", "body", "Badge"]
+              }
+            ],
             "namespace": ["uses", "body"],
             "searchable": true,
             "parser": { "type": "mdx" },
@@ -1470,6 +1900,178 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ThoughtsBodyCalloutFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "kind" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ThoughtsBodyStepsFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ThoughtsBodyStepFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ThoughtsBodyLinkCardFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "description" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "url" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "newTab" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "BooleanFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ThoughtsBodyBadgeFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "text" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "tone" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ThoughtsBodyFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Callout" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ThoughtsBodyCalloutFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Steps" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ThoughtsBodyStepsFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Step" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ThoughtsBodyStepFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "LinkCard" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ThoughtsBodyLinkCardFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Badge" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ThoughtsBodyBadgeFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
         "name": { "kind": "Name", "value": "ThoughtsFilter" },
         "fields": [
           {
@@ -1525,7 +2127,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "RichTextFilter" }
+              "name": { "kind": "Name", "value": "ThoughtsBodyFilter" }
             }
           }
         ]
@@ -1723,6 +2325,178 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyCalloutFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "kind" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyStepsFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyStepFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyLinkCardFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "description" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "url" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "newTab" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "BooleanFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyBadgeFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "text" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "tone" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "ProjectsBodyFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Callout" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ProjectsBodyCalloutFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Steps" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ProjectsBodyStepsFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Step" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ProjectsBodyStepFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "LinkCard" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ProjectsBodyLinkCardFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Badge" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "ProjectsBodyBadgeFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
         "name": { "kind": "Name", "value": "ProjectsFilter" },
         "fields": [
           {
@@ -1770,7 +2544,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "RichTextFilter" }
+              "name": { "kind": "Name", "value": "ProjectsBodyFilter" }
             }
           }
         ]
@@ -1947,6 +2721,178 @@
       },
       {
         "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "UsesBodyCalloutFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "kind" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "UsesBodyStepsFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "UsesBodyStepFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "children" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "RichTextFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "UsesBodyLinkCardFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "title" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "description" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "url" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "newTab" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "BooleanFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "UsesBodyBadgeFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "text" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "tone" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "StringFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
+        "name": { "kind": "Name", "value": "UsesBodyFilter" },
+        "fields": [
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Callout" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "UsesBodyCalloutFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Steps" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "UsesBodyStepsFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Step" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "UsesBodyStepFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "LinkCard" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "UsesBodyLinkCardFilter" }
+            }
+          },
+          {
+            "kind": "InputValueDefinition",
+            "name": { "kind": "Name", "value": "Badge" },
+            "type": {
+              "kind": "NamedType",
+              "name": { "kind": "Name", "value": "UsesBodyBadgeFilter" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "InputObjectTypeDefinition",
         "name": { "kind": "Name", "value": "UsesFilter" },
         "fields": [
           {
@@ -1978,7 +2924,7 @@
             "name": { "kind": "Name", "value": "body" },
             "type": {
               "kind": "NamedType",
-              "name": { "kind": "Name", "value": "RichTextFilter" }
+              "name": { "kind": "Name", "value": "UsesBodyFilter" }
             }
           }
         ]
