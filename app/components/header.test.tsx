@@ -24,7 +24,7 @@ describe('Header', () => {
 		expect(homeLink).not.toHaveClass('outline-0');
 		expect(screen.getByText('Tags')).toBeInTheDocument();
 		expect(
-			screen.getByRole('link', { name: /Robotics Projects/ }),
+			screen.getByRole('link', { name: /Robotics 1 Projects/ }),
 		).toHaveAttribute('href', '/tags/Robotics');
 	});
 });

@@ -20,11 +20,14 @@ export default function TagsMenu() {
 					<Link
 						href={`/tags/${encodeURIComponent(tag.name)}`}
 						key={tag.name}
-						aria-label={`${tag.name} ${tag.sources.join(' ')}`}
+						aria-label={`${tag.name} ${tag.count} ${tag.sources.join(' ')}`}
 						className='flex items-center justify-between gap-2 rounded px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-800'
 					>
-						<span className='truncate'>{tag.name}</span>
-						<span className='flex shrink-0 gap-1 text-[10px] text-gray-500 dark:text-gray-400'>
+						<span className='truncate font-semibold'>{tag.name}</span>
+						<span className='flex shrink-0 items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400'>
+							<span className='font-semibold text-gray-700 dark:text-gray-300'>
+								{tag.count}
+							</span>
 							{tag.sources.map((source) => (
 								<span key={source}>{source}</span>
 							))}
