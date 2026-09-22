@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { client } from '../../../tina/__generated__/client';
 import BackNavigation from '../../components/layouts/back-navigation';
+import PostTags from '../../components/post-tags';
 import { TinaPost } from '../../components/tina-post';
 import { formatDate, getPostFromSlug, getPosts } from '../utils';
 import PageTitle from './page-title';
@@ -64,10 +65,11 @@ export default async function Blog(props: {
 			<section>
 				<BackNavigation />
 				<PageTitle>{metadata.title}</PageTitle>
-				<div className='flex justify-between items-center mt-2 text-sm'>
+				<div className='mt-2 flex items-center justify-between gap-3 text-sm'>
 					<p className='text-sm text-neutral-600 dark:text-neutral-400'>
 						{formatDate(metadata.publishedAt)}
 					</p>
+					<PostTags tags={metadata.tags} />
 				</div>
 			</section>
 			<article className='md:max-w-5xl'>

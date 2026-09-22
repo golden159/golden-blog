@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { client } from '../../../tina/__generated__/client';
 import BackNavigation from '../../components/layouts/back-navigation';
+import PostTags from '../../components/post-tags';
 import { TinaPost } from '../../components/tina-post';
 import { formatDate, readMDXFile } from '../../thoughts/utils';
 
@@ -80,14 +81,7 @@ export default async function ProjectPage({
 					<time dateTime={metadata.publishedAt}>
 						{formatDate(metadata.publishedAt)}
 					</time>
-					{metadata.tags?.map((tag) => (
-						<span
-							className='rounded-full border border-primary-500/40 px-2 py-0.5 text-primary-600 dark:text-primary-300'
-							key={tag}
-						>
-							{tag}
-						</span>
-					))}
+					<PostTags tags={metadata.tags} />
 				</div>
 			</section>
 			<article className='md:max-w-5xl'>
