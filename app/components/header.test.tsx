@@ -22,5 +22,9 @@ describe('Header', () => {
 			'dark:focus-visible:ring-offset-black',
 		);
 		expect(homeLink).not.toHaveClass('outline-0');
+		expect(screen.getByText('Tags')).toBeInTheDocument();
+		expect(
+			screen.getByRole('link', { name: /Robotics Projects/ }),
+		).toHaveAttribute('href', '/tags/Robotics');
 	});
 });
